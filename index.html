@@ -368,15 +368,17 @@
          </svg>
       </div>
    </div>
-   <!-- 第二页图标网格：复制第一页的desktop-grid结构 -->
-   <div id="desktop-grid-2" style="position:relative; width:100%; flex:1; top:0 !important;">
-      <div class="draggable-app" onclick="openApp('checkphone'); if(typeof cpInitSelection === 'function') cpInitSelection();" style="left: 5%; top: 5%;">
-         <div class="app-icon dark" style="display:flex; justify-content:center; align-items:center;">
-            <i class="fa-solid fa-mobile-screen" style="font-size:24px;"></i>
-         </div>
-         <div class="app-label">查手机</div>
+   <!-- 第二页图标网格：克隆第一页 desktop-grid 的完整结构 -->
+<div id="desktop-grid-p2" style="position:relative; width:100%; flex:1; top:0 !important; margin-top: 15px;">
+   <div class="draggable-app" onclick="openApp('checkphone'); if(typeof cpInitSelection === 'function') cpInitSelection();" style="left: 5%; top: 5%;">
+      <div class="app-icon dark" style="display:flex; justify-content:center; align-items:center;">
+         <i class="fa-solid fa-mobile-screen" style="font-size:24px;"></i>
       </div>
+      <div class="app-label">查手机</div>
    </div>
+   <div class="draggable-app" style="left:29%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
+   <div class="draggable-app" style="left:53%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
+   <div class="draggable-app" style="left:77%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
 </div>
                   </div>
                </div>
