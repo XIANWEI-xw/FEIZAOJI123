@@ -576,6 +576,7 @@ c.history[0].content = newPrompt;
          
              if (role === 'system_sum') { 
     if(text.includes('使用了贴纸')) return; // 隐形提示不渲染气泡
+    if(msg.isCpSnoop) return; // 查手机的隐藏提示不渲染
     
     // 🚀 核心修复：如果这段文本只有隐藏标签，剥离后没有任何可见文字，就绝对不要渲染它，彻底消灭聊天室里的空白占位！
     let visibleText = text.replace(/<span[^>]*style=["']display:\s*none;?["'][^>]*>[\s\S]*?<\/span>/gi, '').trim();

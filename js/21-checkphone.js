@@ -1067,7 +1067,7 @@ function cpSyncToChat(action, detail) {
         contact.history.push({
             role: 'system_sum',
             content: '<span style="display:none;">' + snoopMsg + '</span>',
-            timestamp: Date.now()
+            isCpSnoop: true
         });
         saveData();
     }
