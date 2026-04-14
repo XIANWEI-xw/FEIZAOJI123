@@ -368,12 +368,14 @@
          </svg>
       </div>
    </div>
-   <!-- 查手机图标：不放在任何grid里，直接定位在home-page上 -->
-   <div onclick="openApp('checkphone'); if(typeof cpInitSelection === 'function') cpInitSelection();" style="position: absolute; top: calc(var(--safe-top) + 280px); left: 25px; display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 70px; z-index: 10;">
-      <div class="app-icon dark" style="display:flex; justify-content:center; align-items:center;">
-         <i class="fa-solid fa-mobile-screen" style="font-size:24px;"></i>
+   <!-- 第二页图标网格：复制第一页的desktop-grid结构 -->
+   <div id="desktop-grid-2" style="position:relative; width:100%; flex:1; top:0 !important;">
+      <div class="draggable-app" onclick="openApp('checkphone'); if(typeof cpInitSelection === 'function') cpInitSelection();" style="left: 5%; top: 5%;">
+         <div class="app-icon dark" style="display:flex; justify-content:center; align-items:center;">
+            <i class="fa-solid fa-mobile-screen" style="font-size:24px;"></i>
+         </div>
+         <div class="app-label">查手机</div>
       </div>
-      <div class="app-label">查手机</div>
    </div>
 </div>
                   </div>
