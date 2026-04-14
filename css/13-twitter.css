@@ -1,0 +1,250 @@
+      /* ================= 推特私信气泡与转发卡片专属 CSS ================= */
+      .fwd-card-wrapper {
+position: relative; width: 100%; min-width: 240px; max-width: 280px; margin: 8px 0; background: #ffffff; border-radius: 6px; 
+box-shadow: 0 15px 35px rgba(0,0,0,0.08), inset 0 0 0 0.5px rgba(0,0,0,0.05);
+overflow: hidden; cursor: pointer; font-family: "Didot", "Georgia", serif;
+transition: height 0.6s cubic-bezier(0.19, 1, 0.22, 1), transform 0.4s ease;
+-webkit-tap-highlight-color: transparent;
+color: #1C1C1E !important; text-align: left; /* 强制保护卡片内文字不被黑底气泡反色 */
+}
+      /* 推特私信气泡体系 */
+      .tw-msg-row { display: flex; align-items: flex-end; margin-top: 4px; width: 100%; transition: all 0.3s; position: relative; }
+      .tw-msg-row.user { justify-content: flex-end; }
+      .tw-msg-row.bot { justify-content: flex-start; }
+      .tw-msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-right: 8px; transition: opacity 0.2s; }
+      .tw-bubble { padding: 10px 14px; font-size: 15px; line-height: 1.4; max-width: 75%; word-wrap: break-word; position: relative; cursor: pointer; transition: transform 0.1s; }
+      .tw-bubble:active { transform: scale(0.98); opacity: 0.9; }
+      /* 气泡朝里面的圆角 (底部尖角朝向头像/屏幕边缘) */
+      .tw-msg-row.user .tw-bubble { background: #0F1419; color: #FFF; border-radius: 20px 20px 4px 20px; }
+      html body .iphone-frame #app-twitter.dark .tw-msg-row.user .tw-bubble { background: #E7E9EA; color: #000; }
+      .tw-msg-row.bot .tw-bubble { background: #EFF3F4; color: #0F1419; border-radius: 20px 20px 20px 4px; }
+      html body .iphone-frame #app-twitter.dark .tw-msg-row.bot .tw-bubble { background: #2F3336; color: #E7E9EA; }
+      /* 同组消息的圆角处理：如果不是最后一条，底部也是圆的，且隐藏头像 */
+      .tw-msg-row.hide-avatar .tw-bubble { border-radius: 20px !important; }
+      .tw-msg-row.hide-avatar .tw-msg-avatar { opacity: 0; pointer-events: none; }
+      .fwd-card-wrapper:active { transform: translateY(2px) scale(0.98); }
+      .fwd-bg-star { position: absolute; width: 150px; height: 150px; fill: none; stroke: #e8e3dc; stroke-width: 0.5; opacity: 0.6; transform: rotate(15deg); pointer-events: none; transition: transform 0.8s ease; }
+      .fwd-card-post .fwd-bg-star { right: -30px; top: -40px; }
+      .fwd-card-comment .fwd-bg-star { left: -40px; bottom: -50px; }
+      .fwd-card-post.is-expanded .fwd-bg-star { transform: rotate(35deg) scale(1.1); }
+      .fwd-deco-line-h { position: absolute; height: 1px; background: #eae5df; }
+      .fwd-deco-line-v { position: absolute; width: 1px; background: #eae5df; }
+      .fwd-deco-dot { position: absolute; width: 3px; height: 3px; background: #d4c8b8; border-radius: 50%; }
+      /* 转发帖子卡片 */
+      .fwd-card-post { height: 110px; }
+      .fwd-card-post.is-expanded { height: 260px; }
+      .fwd-card-post .fwd-top-plane { position: absolute; left: 15px; top: 15px; right: 15px; height: 80px; display: flex; align-items: center; z-index: 2; }
+      .fwd-card-post .fwd-cover-plane { width: 80px; height: 80px; background: linear-gradient(135deg, #f0ece6 0%, #e3dcd2 100%); position: relative; flex-shrink: 0; border-radius: 4px; overflow: hidden;}
+      .fwd-card-post .fwd-cover-plane img { width: 100%; height: 100%; object-fit: cover; }
+      .fwd-card-post .fwd-cover-plane::after { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(255,255,255,0.6); pointer-events: none;}
+      .fwd-card-post .fwd-text-area { margin-left: 15px; display: flex; flex-direction: column; justify-content: center; flex: 1; overflow: hidden; }
+      .fwd-card-post .fwd-tag { font-family: -apple-system, sans-serif; font-size: 8px; letter-spacing: 2px; color: #b5a898; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+      .fwd-card-post .fwd-title { font-size: 15px; color: #4a443e; font-weight: bold; line-height: 1.4; margin-bottom: 4px; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .fwd-card-post .fwd-author { font-family: -apple-system, sans-serif; font-size: 10px; color: #968c81; font-weight: 500; }
+      .fwd-expand-indicator { position: absolute; right: 15px; bottom: 15px; width: 10px; height: 10px; transition: transform 0.5s ease; }
+      .fwd-expand-indicator::before, .fwd-expand-indicator::after { content: ''; position: absolute; background: #b5a898; }
+      .fwd-expand-indicator::before { width: 10px; height: 1.5px; top: 4.25px; left: 0; }
+      .fwd-expand-indicator::after { width: 1.5px; height: 10px; top: 0; left: 4.25px; }
+      .fwd-card-post.is-expanded .fwd-expand-indicator { transform: rotate(180deg); }
+      .fwd-card-post.is-expanded .fwd-expand-indicator::after { opacity: 0; }
+      .fwd-card-post .fwd-detail-plane { position: absolute; top: 110px; left: 15px; right: 15px; padding-top: 15px; border-top: 1px dashed #eae5df; opacity: 0; transform: translateY(15px); transition: opacity 0.4s ease, transform 0.4s ease; pointer-events: none; }
+      .fwd-card-post.is-expanded .fwd-detail-plane { opacity: 1; transform: translateY(0); transition-delay: 0.2s; pointer-events: auto; }
+      .fwd-detail-plane .fwd-abstract { font-size: 12px; color: #7a736c; line-height: 1.6; font-style: italic; margin-bottom: 15px; text-align: justify; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+      .fwd-detail-plane .fwd-meta-footer { display: flex; justify-content: space-between; align-items: center; font-family: -apple-system, sans-serif; font-size: 8px; letter-spacing: 2px; color: #d4c8b8; text-transform: uppercase; font-weight: 700;}
+      .fwd-card-post .line-1 { width: 40px; top: 15px; right: 15px; }
+      .fwd-card-post .line-2 { height: 40px; bottom: 15px; right: 15px; transition: bottom 0.6s; }
+      .fwd-card-post .dot-1 { right: 14px; top: 14px; }
+      /* 转发评论卡片 */
+      .fwd-card-comment { height: auto; min-height: 120px; background: #faf8f5; padding: 25px 30px; display: flex; flex-direction: column; justify-content: center; }
+      .fwd-card-comment .fwd-quote-mark { font-family: "Georgia", serif; font-size: 40px; color: #e0d7cb; position: absolute; top: 5px; left: 15px; line-height: 1; pointer-events: none;}
+      .fwd-card-comment .fwd-comment-text { font-size: 13px; color: #5c554e; font-style: italic; line-height: 1.6; margin-bottom: 15px; position: relative; z-index: 1; }
+      .fwd-card-comment .fwd-comment-meta { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1;}
+      .fwd-card-comment .fwd-author-name { font-family: -apple-system, sans-serif; font-size: 9px; letter-spacing: 1px; color: #a89d90; text-transform: uppercase; font-weight: 700;}
+      .fwd-tiny-stars { display: flex; gap: 4px; }
+      .fwd-tiny-stars svg { width: 8px; height: 8px; fill: #d4c8b8; }
+      .fwd-card-comment .line-1 { width: 60px; bottom: 15px; left: 30px; }
+      .fwd-card-comment .line-2 { width: 80px; top: 15px; right: 15px; }
+      .fwd-card-comment .dot-1 { bottom: 14px; left: 89px; }
+      /* 评论长按发散菜单 */
+      .radial-menu-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(250, 250, 252, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+      .radial-menu-overlay.active { display: flex; opacity: 1; }
+      .radial-center-item { position: absolute; max-width: 80%; background: #FFF; padding: 15px 20px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); font-size: 14px; color: #1C1C1E; font-style: italic; text-align: center; border: 0.5px solid rgba(0,0,0,0.05); z-index: 2; }
+      .radial-node { position: absolute; width: 48px; height: 48px; border-radius: 50%; background: #FFF; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 2px solid #FFF; display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; transform: scale(0) translate(-50%, -50%); transform-origin: top left; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1; }
+      .radial-node:active { transform: scale(0.9) !important; filter: brightness(0.9); }
+      .radial-node img { width: 100%; height: 100%; object-fit: cover; }
+      .radial-node-name { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 700; color: #1C1C1E; white-space: nowrap; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+      .radial-menu-overlay.active .radial-node-name { opacity: 1; transition-delay: 0.3s; }
+      .radial-cancel { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 40px); font-family: "Courier New", monospace; font-size: 12px; font-weight: 800; color: #A8A39D; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; padding: 10px 20px; }
+      /* ================= 推特面具选择器样式 ================= */
+.tw-mask-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    border-radius: 16px; cursor: pointer; transition: all 0.2s;
+    border: 1.5px solid transparent; position: relative;
+}
+.tw-mask-item:hover { background: rgba(0,0,0,0.03); }
+.tw-mask-item.active {
+    background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+#app-twitter.dark .tw-mask-item.active { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+.tw-mask-item:active { transform: scale(0.98); }
+.tw-mask-avatar {
+    width: 42px; height: 42px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+    background: #F4F3F0; display: flex; justify-content: center; align-items: center;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+.tw-mask-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+.tw-mask-anon-icon {
+    width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
+    font-size: 18px; font-weight: 800; color: #A8A39D;
+    background: linear-gradient(135deg, #E8E8E8 0%, #D4D4D4 100%);
+}
+#app-twitter.dark .tw-mask-anon-icon { background: linear-gradient(135deg, #2F3336 0%, #16181C 100%); color: #71767B; }
+.tw-mask-info { flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.tw-mask-name { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tw-mask-handle { font-size: 13px; color: #536471; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tw-mask-check { width: 24px; height: 24px; flex-shrink: 0; color: #1C1C1E; }
+#app-twitter.dark .tw-mask-check { color: #E7E9EA; }
+.tw-mask-check svg { width: 100%; height: 100%; }
+.tw-mask-divider {
+    display: flex; align-items: center; gap: 10px; margin: 8px 0 4px; padding: 0 4px;
+}
+.tw-mask-divider::before, .tw-mask-divider::after {
+    content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.06);
+}
+#app-twitter.dark .tw-mask-divider::before, #app-twitter.dark .tw-mask-divider::after { background: rgba(255,255,255,0.08); }
+.tw-mask-divider span {
+    font-size: 9px; font-weight: 800; color: #A8A39D; letter-spacing: 2px;
+}
+.tw-cm-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+.tw-cm-anon {
+    width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
+    font-size: 16px; font-weight: 800; color: #A8A39D;
+    background: linear-gradient(135deg, #E8E8E8 0%, #D4D4D4 100%); border-radius: 50%;
+}
+/* ================= 推特专属 CSS 隔离层 ================= */
+      #app-twitter { letter-spacing: 0.01em; -webkit-font-smoothing: antialiased; }
+      #app-twitter .no-scrollbar::-webkit-scrollbar { display: none; }
+      #app-twitter .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      #app-twitter .fade-in { animation: twFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+      @keyframes twFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes twSway { 0% { transform: rotate(0deg); } 50% { transform: rotate(15deg); } 100% { transform: rotate(0deg); } }
+      #app-twitter .sway { transform-origin: center center; animation: twSway 6s ease-in-out infinite; }
+      #app-twitter::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 9998; box-shadow: inset 0 0 40px rgba(0,0,0,0.02); transition: all 0.5s ease; }
+      #app-twitter.dark::after { box-shadow: inset 0 0 100px rgba(255,255,255,0.02); }
+      #app-twitter .glass-panel { background-color: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; }
+      #app-twitter.dark .glass-panel { background-color: rgba(0, 0, 0, 0.7) !important; }
+      #app-twitter img { border-radius: 50% !important; object-fit: cover; }
+      #app-twitter img.cover-img, #app-twitter img.post-img { border-radius: 16px !important; }
+      #app-twitter .organic-blob { border-radius: 50% !important; animation: none !important; transition: none !important; }
+      #app-twitter .thread-line { position: absolute; left: 43px; width: 2px; background-color: #EFF3F4; z-index: 0; }
+#app-twitter.dark .thread-line { background-color: #333639; }
+/* 确保删除按钮在评论区有足够的点击空间，且不遮挡文字 */
+#details-comments-container .fa-trash-can {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+#details-comments-container .cursor-pointer:hover .fa-trash-can {
+    opacity: 1;
+}
+      #app-twitter .img-flip-container { perspective: 1500px; width: 100%; }
+      #app-twitter .img-flipper { position: relative; transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); transform-style: preserve-3d; width: 100%; height: 100%; }
+      #app-twitter .img-flipper.flipped { transform: rotateY(180deg); }
+      #app-twitter .flip-front, #app-twitter .flip-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; width: 100%; height: 100%; border-radius: 16px; }
+      #app-twitter .flip-front { 
+      position: relative; z-index: 2; display: flex; justify-content: center; align-items: center;
+      background: linear-gradient(135deg, #e2e4e6 0%, #c8ccd1 100%);
+      box-shadow: inset 0 0 30px rgba(255,255,255,0.6), inset 0 0 0 1px rgba(255,255,255,0.8);
+      overflow: hidden;
+      }
+      #app-twitter.dark .flip-front {
+      background: linear-gradient(135deg, #2c2e33 0%, #151618 100%);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
+      overflow: hidden;
+      }
+      /* 增加高级网格底纹 */
+      #app-twitter .flip-front::after {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+      background-size: 20px 20px; background-position: center; pointer-events: none; z-index: 1;
+      }
+      #app-twitter.dark .flip-front::after {
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      }
+      #app-twitter .flip-front::before {
+      content: '✦'; position: absolute; font-size: 40px; color: #b5a898; opacity: 0.4; pointer-events: none;
+      }
+      #app-twitter .flip-front img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; border-radius: 16px; opacity: 0.9; }
+      #app-twitter .flip-back { 
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: rotateY(180deg); 
+      background: #F7F9F9; border: 1px solid #EFF3F4; display: flex; flex-direction: column; 
+      align-items: center; justify-content: center; padding: 2rem; color: #536471; z-index: 1; 
+      cursor: pointer; overflow: hidden; background-image: radial-gradient(circle at center, rgba(0,0,0,0.02) 1px, transparent 1px); background-size: 10px 10px;
+      }
+      #app-twitter.dark .flip-back { background: #16181C; border: 1px solid #2F3336; color: #71767B; background-image: radial-gradient(circle at center, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 10px 10px; }
+      #app-twitter .ai-scan-line { width: 100%; height: 2px; background: linear-gradient(90deg, transparent, rgba(0,0,0,0.5), transparent); position: absolute; top: 0; left: 0; animation: ai-scan 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+      #app-twitter.dark .ai-scan-line { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); }
+      #app-twitter .smooth-scroll { scroll-behavior: smooth; }
+      #app-twitter .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+      /* 🚀 暴力覆盖引擎：叠满层级权重，强杀主系统动态注入的 10px 限制！同时修复夜间模式输入框字体变黑的问题！ */
+      html body .iphone-frame #app-twitter textarea.compose-textarea { font-size: 22px !important; line-height: 1.4 !important; }
+      html body .iphone-frame #app-twitter input[type="text"],
+      html body .iphone-frame #app-twitter textarea { color: #0F1419 !important; }
+      html body .iphone-frame #app-twitter.dark input[type="text"],
+      html body .iphone-frame #app-twitter.dark textarea { color: #E7E9EA !important; }
+      html body .iphone-frame #app-twitter textarea.compose-textarea::placeholder { font-size: 22px !important; color: #A3A3A3 !important; }
+      @media (min-width: 640px) {
+      html body .iphone-frame #app-twitter textarea.compose-textarea { font-size: 24px !important; }
+      html body .iphone-frame #app-twitter textarea.compose-textarea::placeholder { font-size: 24px !important; }
+      }
+
+/* ================= 推特私信同步回顾卡片 ================= */
+.tw-sync-card {
+    width: 220px; background: #FFFFFF; border-radius: 16px; overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 4px auto; cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+}
+.tw-sync-card:active { transform: scale(0.97); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.tsc-header {
+    display: flex; align-items: center; gap: 8px; padding: 12px 14px 10px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.04); background: #FAFAFA;
+}
+.tsc-icon-wrap {
+    width: 28px; height: 28px; border-radius: 8px; background: #1C1C1E;
+    display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.tsc-icon { width: 12px; height: 12px; fill: #FFFFFF; }
+.tsc-header-info { display: flex; flex-direction: column; gap: 2px; flex: 1; overflow: hidden; }
+.tsc-title { font-size: 11px; font-weight: 700; color: #1C1C1E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.3px; }
+.tsc-time { font-family: "Courier New", monospace; font-size: 8px; font-weight: 600; color: #A8A39D; letter-spacing: 0.5px; }
+.tsc-badge {
+    font-size: 9px; font-weight: 800; color: #536471; background: rgba(83,100,113,0.08);
+    padding: 2px 8px; border-radius: 100px; letter-spacing: 0.5px; flex-shrink: 0;
+}
+.tsc-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 7px; max-height: 160px; overflow-y: auto; scrollbar-width: none; }
+.tsc-body::-webkit-scrollbar { display: none; }
+.tsc-line { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; line-height: 1.5; color: #333; }
+.tsc-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+    border: 1.5px solid #536471; background: transparent;
+}
+.tsc-line.tsc-user .tsc-dot { background: #1C1C1E; border-color: #1C1C1E; }
+.tsc-line.tsc-bot .tsc-dot { background: transparent; border-color: #536471; }
+.tsc-text { flex: 1; word-break: break-word; font-weight: 500; }
+.tsc-line.tsc-user .tsc-text { color: #1C1C1E; }
+.tsc-line.tsc-bot .tsc-text { color: #536471; font-style: italic; }
+.tsc-sender { display: none; }
+.tsc-footer {
+    padding: 8px 14px; text-align: center; font-size: 8px; font-weight: 800;
+    color: #A8A39D; letter-spacing: 2px; text-transform: uppercase;
+    border-top: 0.5px solid rgba(0,0,0,0.04); background: #FAFAFA;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.tsc-footer-dot {
+    width: 4px; height: 4px; border-radius: 50%; background: #34C759;
+    box-shadow: 0 0 4px #34C759; animation: blink 1.5s infinite;
+}
+/* 强制居中：无论在用户气泡还是对方气泡里 */
+.bubble-clear .tw-sync-card { margin-left: auto; margin-right: auto; }

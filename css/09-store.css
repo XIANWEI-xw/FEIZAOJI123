@@ -1,0 +1,199 @@
+         /* ================= 高定商店 (STORE) 专属 CSS ================= */
+         #app-store {
+         --c-store-bg: #070708;
+         --c-surface: rgba(18, 18, 20, 0.7);
+         --c-text: #EAE6DE;
+         --c-sub: #858078;
+         --c-gold: #C3A772;
+         --c-border: rgba(195, 167, 114, 0.25);
+         --c-glass: rgba(255, 255, 255, 0.04);
+         --img-ph: rgba(255, 255, 255, 0.03); 
+         background-color: var(--c-store-bg);
+         transition: background-color 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+         color: var(--c-text);
+         font-family: "Helvetica Neue", -apple-system, sans-serif;
+         overflow: hidden;
+         }
+         #app-store.theme-white {
+         --c-store-bg: #F4F4F6;
+         --c-surface: rgba(255, 255, 255, 0.8);
+         --c-text: #111111;
+         --c-sub: #8E8E93;
+         --c-gold: #5B5B60; 
+         --c-border: rgba(0, 0, 0, 0.1);
+         --c-glass: rgba(0, 0, 0, 0.03);
+         --img-ph: #E8E8EB; 
+         }
+         #app-store.theme-workshop {
+         --c-store-bg: #000000;
+         --c-surface: rgba(10, 10, 10, 0.8);
+         --c-text: #34C759; 
+         --c-sub: rgba(52, 199, 89, 0.5);
+         --c-gold: #34C759;
+         --c-border: rgba(52, 199, 89, 0.3);
+         --c-glass: rgba(52, 199, 89, 0.05);
+         --img-ph: rgba(52, 199, 89, 0.05);
+         }
+         #app-store .geo-dots { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; background-image: radial-gradient(var(--c-glass) 1px, transparent 1px); background-size: 24px 24px; transition: 0.8s; }
+         #app-store .geo-arcs { position: absolute; top: -15%; right: -30%; width: 150%; aspect-ratio: 1; border: 1px solid var(--c-border); border-radius: 50%; pointer-events: none; z-index: 1; transition: 0.8s; opacity: 0.4; }
+         #app-store .geo-arcs::before { content: ''; position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; border: 1px solid var(--c-border); border-radius: 50%; transition: 0.8s; opacity: 0.6; }
+         #app-store .geo-ruler { position: absolute; left: 24px; top: 20%; bottom: 10%; width: 1px; background: linear-gradient(to bottom, transparent, var(--c-border) 10%, var(--c-border) 90%, transparent); z-index: 1; pointer-events: none; transition: 0.8s; }
+         #app-store .geo-ruler::before, #app-store .geo-ruler::after { content: '+'; position: absolute; left: -4px; color: var(--c-sub); font-size: 10px; line-height: 1; }
+         #app-store .geo-ruler::before { top: 10%; } #app-store .geo-ruler::after { bottom: 10%; }
+         #app-store .noise-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E"); }
+         #app-store .giant-title { position: absolute; top: 8%; left: -2%; z-index: 3; font-family: "Didot", serif; font-size: 75px; font-style: italic; color: transparent; -webkit-text-stroke: 1px var(--c-glass); line-height: 0.9; pointer-events: none; transform: rotate(-2deg); white-space: nowrap; letter-spacing: 2px; opacity: 0.8; transition: 0.8s; }
+         #app-store .giant-title span { display: block; padding-left: 10%; color: var(--c-glass); -webkit-text-stroke: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 900; font-style: normal; letter-spacing: -2px; transition: 0.8s; }
+         #app-store .category-sidebar { position: absolute; right: 15px; top: 25%; z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 40px; }
+         #app-store .cat-line { position: absolute; right: 4px; top: 0; width: 1px; height: 100%; background: var(--c-border); z-index: 0; transition: 0.8s; }
+         #app-store .cat-indicator { position: absolute; right: 2px; top: 0; width: 4px; height: 26px; background: var(--c-gold); z-index: 1; transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.8s, box-shadow 0.8s; box-shadow: 0 0 10px var(--c-gold); }
+         #app-store .cat-item { writing-mode: vertical-rl; transform: rotate(180deg); font-family: "Courier New", monospace; font-size: 9px; letter-spacing: 4px; color: var(--c-sub); cursor: pointer; position: relative; z-index: 2; transition: 0.4s; padding: 8px 0; text-transform: uppercase; font-weight: 600; }
+         #app-store .cat-item.active { color: var(--c-text); font-weight: 800; letter-spacing: 6px; }
+         #app-store .ch-nav { position: absolute; top: var(--safe-top); left: 0; width: 100%; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; z-index: 30; pointer-events: none; }
+         #app-store .nav-left-group, #app-store .nav-right-group { display: flex; align-items: center; gap: 12px; pointer-events: auto; }
+         #app-store .btn-circle { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--c-border); background: var(--c-surface); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; color: var(--c-text); cursor: pointer; transition: 0.4s; position: relative;}
+         #app-store .btn-circle.sm { width: 32px; height: 32px; }
+         #app-store .btn-circle.sm svg { width: 14px; height: 14px; }
+         #app-store .btn-circle:active { transform: scale(0.9); }
+         #app-store .sys-tag { font-family: "Courier New", monospace; font-size: 8px; color: var(--c-gold); letter-spacing: 4px; font-weight: bold; transition: 0.8s; pointer-events: auto;}
+         #app-store .cart-dot { position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; background: var(--c-gold); border-radius: 50%; color: var(--c-bg); font-family: monospace; font-size: 8px; font-weight: bold; display: flex; justify-content: center; align-items: center; opacity: 0; transform: scale(0.5); transition: 0.3s; }
+         #app-store .cart-dot.show { opacity: 1; transform: scale(1); }
+         #app-store .logistics-dot { position: absolute; top: 0; right: 0; width: 6px; height: 6px; background: #34C759; border-radius: 50%; box-shadow: 0 0 8px #34C759; opacity: 0; transition: 0.3s; }
+         #app-store .logistics-dot.active { opacity: 1; animation: pulseGreen 1.5s infinite alternate; }
+         @keyframes pulseGreen { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+         #app-store .abyss-scroll { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; overflow-y: auto; overflow-x: hidden; padding-top: 165px; padding-bottom: 120px; scrollbar-width: none; scroll-behavior: smooth; }
+         #app-store .abyss-scroll::-webkit-scrollbar { display: none; }
+         #app-store .sub-nav-container { width: calc(100% - 60px); display: flex; gap: 20px; padding: 0 24px 30px; margin-top: -10px; overflow-x: auto; scrollbar-width: none; }
+         #app-store .sub-btn { font-family: "Courier New", monospace; font-size: 10px; color: var(--c-sub); letter-spacing: 1px; cursor: pointer; transition: 0.3s; white-space: nowrap; font-weight: 600; position: relative; padding-bottom: 6px; }
+         #app-store .sub-btn span.cn { font-family: "Helvetica Neue", sans-serif; font-size: 12px; margin-left: 4px; font-weight: bold; letter-spacing: 0; }
+         #app-store .sub-btn.active { color: var(--c-text); font-weight: 800; }
+         #app-store .sub-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--c-gold); box-shadow: 0 0 5px var(--c-gold); transition: 0.3s; }
+         #app-store #product-grid { display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 50vh; }
+         #app-store .ai-loading { display: flex; flex-direction: column; align-items: center; margin-top: 100px; color: var(--c-gold); opacity: 0; animation: fadeIn 0.5s forwards; }
+         #app-store .spinner { width: 30px; height: 30px; border: 1.5px dashed var(--c-gold); border-radius: 50%; animation: spin 4s linear infinite; margin-bottom: 15px; }
+         #app-store .ai-loading-text { font-family: "Courier New", monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; animation: pulseGreen 1.5s infinite alternate; }
+         #app-store .item-container { position: relative; width: 100%; display: flex; justify-content: center; margin-bottom: 70px; animation: floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; opacity: 0; }
+         @keyframes floatUp { 0% { opacity: 0; transform: translateY(40px); filter: blur(8px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
+         #app-store .add-custom-card { width: 260px; height: 260px; border: 1px dashed var(--c-sub); border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--c-glass); cursor: pointer; transition: 0.3s; margin-bottom: 40px; }
+         #app-store .add-custom-card:active { transform: scale(0.96); background: rgba(195,167,114,0.1); border-color: var(--c-gold); }
+         #app-store .add-custom-card svg { width: 32px; height: 32px; color: var(--c-gold); margin-bottom: 10px; }
+         #app-store .add-custom-card span { font-family: "Courier New", monospace; font-size: 10px; color: var(--c-text); letter-spacing: 2px; }
+         #app-store .dec-cross { position: absolute; top: -10px; left: -10px; color: var(--c-gold); font-family: monospace; font-size: 14px; line-height: 1; z-index: 5; pointer-events: none; transition: 0.8s; }
+         #app-store .dec-sku { position: absolute; top: -5px; right: 15px; font-family: "Courier New", monospace; font-size: 8px; font-weight: bold; color: var(--c-sub); letter-spacing: 1px; z-index: 5; pointer-events: none; transition: 0.8s;}
+         #app-store .dec-edge { position: absolute; top: 10%; right: -8px; width: 1px; height: 80%; background: var(--c-border); z-index: 5; pointer-events: none; transition: 0.8s;}
+         #app-store .dec-barcode { position: absolute; left: -25px; bottom: 15px; writing-mode: vertical-rl; transform: rotate(180deg); font-family: "Courier New", monospace; font-size: 6px; letter-spacing: 2px; color: var(--c-sub); pointer-events: none; opacity: 0.8; transition: 0.8s;}
+         #app-store .add-btn { position: absolute; width: 44px; height: 44px; border-radius: 50%; background: rgba(18, 18, 20, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--c-border); color: var(--c-sub); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 10; }
+         #app-store .add-btn:active { transform: scale(0.85); }
+         #app-store .item-container:hover .add-btn { color: var(--c-gold); border-color: var(--c-gold); }
+         #app-store .add-btn.in-cart { background: var(--c-gold); color: #000; border: 1px solid var(--c-gold); box-shadow: 0 6px 20px rgba(195, 167, 114, 0.4), inset 0 2px 4px rgba(255,255,255,0.4); transform: scale(1.05); }
+         #app-store .shape-frame { width: 260px; background: var(--c-surface); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--c-border); padding: 12px; border-radius: 2px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+         #app-store .item-container:hover .shape-frame { transform: rotate(0deg) scale(1.03) !important; border-color: var(--c-gold); box-shadow: 0 40px 80px rgba(0,0,0,0.6); }
+         #app-store .s-image-box { width: 100%; aspect-ratio: 1/1; background: var(--img-ph); margin-bottom: 16px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid var(--c-border); cursor: pointer; transition: 0.4s; }
+         #app-store .s-image-box:active { transform: scale(0.96); }
+         #app-store .s-image-box img { position: absolute; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9) contrast(1.1) grayscale(15%); transition: 0.5s; z-index: 1;}
+         #app-store .item-container:hover .s-image-box img { filter: brightness(1) contrast(1) grayscale(0%); }
+         #app-store .ph-star-wrap { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); z-index: 2; pointer-events: none; }
+         #app-store .ph-star { font-size: 32px; color: var(--c-gold); opacity: 0.6; filter: drop-shadow(0 0 10px var(--c-gold)); transition: 0.5s; }
+         #app-store .item-container:hover .ph-star { opacity: 1; transform: scale(1.2) rotate(15deg); }
+         #app-store .ph-text { position: absolute; bottom: 10px; font-family: "Courier New", monospace; font-size: 8px; color: var(--c-sub); letter-spacing: 2px; }
+         #app-store .ph-desc-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-surface); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 15px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); z-index: 3; text-align: justify; font-family: "Georgia", serif; font-style: italic; font-size: 11px; color: var(--c-text); line-height: 1.6; overflow-y: auto; scrollbar-width: none; border-radius: inherit; }
+         #app-store .show-desc .ph-star-wrap { opacity: 0; transform: scale(0.6); }
+         #app-store .show-desc .ph-desc-layer { opacity: 1; pointer-events: auto; }
+         #app-store .s-title { font-family: "Didot", serif; font-size: 18px; color: var(--c-text); letter-spacing: 1px; margin-bottom: 6px; font-style: italic; }
+         #app-store .s-title span { font-family: "Courier New", monospace; font-size: 8px; color: var(--c-gold); font-style: normal; margin-left: 6px; letter-spacing: 1px; vertical-align: middle; }
+         #app-store .s-desc { font-size: 10px; color: var(--c-sub); line-height: 1.5; margin-bottom: 15px; font-weight: 300; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+         #app-store .s-price { font-family: "Courier New", monospace; font-size: 11px; color: var(--c-gold); font-weight: bold; letter-spacing: 1px; }
+         #app-store .shape-frame .add-btn { bottom: -15px; right: -15px; }
+         #app-store .shape-capsule { width: 310px; display: flex; background: var(--c-surface); backdrop-filter: blur(20px); border: 1px solid var(--c-border); border-radius: 100px; padding: 10px; align-items: center; box-shadow: 0 20px 40px rgba(0,0,0,0.15); transition: 0.6s; position: relative; }
+         #app-store .item-container:hover .shape-capsule { transform: scale(1.02) !important; border-color: var(--c-gold); }
+         #app-store .cap-img { width: 85px; height: 85px; border-radius: 50%; background: var(--img-ph); flex-shrink: 0; position: relative; overflow: hidden; border: 1px solid var(--c-border); transition: 0.8s; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+         #app-store .cap-img img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+         #app-store .cap-info { flex: 1; padding: 0 16px; display: flex; flex-direction: column; gap: 4px; }
+         #app-store .cap-title { font-family: "Didot", serif; font-size: 15px; color: var(--c-text); font-style: italic; transition: 0.8s;}
+         #app-store .cap-title span { font-family: "Courier New", monospace; font-size: 7px; color: var(--c-gold); font-style: normal; margin-left: 4px; letter-spacing: 1px; }
+         #app-store .cap-price { font-family: "Courier New", monospace; font-size: 10px; color: var(--c-sub); letter-spacing: 1px; transition: 0.8s;}
+         #app-store .shape-capsule .add-btn { position: relative; right: 0; bottom: 0; margin-right: 4px; background: rgba(0,0,0,0.2); backdrop-filter: none; border: 1px solid var(--c-border); color: var(--c-sub); box-shadow: none; }
+         #app-store .item-container:hover .shape-capsule .add-btn { background: transparent; border-color: var(--c-gold); color: var(--c-gold); }
+         #app-store .shape-capsule .add-btn.in-cart { background: var(--c-gold); color: #000; box-shadow: 0 4px 15px rgba(195, 167, 114, 0.3); border-color: var(--c-gold); transform: scale(1.05); }
+         #app-store .end-mark { text-align: center; font-family: "Courier New", monospace; font-size: 8px; color: var(--c-sub); letter-spacing: 4px; margin-top: 20px; padding-bottom: 40px; text-transform: uppercase; transition: 0.8s;}
+         #app-store .store-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 200; display: none; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.4s; }
+         #app-store .store-modal-overlay.active { display: flex; opacity: 1; }
+         #app-store .modal-box { width: 100%; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 12px; padding: 30px 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); transform: scale(0.95); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 15px; }
+         #app-store .store-modal-overlay.active .modal-box { transform: scale(1); }
+         #app-store .modal-title { font-family: "Courier New", monospace; font-size: 12px; color: var(--c-gold); font-weight: bold; text-align: center; letter-spacing: 2px; margin-bottom: 10px; }
+         #app-store .m-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--c-border); color: var(--c-text); font-size: 13px; padding: 10px 0; outline: none; font-family: inherit; transition: 0.3s; }
+         #app-store .m-input:focus { border-color: var(--c-gold); }
+         #app-store .m-img-btn { width: 100%; aspect-ratio: 4/3; background: var(--c-glass); border: 1px dashed var(--c-border); display: flex; justify-content: center; align-items: center; color: var(--c-sub); font-size: 10px; letter-spacing: 1px; cursor: pointer; border-radius: 4px; position: relative; overflow: hidden; transition: 0.3s;}
+         #app-store .m-img-btn:active { transform: scale(0.98); border-color: var(--c-gold); color: var(--c-gold); }
+         #app-store .m-btn-group { display: flex; gap: 15px; margin-top: 15px; }
+         #app-store .m-btn { flex: 1; padding: 12px; text-align: center; font-family: "Courier New", monospace; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
+         #app-store .m-btn.cancel { background: transparent; border: 1px solid var(--c-border); color: var(--c-sub); }
+         #app-store .m-btn.save { background: var(--c-gold); border: 1px solid var(--c-gold); color: #000; }
+         #app-store .m-btn:active { transform: scale(0.95); }
+         #app-store #store-desc-text { font-size: 12px; color: var(--c-text); line-height: 1.8; text-align: justify; font-style: italic; background: var(--c-glass); padding: 15px; border-radius: 4px; border-left: 2px solid var(--c-gold); max-height: 200px; overflow-y: auto; }
+         #app-store .bottom-panel { position: absolute; bottom: 0; left: 0; width: 100%; height: 85% !important; opacity: 1 !important; pointer-events: auto !important; background: var(--c-surface); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); z-index: 100; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important; display: flex; flex-direction: column; padding: var(--safe-top) 0 40px !important; border-top: 1px solid var(--c-border) !important; border-radius: 24px 24px 0 0; }
+         #app-store .bottom-panel.active { transform: translateY(0); }
+         #app-store .bp-header { display: flex; justify-content: space-between; align-items: center; padding: 0 24px 20px; border-bottom: 1px solid var(--c-border); flex-shrink: 0; }
+         #app-store .bp-close { width: 36px; height: 36px; border-radius: 50%; background: var(--c-glass); border: 1px solid var(--c-border); display: flex; justify-content: center; align-items: center; color: var(--c-text); cursor: pointer; transition: 0.3s; }
+         #app-store .bp-close:active { transform: scale(0.9); }
+         #app-store .bp-title { font-family: "Courier New", monospace; font-size: 11px; font-weight: 800; color: var(--c-gold); letter-spacing: 2px; text-align: center;}
+         #app-store .bp-gallery { display: flex; overflow-x: auto; gap: 15px; padding: 25px 24px; scrollbar-width: none; border-bottom: 1px solid var(--c-border); flex-shrink: 0;}
+         #app-store .bp-gallery::-webkit-scrollbar { display: none; }
+         #app-store .cart-item-card { width: 90px; flex-shrink: 0; display: flex; flex-direction: column; }
+         #app-store .cart-item-img { width: 100%; aspect-ratio: 1/1; background: var(--img-ph); border: 1px solid var(--c-border); position: relative; overflow: hidden; margin-bottom: 10px; border-radius: 2px; display:flex; justify-content:center; align-items:center; color:var(--c-gold); font-size:24px;}
+         #app-store .cart-item-img img { width: 100%; height: 100%; object-fit: cover; position:absolute; top:0;left:0;}
+         #app-store .cart-item-name { font-family: "Didot", serif; font-size: 12px; color: var(--c-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; margin-bottom: 4px;}
+         #app-store .cart-item-price { font-family: "Courier New", monospace; font-size: 9px; color: var(--c-gold); font-weight: bold; }
+         #app-store .bp-body { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; }
+         #app-store .bp-total { font-family: "Didot", serif; font-size: 32px; color: var(--c-text); text-align: center; margin-bottom: 10px; letter-spacing: 1px;}
+         #app-store .bp-total span { font-family: "Courier New", monospace; font-size: 14px; color: var(--c-sub); vertical-align: super; }
+         #app-store .config-row { display: flex; flex-direction: column; gap: 10px; }
+         #app-store .config-label { font-family: "Courier New", monospace; font-size: 9px; color: var(--c-sub); letter-spacing: 2px; }
+         #app-store .toggle-group { display: flex; background: rgba(0,0,0,0.15); border: 1px solid var(--c-border); border-radius: 8px; padding: 4px; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); }
+         #app-store .toggle-btn { flex: 1; text-align: center; padding: 10px 0; font-size: 10px; font-weight: 800; color: var(--c-sub); letter-spacing: 1px; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 6px; background: transparent; }
+         #app-store .toggle-btn.active { background: var(--c-surface); color: var(--c-gold); box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 0.5px solid var(--c-border); transform: scale(1.02); }
+         #app-store .contact-picker { display: flex; overflow-x: auto; gap: 15px; padding: 5px 0; scrollbar-width: none; animation: fadeIn 0.4s; }
+         #app-store .contact-picker::-webkit-scrollbar { display: none; }
+         #app-store .cp-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; opacity: 0.4; transition: 0.3s; filter: grayscale(100%); }
+         #app-store .cp-item.active { opacity: 1; transform: scale(1.05); filter: grayscale(0%); }
+         #app-store .cp-avatar { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--c-border); background: var(--img-ph); overflow: hidden; position: relative; display:flex; justify-content:center; align-items:center; font-family:"Didot"; font-size:20px; color:var(--c-text);}
+         #app-store .cp-avatar img { width: 100%; height: 100%; object-fit: cover; position:absolute; top:0; left:0;}
+         #app-store .cp-name { font-family:"Courier New"; font-size: 10px; color: var(--c-text); font-weight: 600; letter-spacing: 1px; }
+         #app-store .bp-action-btn { width: 100%; padding: 16px; border-radius: 6px; background: var(--c-gold); color: #000; font-family: "Courier New", monospace; font-size: 12px; font-weight: 800; letter-spacing: 3px; border: none; cursor: pointer; margin-top: auto; transition: 0.3s; flex-shrink: 0;}
+         #app-store .bp-action-btn:active { transform: scale(0.98); opacity: 0.8; }
+         #app-store .tm-tabs { display: flex; border-bottom: 1px solid var(--c-border); margin: 0 24px; padding-bottom: 12px; gap: 20px; flex-shrink: 0; }
+         #app-store .tm-tab { font-family: "Courier New", monospace; font-size: 10px; color: var(--c-sub); cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
+         #app-store .tm-tab.active { color: var(--c-gold); font-weight: bold; border-bottom: 1px solid var(--c-gold); padding-bottom: 4px; }
+         #app-store .timeline-row { display: flex; gap: 20px; position: relative; opacity: 0.3; transition: 0.5s; }
+         #app-store .timeline-row.active { opacity: 1; }
+         #app-store .timeline-row::before { content: ''; position: absolute; left: 4px; top: 15px; bottom: -30px; width: 1px; background: var(--c-border); }
+         #app-store .timeline-row:last-child::before { display: none; }
+         #app-store .tl-dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--c-sub); background: var(--c-bg); z-index: 2; margin-top: 4px; flex-shrink: 0; transition: 0.5s;}
+         #app-store .timeline-row.active .tl-dot { border-color: var(--c-gold); background: var(--c-gold); box-shadow: 0 0 10px var(--c-gold); }
+         #app-store .timeline-row.current .tl-dot { animation: pulse 1.5s infinite alternate; }
+         #app-store .tl-content { display: flex; flex-direction: column; gap: 4px; padding-bottom: 5px; }
+         #app-store .tl-status { font-family: "Courier New", monospace; font-size: 11px; font-weight: 800; color: var(--c-text); letter-spacing: 1px; }
+         #app-store .tl-desc { font-family: "Helvetica Neue", sans-serif; font-size: 10px; color: var(--c-sub); line-height: 1.5; }
+         #app-store .tl-time { font-family: "Courier New", monospace; font-size: 9px; color: var(--c-gold); margin-top: 4px; display: none; }
+         #app-store .timeline-row.active .tl-time { display: block; }
+         #app-store .btn-instant { margin-top: auto; padding: 14px; background: rgba(195,167,114,0.1); border: 1px dashed var(--c-gold); color: var(--c-gold); font-family: "Courier New", monospace; font-size: 10px; font-weight: bold; letter-spacing: 2px; text-align: center; cursor: pointer; border-radius: 4px; backdrop-filter: blur(10px); transition: 0.3s; display: none; flex-shrink: 0;}
+         #app-store .btn-instant:active { background: var(--c-gold); color: #000; }
+         #app-store .archive-card { border: 1px dashed var(--c-border); background: var(--c-glass); border-radius: 4px; padding: 15px; margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s; }
+         #app-store .archive-card:active { border-color: var(--c-gold); }
+         #app-store .ac-header { display: flex; justify-content: space-between; font-family: "Courier New", monospace; font-size: 9px; color: var(--c-sub); margin-bottom: 10px; border-bottom: 1px solid var(--c-border); padding-bottom: 8px;}
+         #app-store .ac-gallery { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; margin-bottom: 10px; transition: opacity 0.3s, max-height 0.3s; max-height: 50px; }
+         #app-store .ac-gallery::-webkit-scrollbar { display: none; }
+         #app-store .ac-img { width: 45px; height: 45px; flex-shrink: 0; border: 1px solid var(--c-border); border-radius: 2px; background: var(--img-ph); display:flex; justify-content:center; align-items:center; color:var(--c-gold); font-size:12px; position:relative;}
+         #app-store .ac-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(30%); position:absolute; top:0; left:0;}
+         #app-store .ac-footer { display: flex; justify-content: flex-end; align-items: center; font-family: "Didot", serif; font-size: 14px; color: var(--c-text); }
+         /* 全新折叠详情 CSS */
+         #app-store .archive-card .ac-expand-icon { font-size: 10px; margin-right: auto; color: var(--c-sub); transition: transform 0.3s; font-family: monospace;}
+         #app-store .archive-card.expanded .ac-expand-icon { transform: rotate(180deg); color: var(--c-gold); }
+         #app-store .archive-card.expanded .ac-gallery { max-height: 0; opacity: 0; margin-bottom: 0; pointer-events: none; }
+         #app-store .ac-details { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.3s, padding-top 0.3s; opacity: 0; }
+         #app-store .archive-card.expanded .ac-details { max-height: 800px; opacity: 1; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--c-border); }
+         #app-store .ac-detail-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+         #app-store .ac-detail-item:last-child { margin-bottom: 0; }
+         #app-store .ac-di-img { width: 28px; height: 28px; flex-shrink: 0; background: var(--img-ph); border: 1px solid var(--c-border); border-radius: 2px; display: flex; justify-content: center; align-items: center; color: var(--c-gold); font-size: 10px; overflow: hidden; position: relative; }
+         #app-store .ac-di-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; filter: grayscale(30%); }
+         #app-store .ac-di-name { flex: 1; font-family: "Didot", serif; font-size: 12px; color: var(--c-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; }
+         #app-store .ac-di-price { font-family: "Courier New", monospace; font-size: 10px; color: var(--c-sub); }

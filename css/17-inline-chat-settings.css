@@ -1,0 +1,93 @@
+    /* 核心 UI 样式 */
+    .cs-section-head {
+        font-family: 'Playfair Display', serif;
+        font-size: 18px;
+        font-weight: 900;
+        color: #1C1C1E;
+        margin-bottom: 20px;
+        letter-spacing: -0.5px;
+        border-left: 3px solid #C3A772;
+        padding-left: 12px;
+    }
+    .cs-row-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 0.5px solid rgba(0,0,0,0.05);
+    }
+    .cs-row-item label {
+        font-size: 13px;
+        font-weight: 800;
+        color: #1C1C1E;
+    }
+    .cs-input-minimal, .cs-select-minimal {
+        border: none;
+        background: transparent;
+        text-align: right;
+        font-weight: 700;
+        font-size: 13px;
+        outline: none;
+        color: #C3A772;
+    }
+    .cs-num-input {
+        width: 60px;
+        border: none;
+        background: #F4F3F0;
+        padding: 8px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 800;
+        font-family: monospace;
+    }
+    /* 极简拨杆开关 */
+    .cs-toggle { position: relative; width: 40px; height: 20px; }
+    .cs-toggle-input { display: none; }
+    .cs-toggle label {
+        display: block; width: 100%; height: 100%; background: #E5E5EA;
+        border-radius: 20px; cursor: pointer; transition: 0.3s; position: relative;
+    }
+    .cs-toggle label::after {
+        content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+        background: #FFF; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .cs-toggle-input:checked + label { background: #1C1C1E; }
+    .cs-toggle-input:checked + label::after { left: 22px; }
+
+    /* 胶囊选块 */
+    .cs-chip {
+        padding: 8px 16px; background: #FFF; border: 0.5px solid rgba(0,0,0,0.1);
+        border-radius: 100px; font-size: 10px; font-weight: 800; cursor: pointer; transition: 0.2s;
+    }
+    .cs-chip.active { background: #1C1C1E; color: #FFF; border-color: #1C1C1E; }
+
+    /* 颜色点 */
+    .cs-color-dot {
+        -webkit-appearance: none; border: none; width: 24px; height: 24px;
+        border-radius: 50%; cursor: pointer; background: none; padding: 0;
+    }
+    .cs-color-dot::-webkit-color-swatch-wrapper { padding: 0; }
+    .cs-color-dot::-webkit-color-swatch { border: 2px solid #FFF; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+
+    /* 文本域 */
+    .cs-textarea-minimal {
+        width: 100%; border: none; background: #F9F9F7; border-radius: 16px;
+        padding: 15px; font-size: 12px; line-height: 1.6; outline: none; resize: none;
+    }
+    .cs-textarea-dark {
+        width: 100%; border: none; background: #1C1C1E; color: #FFF; border-radius: 16px;
+        padding: 15px; font-size: 12px; line-height: 1.6; outline: none; resize: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    /* 保存按钮 */
+    .cs-save-btn {
+        width: 100%; padding: 18px; border-radius: 100px; background: #1C1C1E;
+        color: #FFFFFF; border: none; font-size: 13px; font-weight: 800;
+        letter-spacing: 4px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); cursor: pointer;
+    }
+    .cs-text-btn { font-size: 10px; font-weight: 800; color: #C3A772; cursor: pointer; }
+    
+    /* 滑块 */
+    .cs-range { -webkit-appearance: none; width: 100%; height: 4px; background: #E5E5EA; border-radius: 2px; outline: none; }
+    .cs-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #1C1C1E; border-radius: 50%; cursor: pointer; border: 3px solid #FFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }

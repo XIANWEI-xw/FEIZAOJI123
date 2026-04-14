@@ -1,0 +1,59 @@
+         /* ================= 融合新增：搜索框强化与战术索引 ================= */
+         .search-bar-wrap { padding: 10px 24px 15px !important; position: relative; }
+         .search-bar { 
+         background: #FFFFFF !important; border-radius: 100px !important; padding: 12px 20px !important; 
+         display: flex !important; align-items: center !important; gap: 10px !important; color: #A8A39D !important;
+         border: 1px solid rgba(0,0,0,0.08) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.02) !important; 
+         }
+         .search-star { position: absolute; right: 40px; top: 22px; font-size: 14px; color: rgba(0,0,0,0.1); pointer-events: none; }
+         .index-container {
+         display: flex; align-items: center; padding: 0 0 10px 24px; margin-bottom: 5px; border-bottom: 0.5px solid rgba(0,0,0,0.04);
+         }
+         .index-label {
+         font-family: "Courier New", monospace; font-size: 8px; font-weight: 800; color: #A8A39D;
+         letter-spacing: 2px; margin-right: 15px; position: relative; flex-shrink: 0;
+         }
+         .index-label::after { content: ''; position: absolute; right: -8px; top: 10%; height: 80%; width: 1px; background: rgba(0,0,0,0.1); }
+         .filter-scroll-area {
+         flex: 1; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; gap: 6px; padding-right: 24px; align-items: center;
+         }
+         .filter-scroll-area::-webkit-scrollbar { display: none; }
+         .f-tab {
+         font-family: "Didot", -apple-system, sans-serif; font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; white-space: nowrap;
+         padding: 6px 12px; color: #8E8E93; background: rgba(0,0,0,0.03); border-radius: 6px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+         }
+         .f-tab.active { color: #FFFFFF; background: #1C1C1E; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transform: scale(1.05); }
+         /* ================= 融合新增：机能风星尘胶囊卡片 ================= */
+         .msg-card { 
+         background: #FFFFFF !important; border-radius: 32px !important; margin: 0 20px 14px 20px !important; padding: 16px 20px !important; 
+         border: 0.5px solid rgba(0,0,0,0.06) !important; box-shadow: 0 6px 16px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.02) !important; 
+         position: relative; overflow: hidden; opacity: 1; transform: scale(1);
+         }
+         .msg-card.hidden { display: none !important; }
+         .card-seal-line { position: absolute; right: 28px; top: 0; bottom: 0; width: 1px; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 4px, transparent 4px, transparent 8px); pointer-events: none; z-index: 1; }
+         .card-seal-line::after { content: 'SYS-' attr(data-id); position: absolute; top: 50%; right: -12px; transform: translateY(-50%) rotate(90deg); font-family: "Courier New", monospace; font-size: 6px; font-weight: 800; color: rgba(0,0,0,0.2); letter-spacing: 1px; }
+         .crosshair { position: absolute; right: 12px; top: 12px; width: 10px; height: 10px; pointer-events: none; z-index: 1; }
+         .crosshair::before { content: ''; position: absolute; top: 50%; left: -20%; right: -20%; height: 0.5px; background: rgba(0,0,0,0.15); }
+         .crosshair::after { content: ''; position: absolute; left: 50%; top: -20%; bottom: -20%; width: 0.5px; background: rgba(0,0,0,0.15); }
+         .star-dust { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+         .star-dust::before { content: '★'; position: absolute; right: 40px; top: -6px; font-size: 32px; color: rgba(0,0,0,0.02); transform: rotate(15deg); }
+         .star-dust::after { content: '✧'; position: absolute; left: 50px; bottom: 4px; font-size: 16px; color: rgba(0,0,0,0.03); transform: rotate(-10deg); }
+         .star-dust .sd-1 { position: absolute; right: 10px; bottom: -8px; font-size: 40px; color: rgba(0,0,0,0.02); transform: rotate(45deg); }
+         .star-dust .sd-2 { position: absolute; left: 20px; top: -4px; font-size: 10px; color: rgba(0,0,0,0.04); transform: rotate(20deg); }
+         .c-name-wrap { display: flex; align-items: baseline; gap: 6px; position: relative; width: 100%; }
+         .status-dot { width: 4px; height: 4px; border-radius: 50%; background: #34C759; box-shadow: 0 0 4px #34C759; animation: breathe 2s infinite ease-in-out; margin-bottom: 2px;}
+         .status-dot.offline { background: #D6D3CF; box-shadow: none; animation: none; }
+         @keyframes breathe { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+         .c-name::before { content: '✦ '; font-size: 14px; color: #A8A39D; font-weight: 400; }
+         .c-name::after { content: attr(data-group); position: absolute; right: 0; top: 2px; font-family: "Courier New", monospace; font-size: 6px; color: rgba(0,0,0,0.15); letter-spacing: 1px; text-transform: uppercase; }
+         .group-divider {
+         font-family: "Courier New", monospace; font-size: 9px; font-weight: 800; color: #A8A39D;
+         letter-spacing: 2px; text-transform: uppercase;
+         margin: 25px 24px 8px; display: flex; align-items: center; gap: 10px;
+         }
+         .group-divider:first-child { margin-top: 5px; }
+         .group-divider::after {
+         content: ''; flex: 1; height: 1px;
+         background: repeating-linear-gradient(to right, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 2px, transparent 2px, transparent 6px);
+         }
+         .group-divider.hidden { display: none; }

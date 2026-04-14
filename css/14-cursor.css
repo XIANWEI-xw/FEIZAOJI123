@@ -1,0 +1,60 @@
+         /* ================= 全新：顶部动态光标库 CSS ================= */
+         .cursor-icon-box { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
+         /* 1. 灵魂声纹 */
+         .cw-waveform { display: flex; align-items: center; gap: 3px; height: 16px; }
+         .cw-wave-bar { width: 3px; background-color: currentColor; border-radius: 3px; animation: cw-wave-bounce 1s ease-in-out infinite; }
+         .cw-wave-bar:nth-child(1) { height: 8px; animation-delay: 0.0s; } .cw-wave-bar:nth-child(2) { height: 16px; animation-delay: 0.15s; }
+         .cw-wave-bar:nth-child(3) { height: 10px; animation-delay: 0.3s; } .cw-wave-bar:nth-child(4) { height: 14px; animation-delay: 0.45s; }
+         @keyframes cw-wave-bounce { 0%, 100% { transform: scaleY(0.5); opacity: 0.5; } 50% { transform: scaleY(1); opacity: 1; } }
+         /* 2. 宿命星轨 */
+         .cw-astrolabe { position: relative; width: 22px; height: 22px; animation: cw-astro-spin 8s linear infinite; }
+         .cw-astro-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 1px solid currentColor; opacity: 0.3; border-radius: 50%; box-sizing: border-box; }
+         .cw-astro-star { position: absolute; color: currentColor; line-height: 1; }
+         .cw-astro-s1 { top: -4px; left: 50%; transform: translateX(-50%); font-size: 10px;}
+         .cw-astro-s2 { bottom: 2px; right: -2px; font-size: 6px; }
+         .cw-astro-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8px; color: currentColor; animation: cw-astro-pulse 2s ease-in-out infinite; }
+         @keyframes cw-astro-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+         @keyframes cw-astro-pulse { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.8); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
+         /* 3. 齿轮推演 */
+         .cw-gears { position: relative; width: 24px; height: 24px; }
+         .cw-gear-svg { position: absolute; stroke: currentColor; fill: none; stroke-width: 1.5; }
+         .cw-gear-1 { width: 16px; height: 16px; top: 0; left: 0; animation: cw-gear-spin-r 4s linear infinite; }
+         .cw-gear-2 { width: 11px; height: 11px; bottom: 0; right: 0; animation: cw-gear-spin-l 2.66s linear infinite; }
+         @keyframes cw-gear-spin-r { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+         @keyframes cw-gear-spin-l { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+         /* 4. 潜意识解码 */
+         .cw-cyber-term { font-family: "Courier New", monospace; font-size: 12px; font-weight: 800; color: currentColor; letter-spacing: 1px; display: flex; align-items: center; gap: 2px; }
+         .cw-cyber-spinner::after { content: ''; animation: cw-cyber-spin 1s steps(4) infinite; }
+         @keyframes cw-cyber-spin { 0% { content: '///'; } 25% { content: '---'; } 50% { content: '\\\\\\'; } 75% { content: '|||'; } 100% { content: '///'; } }
+         /* 5. 情绪流体 (支持动态颜色变量) */
+         .cw-fluid-orb { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid currentColor; position: relative; overflow: hidden; box-shadow: inset 0 0 4px rgba(0,0,0,0.2); }
+         .cw-fluid-wave { position: absolute; top: 45%; left: -50%; width: 200%; height: 200%; background: var(--orb-solid, #FFB6C1); border-radius: 40%; animation: cw-fluid-spin 3s linear infinite; transition: background 0.5s; }
+         .cw-fluid-wave::before { content: ''; position: absolute; top: -5%; left: -5%; width: 110%; height: 110%; background: var(--orb-trans, rgba(255, 182, 193, 0.5)); border-radius: 45%; animation: cw-fluid-spin 4s linear infinite reverse; transition: background 0.5s; }
+         @keyframes cw-fluid-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+         /* 6. 欲言又止 */
+         .cw-typing-hesitant { font-family: "Courier New", monospace; font-size: 16px; font-weight: 900; color: currentColor; display: inline-block; overflow: hidden; white-space: nowrap; border-right: 2px solid currentColor; animation: cw-type-del 4s steps(6, end) infinite, cw-cursor-blink 0.8s step-end infinite; }
+         @keyframes cw-type-del { 0% { width: 0ch; } 20%, 40% { width: 3ch; } 50% { width: 1ch; } 70%, 90% { width: 4ch; } 100% { width: 0ch; } }
+         @keyframes cw-cursor-blink { 0%, 100% { border-color: transparent; } 50% { border-color: currentColor; } }
+         /* 7. 老式打字机 */
+         .cw-typewriter { position: relative; width: 22px; height: 22px; }
+         .cw-hammer { position: absolute; bottom: 0; width: 2px; height: 14px; background: currentColor; transform-origin: bottom center; border-radius: 2px; }
+         .cw-hammer::after { content:''; position:absolute; top:-3px; left:-2px; width:6px; height:6px; border-radius:50%; background:currentColor; }
+         .cw-h1 { left: 4px; transform: rotate(-30deg); animation: cw-strike1 1.5s infinite; } .cw-h2 { left: 10px; transform: rotate(0deg); animation: cw-strike2 1.5s infinite; } .cw-h3 { right: 4px; transform: rotate(30deg); animation: cw-strike3 1.5s infinite; }
+         @keyframes cw-strike1 { 0%, 100% { transform: rotate(-30deg); } 15% { transform: rotate(0deg) translateY(-4px); } 30% { transform: rotate(-30deg); } }
+         @keyframes cw-strike2 { 0%, 100% { transform: rotate(0deg); } 30%, 60% { transform: rotate(0deg); } 45% { transform: rotate(0deg) translateY(-6px); } }
+         @keyframes cw-strike3 { 0%, 100% { transform: rotate(30deg); } 60%, 90% { transform: rotate(30deg); } 75% { transform: rotate(0deg) translateY(-4px); } }
+         /* 8. 提笔晕墨 */
+         .cw-pen-wrap { display: flex; align-items: flex-end; gap: 2px; width: 28px; position: relative; }
+         .cw-pen-icon { width: 14px; height: 14px; z-index: 2; animation: cw-pen-write 2s ease-in-out infinite; color: currentColor; }
+         .cw-ink-trail { position: absolute; bottom: 2px; left: 0; height: 2px; background: currentColor; border-radius: 2px; animation: cw-ink-spread 2s ease-in-out infinite; }
+         @keyframes cw-pen-write { 0% { transform: translateX(0) rotate(0deg); } 70% { transform: translateX(16px) rotate(15deg); } 100% { transform: translateX(0) rotate(0deg); opacity: 0;} }
+         @keyframes cw-ink-spread { 0% { width: 0; opacity: 1; } 70% { width: 20px; opacity: 1; } 100% { width: 20px; opacity: 0; } }
+         /* 9. 灵感涂鸦 */
+         .cw-scribble-box { position: relative; width: 22px; height: 22px; }
+         .cw-scribble-line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: cw-scribble-draw 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
+         @keyframes cw-scribble-draw { 0% { stroke-dashoffset: 100; } 100% { stroke-dashoffset: 0; } }
+         /* 10. 白金三点式 */
+         .cw-luxury-dots { display: flex; gap: 3px; align-items: center; color: currentColor; }
+         .cw-l-star { font-size: 12px; line-height: 1; animation: cw-star-float 1.4s ease-in-out infinite; }
+         .cw-l-star:nth-child(1) { animation-delay: 0s; font-size: 14px;} .cw-l-star:nth-child(2) { animation-delay: 0.2s; font-size: 10px; } .cw-l-star:nth-child(3) { animation-delay: 0.4s; font-size: 14px; }
+         @keyframes cw-star-float { 0%, 100% { transform: translateY(0) scale(0.8); opacity: 0.4; } 50% { transform: translateY(-4px) scale(1.1); opacity: 1; } }

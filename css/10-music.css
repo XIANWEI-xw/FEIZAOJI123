@@ -1,0 +1,339 @@
+         /* ================= 专属一起听卡片 CSS ================= */
+         .sync-invite-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
+         .sync-card { position: relative; width: 265px; height: 145px; border-radius: 8px; overflow: hidden; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s; z-index: 10; background-color: transparent; }
+         .sync-invite-wrap:hover .sync-card { transform: translateY(-4px) scale(1.01); }
+         .card-cover-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.85; z-index: -2; }
+         .sync-card.light { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.6); }
+         .sync-invite-wrap:hover .sync-card.light { box-shadow: 0 25px 45px rgba(0, 0, 0, 0.15); }
+         .sync-card.light .card-overlay { position: absolute; inset: 0; z-index: -1; background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.3) 100%); }
+         .sync-card.light .no-img-overlay { background: #FCFCFC; }
+         .sync-card.dark { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.15); }
+         .sync-invite-wrap:hover .sync-card.dark { box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4); }
+         .sync-card.dark .card-overlay { position: absolute; inset: 0; z-index: -1; background: linear-gradient(135deg, rgba(15,15,15,0.9) 0%, rgba(15,15,15,0.4) 100%); }
+         .sync-card.dark .no-img-overlay { background: #1A1A1A; }
+         .sc-glass-plane { position: absolute; inset: 8px; border-radius: 4px; z-index: 1; }
+         .light .sc-glass-plane { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.4); }
+         .dark .sc-glass-plane { background: rgba(0, 0, 0, 0.15); border: 1px solid rgba(255, 255, 255, 0.1); }
+         .sc-accent-plane { position: absolute; top: 8px; left: 35px; width: 14px; height: 3px; z-index: 10; }
+         .light .sc-accent-plane { background: #D63031; } .dark .sc-accent-plane { background: #00C896; }
+         .sc-deco-frame { position: absolute; inset: 14px; border-style: dashed; border-width: 1px; z-index: 2; pointer-events: none; }
+         .light .sc-deco-frame { border-color: rgba(0, 0, 0, 0.1); } .dark .sc-deco-frame { border-color: rgba(255, 255, 255, 0.15); }
+         .sc-deco-line-v1 { position: absolute; top: 8px; bottom: 8px; left: 24px; width: 1px; z-index: 2; }
+         .sc-deco-line-h1 { position: absolute; top: 45px; left: 8px; right: 8px; height: 1px; z-index: 2; }
+         .light .sc-deco-line-v1, .light .sc-deco-line-h1 { background: rgba(0, 0, 0, 0.08); }
+         .dark .sc-deco-line-v1, .dark .sc-deco-line-h1 { background: rgba(255, 255, 255, 0.1); }
+         .sc-soundwave { position: absolute; top: 24px; right: 24px; display: flex; align-items: center; gap: 1.5px; z-index: 5; }
+         .sc-soundwave span { width: 1px; animation: sc-wave 1.2s ease-in-out infinite alternate; }
+         .light .sc-soundwave span { background: rgba(0,0,0,0.5); } .dark .sc-soundwave span { background: rgba(255,255,255,0.6); }
+         .sc-soundwave span:nth-child(1) { height: 3px; animation-delay: 0.1s; } .sc-soundwave span:nth-child(2) { height: 7px; animation-delay: 0.2s; } .sc-soundwave span:nth-child(3) { height: 11px; animation-delay: 0.3s; } .sc-soundwave span:nth-child(4) { height: 4px; animation-delay: 0.4s; } .sc-soundwave span:nth-child(5) { height: 8px; animation-delay: 0.5s; }
+         @keyframes sc-wave { 0% { height: 2px; } 100% { height: 11px; } }
+         .sc-vinyl-stage { position: absolute; top: 50%; right: -25px; transform: translateY(-50%); width: 100px; height: 100px; z-index: 8; pointer-events: none; }
+         .sc-vinyl-disc { position: absolute; inset: 0; border-radius: 50%; background-color: #0A0A0A; background-image: repeating-radial-gradient(#0A0A0A, #0A0A0A 1px, #181818 1.5px, #181818 2px); box-shadow: -4px 10px 20px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.15), inset 0 0 0 3px #000; animation: spin 10s linear infinite; display: flex; justify-content: center; align-items: center; }
+         .sc-vinyl-reflection { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 80deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,0.15) 45deg, rgba(255,255,255,0) 90deg, rgba(255,255,255,0) 180deg, rgba(255,255,255,0.15) 225deg, rgba(255,255,255,0) 270deg, rgba(255,255,255,0) 360deg); }
+         .sc-vinyl-center { width: 32px; height: 32px; border-radius: 50%; background: #F8F8F8; border: 1px solid #111; display: flex; justify-content: center; align-items: center; position: relative; z-index: 2; }
+         .dark .sc-vinyl-center { background: #222; border-color: #000; }
+         .sc-vinyl-hole { width: 5px; height: 5px; border-radius: 50%; z-index: 2; }
+         .light .sc-vinyl-hole { background: #FFF; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6); } .dark .sc-vinyl-hole { background: #0A0A0A; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8); }
+         .sc-vinyl-text-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+         .sc-tonearm { position: absolute; top: -10px; left: 0px; width: 50px; height: 80px; z-index: 9; transform-origin: 12px 12px; transform: rotate(26deg); filter: drop-shadow(-3px 4px 4px rgba(0,0,0,0.4)); }
+         .sc-typography { position: absolute; inset: 0; padding: 22px 20px; z-index: 10; pointer-events: none; display: flex; flex-direction: column; }
+         .sc-top-status { font-size: 6px; font-weight: 700; letter-spacing: 2.5px; margin-left: 35px; display: flex; align-items: center; gap: 5px; font-family:-apple-system,sans-serif;}
+         .light .sc-top-status { color: rgba(0,0,0,0.8); } .dark .sc-top-status { color: rgba(255,255,255,0.9); }
+         .sc-main-invite { margin-top: 15px; margin-left: 10px; position: relative; }
+         .sc-title-serif { font-family: "Didot", serif; font-size: 26px; font-weight: 600; font-style: italic; line-height: 1; letter-spacing: 0px; }
+         .light .sc-title-serif { color: #111; text-shadow: 0 2px 10px rgba(255,255,255,0.8); } .dark .sc-title-serif { color: #FFF; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+         .sc-title-sans { font-family: "Courier New", monospace; font-size: 6px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+         .light .sc-title-sans { color: #333; } .dark .sc-title-sans { color: #DDD; }
+         .sc-title-sans::after { content: ''; width: 10px; height: 1px; }
+         .light .sc-title-sans::after { background: #333; } .dark .sc-title-sans::after { background: #DDD; }
+         .sc-outbox-btn { position: relative; z-index: 20; margin-top: -16px; width: 160px; height: 32px; border-radius: 2px; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+         .sc-light-btn { background: #111; color: #FFF; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); }
+         .sync-invite-wrap:hover .sc-light-btn { background: #D63031; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(214, 48, 49, 0.3); }
+         .sc-dark-btn { background: #FFFFFF; color: #111; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); }
+         .sync-invite-wrap:hover .sc-dark-btn { background: #00C896; color: #FFF; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 200, 150, 0.25); }
+         .sc-outbox-btn span { font-family: -apple-system, sans-serif; font-size: 8px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
+         .sc-outbox-btn svg { height: 10px; fill: currentColor; transition: transform 0.3s; }
+         .sc-outbox-btn:hover svg { transform: scale(1.2); }
+         /* ============================================================= */
+         /* ================= SOAP. SYMPHONY 专属样式 ================= */
+         #app-music {
+         --c-dyn-text: #1A1A1A; --c-dyn-sub: #8A929A; --c-dyn-line: rgba(26, 26, 26, 0.08); 
+         --c-dyn-bg: #F7F7F5; --c-dyn-invert: 1; --c-overlay: linear-gradient(to bottom, rgba(247, 247, 245, 0.1), rgba(247, 247, 245, 0.4));
+         --c-glow: rgba(255, 255, 255, 0.9); --c-silver: #A3B1BE;       
+         color: var(--c-dyn-text); background-color: var(--c-dyn-bg);
+         transition: color 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+         }
+         #app-music.dark-mode {
+         --c-dyn-text: #EAEAEA; --c-dyn-sub: #7A848D; --c-dyn-line: rgba(234, 234, 234, 0.06);
+         --c-dyn-bg: #0D0F12; --c-dyn-invert: 0; --c-overlay: linear-gradient(to bottom, rgba(13, 15, 18, 0.2), rgba(13, 15, 18, 0.6));
+         --c-glow: rgba(0, 0, 0, 0.9);
+         }
+         #app-music .glow-layer { filter: drop-shadow(0 2px 6px var(--c-glow)) drop-shadow(0 0 16px var(--c-glow)); transition: filter 0.8s; }
+         #app-music .fullscreen-canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; overflow: hidden; background: var(--c-dyn-bg); display: flex; flex-direction: column; z-index: 10; }
+         #app-music .bg-image-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background-size: cover; background-position: center; transition: opacity 0.8s, background-image 0.8s; }
+         #app-music .bg-image-layer::after { content: ''; position: absolute; inset: 0; background: var(--c-overlay); transition: background 0.8s; }
+         #app-music .noise-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 99; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"); transform: translateZ(0); mix-blend-mode: multiply; }
+         #app-music .deco-crosshair { position: absolute; width: 14px; height: 14px; z-index: 5; pointer-events: none; opacity: 0.5; }
+         #app-music .deco-crosshair::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--c-dyn-text); transition: 0.6s;} #app-music .deco-crosshair::after { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--c-dyn-text); transition: 0.6s;}
+         #app-music .ch-1 { top: 40px; left: 40px; } #app-music .ch-2 { top: 40px; right: 40px; } #app-music .ch-3 { bottom: 40px; left: 40px; } #app-music .ch-4 { bottom: 40px; right: 40px; }
+         #app-music .deco-circle { position: absolute; top: -150px; right: -150px; width: 600px; height: 600px; border: 1px solid var(--c-dyn-line); border-radius: 50%; z-index: 1; animation: slowSpin 100s linear infinite; pointer-events: none; transition: 0.6s; }
+         #app-music .deco-circle::after { content: ''; position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; border: 1px dashed var(--c-dyn-line); border-radius: 50%; transition: 0.6s; }
+         #app-music .header { position: absolute; top: 0; left: 0; width: 100%; z-index: 50; padding: 50px 60px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; }
+         #app-music .brand { font-family: "Didot", serif; font-size: 15px; letter-spacing: 6px; font-weight: 900; pointer-events: auto; cursor: pointer; transition: 0.3s; }
+         #app-music .sys-status { font-family: "Courier New", monospace; font-size: 9px; font-weight: 800; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;}
+         #app-music .sys-status::before { content: ''; width: 4px; height: 4px; background: var(--c-dyn-text); border-radius: 50%; animation: pulse 3s infinite alternate; transition: 0.6s;}
+         #app-music .giant-music-river { position: absolute; top: -10%; left: -30%; width: 160%; height: 120%; z-index: 10; pointer-events: none; transform: perspective(1000px) rotateX(40deg) rotateZ(-8deg); animation: floatRiver 20s infinite alternate ease-in-out; filter: invert(var(--c-dyn-invert)); transition: filter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); opacity: 0.85; }
+         #app-music .staff-line { animation: silkWave 10s infinite alternate ease-in-out; transform-origin: left bottom; }
+         #app-music .staff-line:nth-child(1) { animation-delay: 0s; } #app-music .staff-line:nth-child(2) { animation-delay: -2s; } #app-music .staff-line:nth-child(3) { animation-delay: -4s; } #app-music .staff-line:nth-child(4) { animation-delay: -6s; } #app-music .staff-line:nth-child(5) { animation-delay: -8s; }
+         #app-music .minimal-track-info { position: absolute; top: 25%; left: 80px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 6px; border-left: 2px solid var(--c-dyn-text); padding-left: 15px; transition: 0.6s; }
+         #app-music .mti-label { font-family: "Courier New", monospace; font-size: 8px; font-weight: 800; color: var(--c-dyn-sub); opacity: 0.6; letter-spacing: 4px; text-transform: uppercase; transition: 0.6s; }
+         #app-music .mti-title { font-family: "Didot", serif; font-size: 26px; font-style: italic; font-weight: 600; letter-spacing: 1px; transition: 0.6s;}
+         #app-music .mti-artist { font-family: "Courier New", monospace; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; transition: 0.6s;}
+         #app-music .avatar-nest { position: absolute; top: 40%; right: 14%; z-index: 60; display: flex; align-items: center; animation: breatheAvatar 7s infinite alternate ease-in-out; }
+         #app-music .avatar-wrap { width: 50px; height: 50px; border-radius: 50%; background: var(--c-dyn-bg); border: 1px solid var(--c-dyn-line); box-shadow: 0 0 0 1.5px var(--c-dyn-bg), inset 0 2px 6px rgba(0,0,0,0.1); position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), background 0.6s; cursor: pointer; }
+         #app-music .avatar-wrap:hover { transform: scale(1.15); z-index: 10 !important; }
+         #app-music .avatar-wrap img, #app-music .avatar-wrap svg { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%) contrast(1.05) brightness(1.02); }
+         #app-music .avatar-nest .them { z-index: 1; transform: translateY(-2px); } #app-music .avatar-nest .me { z-index: 2; margin-left: -8px; transform: translateY(5px); }
+         #app-music .co-listening-badge { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-family: "Courier New", monospace; font-size: 6px; font-weight: 800; color: var(--c-dyn-bg); letter-spacing: 3px; padding: 4px 10px; border-radius: 100px; background: var(--c-dyn-text); white-space: nowrap; display: flex; align-items: center; gap: 4px; transition: 0.6s; }
+         #app-music .co-listening-badge svg { width: 6px; height: 6px; fill: var(--c-dyn-bg); animation: heartbeat 1.5s infinite; transition: 0.6s; }
+         #app-music .butterfly-container { position: absolute; z-index: 70; width: 30px; height: 30px; pointer-events: none; }
+         #app-music .butterfly { width: 100%; height: 100%; transform-style: preserve-3d; overflow: visible; z-index: 2; position: relative;}
+         #app-music .wing { transform-origin: 50% 50%; animation: glassFlap 0.8s infinite alternate cubic-bezier(0.4, 0.1, 0.6, 0.9); }
+         #app-music .wing-right { animation-delay: 0.2s; }
+         #app-music .bf-tail { position: absolute; top: 50%; left: 50%; width: 2px; height: 60px; background: linear-gradient(to bottom, rgba(163, 177, 190, 0.8), transparent); filter: blur(1px); border-radius: 2px; transform-origin: top center; z-index: 1; }
+         #app-music .bf-1 .bf-tail { transform: translate(-50%, 0) rotate(-25deg); } #app-music .bf-2 .bf-tail { transform: translate(-50%, 0) rotate(15deg); }
+         #app-music .bf-1 { top: 35%; right: 12%; animation: orbitGlass 25s infinite linear; } #app-music .bf-2 { top: 52%; right: 30%; transform: scale(0.6); animation: orbitGlassRev 30s infinite linear reverse; }
+         #app-music .lyrics-container { position: absolute; z-index: 40; display: flex; flex-direction: column; justify-content: center; transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); width: 100%;}
+         #app-music .lyric-wrapper { display: flex; position: relative; width: 100%; flex-direction: column;}
+         #app-music .lyrics-container:not(.center-mode) { bottom: 22%; right: 60px; left: auto; transform: none; width: 400px; }
+         #app-music .lyrics-container:not(.center-mode) .lyric-wrapper { align-items: flex-end; text-align: right; }
+         #app-music .lyric-active { animation: subtleFloat 12s ease-in-out infinite; }
+         #app-music .lyrics-container:not(.center-mode) .lyric-active { display: flex; flex-direction: column; align-items: flex-end; }
+         #app-music .lyrics-container.center-mode { top: 65%; left: 50%; bottom: auto; right: auto; transform: translate(-50%, -50%); width: 85vw; }
+         #app-music .lyrics-container.center-mode .lyric-wrapper { align-items: center; justify-content: center; width: 100%; }
+         #app-music .lyrics-container.center-mode .lyric-active { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; transition: 0.6s; }
+         #app-music .lyrics-container.center-mode .lyric-active.staggered-layout .lyric-line:nth-child(odd) { transform: translateX(-35px); }
+         #app-music .lyrics-container.center-mode .lyric-active.staggered-layout .lyric-line:nth-child(even) { transform: translateX(35px); }
+         #app-music .lyric-line { font-family: "Didot", serif; white-space: nowrap; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+         #app-music .lyrics-container:not(.center-mode) .lyric-line { font-size: 15px; font-style: italic; letter-spacing: 1px; font-weight: 600; margin-bottom: 6px; }
+         #app-music .lyrics-container.center-mode .lyric-line { font-size: 26px; font-weight: 900; line-height: 1.4; letter-spacing: 3px; margin: 0 4px; }
+         #app-music .lyric-word { display: inline-block; opacity: 0; filter: blur(8px); transform: translateY(4px); animation-name: wordFadeIn; animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); color: var(--c-dyn-text); }
+         #app-music .lyric-next { font-family: "Courier New", monospace; font-weight: 600; color: var(--c-dyn-text); text-transform: uppercase; opacity: 0; animation: bottomNextFade 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.8s forwards; transition: color 0.6s; }
+         #app-music .lyrics-container:not(.center-mode) .lyric-next { font-family: "Didot", serif; font-size: 11px; font-style: italic; letter-spacing: 1px; margin-top: 8px; }
+         #app-music .lyrics-container.center-mode .lyric-next { font-size: 10px; letter-spacing: 2px; margin-top: 25px; white-space: nowrap; align-self: flex-end; margin-right: 15vw; }
+         /* 核心修复：找回丢失的歌词呼吸与淡入动画关键帧，赋予它们生命！ */
+         @keyframes subtleFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(0.5deg); } }
+         @keyframes wordFadeIn { 100% { opacity: 1; filter: blur(0); transform: translateY(0); } }
+         @keyframes bottomNextFade { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 0.4; transform: translateY(0); } }
+         @keyframes fadeInList { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+         /* 核心修复：注入蝴蝶的扇翅与巡游飞行物理引擎！ */
+         @keyframes glassFlap { 0% { transform: rotateY(10deg); } 100% { transform: rotateY(55deg); } }
+         @keyframes orbitGlass { 
+         0% { transform: translateY(0) translateX(0) rotate(0deg); } 
+         25% { transform: translateY(-20px) translateX(-30px) rotate(-10deg); }
+         50% { transform: translateY(10px) translateX(-50px) rotate(-20deg); }
+         75% { transform: translateY(30px) translateX(-20px) rotate(-5deg); }
+         100% { transform: translateY(0) translateX(0) rotate(0deg); } 
+         }
+         @keyframes orbitGlassRev { 
+         0% { transform: scale(0.6) translateY(0) translateX(0) rotate(0deg); } 
+         25% { transform: scale(0.6) translateY(20px) translateX(30px) rotate(10deg); }
+         50% { transform: scale(0.6) translateY(-10px) translateX(50px) rotate(20deg); }
+         75% { transform: scale(0.6) translateY(-30px) translateX(20px) rotate(5deg); }
+         100% { transform: scale(0.6) translateY(0) translateX(0) rotate(0deg); } 
+         }
+         #app-music .minimal-controls { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; gap: 50px; font-family: "Courier New", monospace; font-size: 18px; align-items: center; font-weight: 300; transition: color 0.6s; }
+         #app-music .ctrl-btn { cursor: pointer; transition: 0.3s; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 1px solid transparent; color: var(--c-dyn-text);}
+         #app-music .ctrl-btn:hover { border-color: var(--c-dyn-line); }
+         #app-music .play-wrapper { position: relative; width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: var(--c-dyn-text); color: var(--c-dyn-bg); transition: 0.3s; }
+         #app-music .play-btn { font-size: 14px; font-weight: 900; letter-spacing: 2px; margin-left: 2px; z-index: 10; transition: 0.3s; cursor: pointer; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
+         #app-music .play-btn:active { transform: scale(0.85); }
+         #app-music .progress-ring-svg { position: absolute; top: -12px; left: -12px; width: 68px; height: 68px; transform: rotate(-90deg); z-index: 5; touch-action: none; cursor: pointer; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s; }
+         #app-music .ring-bg { fill: none; stroke: var(--c-dyn-line); stroke-width: 1.5; transition: stroke 0.6s, stroke-width 0.4s, opacity 0.4s; }
+         #app-music .ring-progress { fill: none; stroke: var(--c-dyn-text); stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 226; stroke-dashoffset: 226; transition: stroke-dashoffset 0.1s linear, stroke 0.6s, stroke-width 0.4s; }
+         #app-music .play-wrapper.is-dragging-progress .progress-ring-svg { transform: rotate(-90deg) scale(1.4); filter: drop-shadow(0 0 10px var(--c-dyn-text)); }
+         #app-music .play-wrapper.is-dragging-progress .ring-bg { stroke-width: 2.5; opacity: 0.5; }
+         #app-music .play-wrapper.is-dragging-progress .ring-progress { stroke-width: 3.5; transition: none; }
+         #app-music .bottom-left-actions { position: absolute; bottom: 35px; left: 35px; z-index: 100; display: flex; flex-direction: column; gap: 12px; }
+         #app-music .bottom-right-actions { position: absolute; bottom: 35px; right: 35px; z-index: 100; display: flex; flex-direction: column; gap: 12px; }
+         #app-music .icon-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--c-dyn-line); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; background: rgba(120,120,120,0.05); backdrop-filter: blur(10px); color: var(--c-dyn-text); position: relative; }
+         #app-music .icon-btn:hover { transform: scale(1.1); background: rgba(120,120,120,0.1); }
+         #app-music .icon-btn svg { width: 14px; height: 14px; stroke: currentColor; }
+         #app-music #btn-lock-bg .icon-lock { display: none; } #app-music #btn-lock-bg .icon-unlock { display: block; }
+         #app-music #btn-lock-bg.active-lock { background: var(--c-dyn-text) !important; color: var(--c-dyn-bg) !important; border-color: var(--c-dyn-text) !important; transform: scale(1.05); }
+         #app-music #btn-lock-bg.active-lock .icon-lock { display: block; } #app-music #btn-lock-bg.active-lock .icon-unlock { display: none; }
+         #app-music .chat-input-wrap { position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%); width: 55vw; max-width: 280px; height: 42px; border-radius: 21px; border: 1px solid var(--c-dyn-line); background: rgba(120,120,120,0.05); backdrop-filter: blur(15px); display: flex; flex-direction: row !important; align-items: center; justify-content: space-between; padding: 0 5px 0 16px; z-index: 100; transition: 0.6s; box-sizing: border-box; }
+         /* 核心修复：加入 min-width: 0 防撑爆，width: 100% 占满弹性空间 */
+         #app-music .chat-input-wrap input { flex: 1; min-width: 0; width: 100%; border: none; outline: none; background: transparent; font-family: -apple-system, sans-serif; font-size: 12px; color: var(--c-dyn-text); font-weight: 500; letter-spacing: 0.5px; transition: 0.6s; }
+         #app-music .chat-input-wrap input::placeholder { color: var(--c-dyn-sub); font-style: italic; opacity: 0.6;}
+         #app-music .chat-input-action { width: 32px; height: 32px; border-radius: 50%; background: var(--c-dyn-text); color: var(--c-dyn-bg); display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; margin-left: 6px; flex-shrink: 0; transition: transform 0.2s, background 0.6s, color 0.6s; }
+         #app-music .chat-input-action:active { transform: scale(0.9); }
+         #app-music .chat-input-action svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
+         #app-music .bubble-host-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 65; pointer-events: none; }
+         #app-music .shared-bubble-track { position: absolute; bottom: 62%; right: 13%; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 10px; pointer-events: none; }
+         #app-music .head-bubble-wrap { display: flex; flex-direction: column; pointer-events: none; animation: popBubble 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards; }
+         #app-music .head-bubble-wrap.bot { margin-right: 45px; }
+         @keyframes popBubble { 0% { opacity: 0; transform: scale(0.3) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+         #app-music .head-bubble { background: var(--c-dyn-text); color: var(--c-dyn-bg); font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.4; padding: 8px 20px; border-radius: 30px; max-width: 180px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; text-align: center; white-space: pre-wrap; word-wrap: break-word; transition: background 0.6s, color 0.6s; }
+         #app-music .head-bubble-wrap.bot .head-bubble { background: var(--c-dyn-bg); color: var(--c-dyn-text); border: 1px solid var(--c-dyn-line); }
+         @keyframes gentleFadeOut { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-15px); } }
+         #app-music .head-bubble-wrap.fade-out { animation: gentleFadeOut 0.8s ease-out forwards !important; }
+         #app-music .master-menu-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-dyn-bg); z-index: 999; overflow-y: auto; overflow-x: hidden; padding: 50px 60px 100px 60px; display: flex; flex-direction: column; gap: 45px; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s, background-color 0.8s; color: var(--c-dyn-text); }
+         #app-music .master-menu-overlay::-webkit-scrollbar { display: none; }
+         #app-music .master-menu-overlay.hidden { opacity: 0; pointer-events: none; transform: scale(1.03); visibility: hidden; transition: opacity 0.8s, transform 0.8s, visibility 0s 0.8s; }
+         #app-music .menu-top-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+         #app-music .curator-indicator { font-family: "Courier New", monospace; font-size: 9px; letter-spacing: 3px; color: #D63031; font-weight: 800; opacity: 0; transition: 0.3s; transform: translateX(10px); display: flex; align-items: center; gap: 6px; }
+         #app-music .curator-indicator::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #D63031; animation: pulse 1s infinite alternate; }
+         #app-music .is-curator .curator-indicator { opacity: 1; transform: translateX(0); }
+         #app-music .menu-settings-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--c-dyn-line); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
+         #app-music .menu-settings-btn:hover { background: var(--c-dyn-text); color: var(--c-dyn-bg); }
+         #app-music .is-curator .menu-settings-btn { background: var(--c-dyn-text); color: var(--c-dyn-bg); }
+         #app-music .menu-settings-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+         #app-music .section-headline { font-family: "Didot", serif; font-size: 14px; font-weight: 800; letter-spacing: 4px; display: flex; align-items: center; gap: 15px; text-transform: uppercase; }
+         #app-music .section-headline span { font-size: 10px; font-weight: 500; letter-spacing: 2px; color: var(--c-dyn-sub); opacity: 0.7; border-left: 1px solid var(--c-dyn-line); padding-left: 15px; }
+         #app-music .square-gallery { display: flex; gap: 20px; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; transform: translateZ(0); }
+         #app-music .square-gallery::-webkit-scrollbar { display: none; }
+         #app-music .sq-card { width: 180px; height: 180px; flex-shrink: 0; position: relative; overflow: hidden; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transform: translateZ(0); }
+         #app-music .sq-card img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(1.05); transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+         #app-music .sq-card:hover img { filter: grayscale(0%) contrast(1); transform: scale(1.05); }
+         #app-music .sq-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%); opacity: 0.5; transition: 0.6s; }
+         #app-music .sq-card:hover::after { opacity: 0.8; }
+         #app-music .sq-title { position: absolute; bottom: 15px; left: 15px; z-index: 2; font-family: "Didot", serif; font-style: italic; font-size: 18px; color: #FFF; letter-spacing: 1px; transition: 0.3s;}
+         #app-music .sq-add-btn { position: absolute; top: 15px; right: 15px; z-index: 4; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.4); color: #FFF; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(4px); }
+         #app-music .sq-card:hover .sq-add-btn, #app-music .sq-card.show-actions .sq-add-btn { opacity: 1; pointer-events: auto; }
+         #app-music .sq-add-btn:hover { background: #FFF; color: #000; transform: scale(1.1); }
+         #app-music .sq-add-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
+         #app-music .is-curator .sq-card { border: 1px solid var(--c-dyn-line); }
+         #app-music .is-curator .sq-card:hover::before { content: '✎ EDIT CONFIG'; position: absolute; top: 15px; right: 15px; z-index: 3; color: #FFF; font-family: "Courier New", monospace; font-size: 8px; letter-spacing: 2px; font-weight: 800; }
+         #app-music .is-curator .sq-add-btn { display: none !important; }
+         #app-music .category-nav { display: flex; gap: 30px; border-bottom: 1px solid var(--c-dyn-line); padding-bottom: 15px; }
+         #app-music .cat-item { font-family: "Courier New", monospace; font-size: 10px; font-weight: 800; letter-spacing: 3px; color: var(--c-dyn-sub); cursor: pointer; transition: 0.3s; position: relative; }
+         #app-music .cat-item:hover, #app-music .cat-item.active { color: var(--c-dyn-text); }
+         #app-music .cat-item.active::after { content: ''; position: absolute; bottom: -16px; left: 0; width: 100%; height: 1px; background: var(--c-dyn-text); }
+         #app-music .capsule-list { display: flex; flex-direction: column; gap: 15px; max-width: 800px; transform: translateZ(0); animation: fadeInList 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+         #app-music .capsule-item { display: flex; align-items: center; padding: 10px 25px 10px 10px; border-radius: 999px; border: 1px solid var(--c-dyn-line); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; background: transparent; color: var(--c-dyn-text); }
+         #app-music .capsule-item:hover { background: var(--c-dyn-text); color: var(--c-dyn-bg); transform: translateX(10px); border-color: transparent; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+         #app-music .is-curator .capsule-item:hover { background: transparent; color: var(--c-dyn-text); border-color: var(--c-dyn-text); transform: scale(0.99); box-shadow: none; }
+         #app-music .cap-cover { width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-right: 20px; border: 1px solid rgba(120,120,120,0.1); }
+         #app-music .cap-cover img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(50%); transition: 0.5s; }
+         #app-music .capsule-item:hover .cap-cover img { filter: grayscale(0%); }
+         #app-music .cap-meta { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+         #app-music .cap-title { font-family: "Didot", serif; font-size: 16px; font-weight: 600; letter-spacing: 1px; }
+         #app-music .cap-artist { font-size: 10px; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; }
+         #app-music .cap-actions { display: flex; align-items: center; gap: 15px; opacity: 0; transform: translateX(-10px); transition: 0.4s; pointer-events: none; }
+         #app-music .capsule-item:hover .cap-actions, #app-music .capsule-item.show-actions .cap-actions { opacity: 1; transform: translateX(0); pointer-events: auto; }
+         #app-music .cap-add-btn { display: flex; justify-content: center; align-items: center; width: 24px; height: 24px; border-radius: 50%; transition: 0.3s; }
+         #app-music .cap-add-btn:hover { background: var(--c-dyn-bg); color: var(--c-dyn-text); transform: scale(1.1); }
+         #app-music .cap-add-btn svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2; }
+         #app-music .cap-play-btn { font-family: "Courier New", monospace; font-size: 9px; font-weight: 800; letter-spacing: 3px; }
+         #app-music .is-curator .cap-add-btn { display: none !important; }
+         #app-music .capsule-import { border: 1px dashed var(--c-dyn-line); opacity: 0.7; justify-content: center; padding: 18px; }
+         #app-music .capsule-import:hover { opacity: 1; border-style: solid; background: transparent; color: var(--c-dyn-text); transform: scale(0.99); }
+         #app-music .capsule-import .cap-title { font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 4px; font-weight: 800; text-align: center; width: 100%;}
+         #app-music .mini-player-capsule { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--c-dyn-text); color: var(--c-dyn-bg); padding: 8px 20px 8px 8px; border-radius: 50px; display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); cursor: pointer; transition: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1000; opacity: 0; pointer-events: none; }
+         #app-music .mini-player-capsule.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+         #app-music .mini-player-capsule:hover { transform: translateX(-50%) translateY(-4px) scale(1.02); }
+         #app-music .mini-cap-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+         #app-music .mini-cap-info { display: flex; flex-direction: column; max-width: 150px;}
+         #app-music .mini-cap-title { font-family: "Didot", serif; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.5px;}
+         #app-music .mini-cap-artist { font-size: 9px; opacity: 0.6; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;}
+         #app-music .mini-eq { display: flex; gap: 3px; align-items: flex-end; height: 14px; margin-left: 8px; }
+         #app-music .mini-eq span { width: 2.5px; background: var(--c-dyn-bg); border-radius: 2px; animation: eqBounce 0.5s infinite alternate ease-in-out; }
+         #app-music .mini-eq span:nth-child(2) { animation-delay: 0.2s; }
+         #app-music .mini-eq span:nth-child(3) { animation-delay: 0.4s; }
+         #app-music .mini-eq.paused span { animation: none; height: 4px; }
+         #app-music .playlist-sidebar { position: absolute; top: 0; right: 0; width: 300px; height: 100%; background: rgba(255,255,255,0.02); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-left: 1px solid var(--c-dyn-line); z-index: 200; transform: translateX(100%); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; padding: 40px 25px; color: var(--c-dyn-text); }
+         #app-music .playlist-sidebar.show { transform: translateX(0); }
+         #app-music .pl-header { font-family: "Didot", serif; font-size: 14px; font-weight: 800; letter-spacing: 4px; margin-bottom: 25px; border-bottom: 1px solid var(--c-dyn-line); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+         #app-music .pl-close { cursor: pointer; opacity: 0.5; transition: 0.3s; }
+         #app-music .pl-close:hover { opacity: 1; transform: scale(1.1); }
+         #app-music .pl-close svg { width: 18px; height: 18px; stroke: currentColor; }
+         #app-music .pl-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; scrollbar-width: none; }
+         #app-music .pl-list::-webkit-scrollbar { display: none; }
+         #app-music .pl-item { display: flex; align-items: center; gap: 15px; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; position: relative;}
+         #app-music .pl-item:hover { background: rgba(120,120,120,0.1); }
+         #app-music .pl-item.active { border-color: var(--c-dyn-line); background: rgba(120,120,120,0.05); }
+         #app-music .pl-cover { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; filter: grayscale(50%); transition: 0.3s; }
+         #app-music .pl-item:hover .pl-cover, #app-music .pl-item.active .pl-cover { filter: grayscale(0%); }
+         #app-music .pl-info { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: hidden;}
+         #app-music .pl-title { font-family: "Didot", serif; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+         #app-music .pl-artist { font-size: 9px; opacity: 0.6; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+         #app-music .pl-remove-btn { display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(214, 48, 49, 0.1); color: #D63031; cursor: pointer; transition: 0.3s; margin-left: auto; flex-shrink: 0; }
+         #app-music .pl-remove-btn:hover { background: #D63031; color: #FFF; transform: scale(1.1); }
+         #app-music .pl-remove-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; }
+         #app-music .settings-modal-wrap { position: absolute; inset: 0; z-index: 10000; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); opacity: 0; pointer-events: none; visibility: hidden; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+         #app-music .settings-modal-wrap.show { opacity: 1; pointer-events: auto; visibility: visible; }
+         #app-music .settings-panel { width: 360px; padding: 40px; background: var(--c-dyn-bg); border: 1px solid var(--c-dyn-line); border-radius: 12px; display: flex; flex-direction: column; gap: 20px; transform: translateY(20px); transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); color: var(--c-dyn-text); box-shadow: 0 20px 50px rgba(0,0,0,0.1); max-height: 80vh; overflow-y: auto; scrollbar-width: none; }
+         #app-music .settings-panel::-webkit-scrollbar { display: none; }
+         #app-music .settings-modal-wrap.show .settings-panel { transform: translateY(0); }
+         #app-music .sp-title { font-family: "Didot", serif; font-size: 18px; font-weight: 800; letter-spacing: 4px; text-align: center; margin-bottom: 10px; }
+         #app-music .sp-input-group { display: flex; flex-direction: column; gap: 12px; }
+         #app-music .sp-input-wrapper { display: flex; align-items: center; border-bottom: 1px solid var(--c-dyn-line); transition: 0.3s; }
+         #app-music .sp-input-wrapper:focus-within { border-bottom-color: var(--c-dyn-text); }
+         #app-music .sp-input-wrapper input[type="text"] { flex: 1; background: transparent; border: none; padding: 8px 0; color: var(--c-dyn-text); font-weight: 600; font-size: 13px; outline: none; }
+         #app-music .sp-input-wrapper input[type="text"]::placeholder { color: var(--c-dyn-sub); font-weight: 400; opacity: 0.6; font-size: 11px;}
+         #app-music .sp-upload-btn { display: flex; justify-content: center; align-items: center; padding: 5px; margin-left: 10px; color: var(--c-dyn-sub); cursor: pointer; transition: 0.3s; }
+         #app-music .sp-upload-btn:hover { color: var(--c-dyn-text); transform: scale(1.1); }
+         #app-music .sp-upload-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+         #app-music .sp-actions { display: flex; gap: 15px; margin-top: 15px; }
+         #app-music .sp-btn { flex: 1; padding: 14px; border-radius: 4px; text-align: center; cursor: pointer; font-family: "Courier New", monospace; font-size: 10px; font-weight: 800; letter-spacing: 2px; transition: 0.3s; border: 1px solid var(--c-dyn-line); }
+         #app-music .sp-btn.primary { background: var(--c-dyn-text); color: var(--c-dyn-bg); border-color: transparent; }
+         #app-music .sp-btn:hover { opacity: 0.8; transform: scale(0.98); }
+         /* --- 神圣组件 (桌面 2x1) --- */
+      /* ================= 悬浮播放器外壳 ================= */
+      .soap-float-player {
+      position: absolute; top: 10%; left: 50%; transform: translate3d(-50%, 0, 0) scale(1);
+      width: 210px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+      border: 0.5px solid rgba(0, 0, 0, 0.1); border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02), inset 0 0 0 1px rgba(255, 255, 255, 1);
+      display: none; flex-direction: column; overflow: hidden;
+      transition: border-radius 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+      z-index: 9999; will-change: transform; opacity: 0; pointer-events: none;
+      }
+      .soap-float-player.show { display: flex; opacity: 1; pointer-events: auto; animation: popInFloat 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      @keyframes popInFloat { 0% { transform: translate3d(-50%, -20px, 0) scale(0.9); opacity: 0; } 100% { transform: translate3d(-50%, 0, 0) scale(1); opacity: 1; } }
+      .soap-float-player.is-expanded { border-radius: 8px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 1); }
+      /* 满天星装饰 */
+      .fp-bg-stars { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+      .fp-star-d { position: absolute; color: #1C1C1E; font-size: 8px; animation: fpTwinkle 3s infinite alternate ease-in-out; opacity: 0.1; }
+      @keyframes fpTwinkle { 0% { opacity: 0.05; transform: scale(0.8); } 100% { opacity: 0.25; transform: scale(1.2); } }
+      .fp-drag-handle { position: relative; z-index: 1; width: 100%; height: 16px; background: rgba(0, 0, 0, 0.02); border-bottom: 0.5px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: center; align-items: center; gap: 6px; cursor: grab; touch-action: none; font-family: "Courier New", monospace; font-size: 6px; letter-spacing: 3px; color: #A8A39D; text-transform: uppercase; user-select: none; }
+      .fp-drag-handle:active { cursor: grabbing; background: rgba(0, 0, 0, 0.05); }
+      /* 新增：悬浮窗右上角的收起按钮 */
+      .fp-close-btn { position: absolute; right: 8px; top: 0; height: 100%; display: flex; justify-content: center; align-items: center; color: #A8A39D; cursor: pointer; transition: 0.2s; z-index: 10; }
+      .fp-close-btn:active { color: #1C1C1E; transform: scale(0.8); }
+      .fp-close-btn svg { width: 10px; height: 10px; stroke-width: 2.5; }
+      .fp-main { display: flex; align-items: center; padding: 10px 12px 6px; position: relative; background: transparent; cursor: pointer; z-index: 1; }
+      .fp-vinyl-wrap { position: relative; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: #111; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; animation: spin 8s linear infinite; animation-play-state: paused; }
+      .is-playing .fp-vinyl-wrap { animation-play-state: running; }
+      .fp-vinyl-wrap::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 45deg, transparent 0deg, rgba(255,255,255,0.3) 45deg, transparent 90deg, transparent 180deg, rgba(255,255,255,0.3) 225deg, transparent 270deg); }
+      .fp-vinyl-center { width: 10px; height: 10px; background: #F8F6F0; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 5px; color: #111; z-index: 2; }
+      .fp-track-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
+      .fp-title { font-family: "Didot", serif; font-style: italic; font-size: 13px; font-weight: 600; color: #1C1C1E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+      .fp-artist { font-family: "Courier New", monospace; font-size: 7px; color: #A8A39D; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .fp-actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; }
+      .fp-btn { background: transparent; border: 0.5px solid rgba(0, 0, 0, 0.1); width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #1C1C1E; transition: all 0.3s; padding: 0; outline: none; }
+      .fp-btn:hover { background: #FAFAFA; border-color: #1C1C1E; transform: scale(1.05); }
+      .fp-btn:active { transform: scale(0.95); }
+      .fp-btn svg { width: 8px; height: 8px; fill: currentColor; }
+      /* 新增：紧凑的进度条 */
+      .fp-progress-wrap { position: relative; z-index: 2; width: 100%; height: 10px; padding: 0 12px 6px; cursor: pointer; display: flex; align-items: center; }
+      .fp-progress-bar { flex: 1; height: 2px; background: rgba(0,0,0,0.08); border-radius: 1px; position: relative; }
+      .fp-progress-fill { height: 100%; width: 0%; background: #1C1C1E; border-radius: 1px; position: relative; pointer-events: none; transition: width 0.1s linear; }
+      .fp-progress-fill::after { content: ''; position: absolute; right: -3px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; background: #1C1C1E; border-radius: 50%; box-shadow: 0 0 2px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; }
+      .fp-progress-wrap:hover .fp-progress-fill::after { opacity: 1; }
+      .fp-lyrics-panel { position: relative; background: rgba(250, 250, 252, 0.5); border-top: 1px dashed rgba(0, 0, 0, 0.1); max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s; z-index: 1; }
+      .is-expanded .fp-lyrics-panel { max-height: 150px; opacity: 1; }
+      .fp-deco-cross { position: absolute; width: 6px; height: 6px; opacity: 0.3; pointer-events: none; }
+      .fp-deco-cross::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 0.5px; background: #111; }
+      .fp-deco-cross::after { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 0.5px; background: #111; }
+      .dc-tl { top: 8px; left: 8px; } .dc-tr { top: 8px; right: 8px; } .dc-bl { bottom: 8px; left: 8px; } .dc-br { bottom: 8px; right: 8px; }
+      .fp-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: "Didot", serif; font-size: 50px; font-style: italic; color: rgba(0, 0, 0, 0.02); pointer-events: none; white-space: nowrap; }
+      .fp-lyrics-content { padding: 16px 15px; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 2; }
+      .lyric-cn { font-family: -apple-system, sans-serif; font-size: 12px; color: #1C1C1E; font-weight: 600; letter-spacing: 1px; margin-bottom: 4px; }
+      .lyric-en { font-family: "Didot", serif; font-size: 10px; font-style: italic; color: #8E8E93; letter-spacing: 0.5px; }
+      .fp-eq { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px; align-items: flex-end; height: 8px; opacity: 0; transition: 0.3s; }
+      .is-playing .fp-eq { opacity: 1; }
+      .fp-eq span { width: 2px; background: var(--c-black); border-radius: 1px; animation: eqBounce 0.6s infinite alternate ease-in-out; }
+      .fp-eq span:nth-child(1) { animation-delay: 0.1s; } .fp-eq span:nth-child(2) { animation-delay: 0.4s; } .fp-eq span:nth-child(3) { animation-delay: 0.2s; } .fp-eq span:nth-child(4) { animation-delay: 0.5s; } .fp-eq span:nth-child(5) { animation-delay: 0.3s; }
+      @keyframes eqBounce { 0% { height: 2px; } 100% { height: 8px; } }

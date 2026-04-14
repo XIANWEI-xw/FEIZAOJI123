@@ -1,0 +1,61 @@
+         /* ================= 银白星轨开屏 CSS ================= */
+         #lock-screen {
+         --bg-void: #030304; --platinum: #FFFFFF; --titanium: #E0E4EB;
+         --titanium-dim: rgba(224, 228, 235, 0.25); --platinum-glow: rgba(255, 255, 255, 0.6);
+         --alert-red: #D32F2F;
+         position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-void);
+         z-index: 9999; display: flex; justify-content: center; align-items: center; 
+         transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s; overflow: hidden;
+         }
+         #lock-screen.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
+         .ls-noise { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1; mix-blend-mode: overlay; }
+         .ls-wire-star { position: absolute; top: 40%; left: 30%; width: 200vw; height: 200vw; transform: translate(-50%, -50%) rotate(15deg); fill: none; stroke: var(--titanium-dim); stroke-width: 0.2; pointer-events: none; z-index: 0; opacity: 0.5; }
+         .ls-abyss { position: absolute; bottom: -10%; right: -20%; width: 150%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 60%); filter: blur(50px); z-index: 0; pointer-events: none; animation: pulseAbyss 6s infinite alternate ease-in-out; }
+         /* 呼吸星尘层 */
+         .ls-stardust-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+         .ls-dust-dot { position: absolute; background: var(--platinum); border-radius: 50%; box-shadow: 0 0 4px var(--platinum); }
+         .ls-dust-star { position: absolute; color: var(--platinum); line-height: 1; }
+         @keyframes twinkle { 0% { opacity: 0.1; transform: scale(0.6); } 100% { opacity: 0.8; transform: scale(1.2); filter: drop-shadow(0 0 6px var(--platinum-glow)); } }
+         .ls-geo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+         .ls-slash-1 { position: absolute; top: -50%; left: 30%; width: 1px; height: 200%; background: var(--titanium-dim); transform: rotate(25deg); }
+         .ls-slash-2 { position: absolute; top: 70%; left: -50%; width: 200%; height: 1px; background: var(--titanium-dim); transform: rotate(15deg); }
+         .ls-brand { position: absolute; top: 12%; left: 24px; z-index: 10; display: flex; flex-direction: column; align-items: flex-start; pointer-events: none; }
+         .ls-title { font-family: "Didot", serif; font-size: 54px; font-weight: 400; font-style: italic; color: var(--platinum); letter-spacing: 2px; line-height: 0.9; }
+         .ls-sub { font-family: "Courier New", monospace; font-size: 8px; font-weight: 800; color: var(--titanium); letter-spacing: 8px; text-transform: uppercase; margin-top: 16px; border-left: 2px solid var(--platinum); padding-left: 8px; }
+         .ls-sysdata { position: absolute; bottom: 30px; left: 24px; font-family: "Courier New", monospace; font-size: 7px; color: rgba(224, 228, 235, 0.3); letter-spacing: 3px; line-height: 1.8; }
+         .ls-sysdata span { color: var(--titanium); font-weight: bold; }
+         .ls-const { position: absolute; top: 40px; right: 24px; width: 80px; height: 60px; z-index: 50; }
+         .ls-c-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+         .ls-c-path { fill: none; stroke: var(--titanium-dim); stroke-width: 0.5px; opacity: 0; transition: opacity 0.3s, stroke 0.3s; }
+         .ls-c-path.active { opacity: 1; stroke: var(--platinum); filter: drop-shadow(0 0 5px var(--platinum-glow)); }
+         .ls-c-node { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+         .ls-c-node::before { content: '★'; font-size: 8px; color: var(--titanium-dim); transition: 0.3s; }
+         .ls-c-node.glow::before { color: var(--platinum); font-size: 10px; text-shadow: 0 0 12px var(--platinum); }
+         .ls-const.error { animation: glitchTear 0.3s forwards; }
+         .ls-const.error .ls-c-node::before { color: var(--platinum); text-shadow: 0 0 20px var(--platinum); }
+         .ls-auth { position: absolute; top: 50%; right: 40px; width: 120px; height: 180px; transform: translateY(-50%); z-index: 20; pointer-events: none; }
+         .ls-stealth-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 30; border: none; outline: none; background: transparent; color: transparent; }
+         .ls-slot { position: absolute; width: 12px; height: 12px; border: 1px solid var(--titanium-dim); transform: rotate(45deg); display: flex; justify-content: center; align-items: center; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+         .ls-slot-1 { top: 0; left: 50%; } .ls-slot-2 { top: 30%; right: 0; } .ls-slot-3 { top: 60%; left: 20%; } .ls-slot-4 { bottom: 0; right: 20%; }
+         .ls-slot-core { width: 100%; height: 100%; background: var(--platinum); opacity: 0; transform: scale(0); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 15px var(--platinum-glow); }
+         .ls-slot.active { border-color: var(--platinum); transform: rotate(0deg) scale(1.2); }
+         .ls-slot.active .ls-slot-core { opacity: 1; transform: scale(1); }
+         .ls-auth.error { animation: glitchTear 0.4s ease-in-out forwards; }
+         .ls-auth.error .ls-slot-core { background: #FFF; box-shadow: 0 0 25px #FFF; }
+         .ls-auth.error .ls-slot { border-color: #FFF; }
+         .ls-hint { position: absolute; bottom: -30px; right: 0; text-align: right; font-family: "Courier New", monospace; font-size: 7px; color: var(--titanium); letter-spacing: 2px; transition: opacity 0.3s; white-space: nowrap; }
+         .ls-links { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;}
+         .ls-m-link { fill: none; stroke: var(--platinum); stroke-width: 1px; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 0.4s ease; opacity: 0.8; filter: drop-shadow(0 0 3px var(--platinum-glow));}
+         .ls-m-link.active { stroke-dashoffset: 0; }
+         .ls-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--platinum); opacity: 0; pointer-events: none; z-index: 999; mix-blend-mode: overlay; }
+         #lock-screen.unlocking .ls-brand { animation: slideOutLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+         #lock-screen.unlocking .ls-auth, #lock-screen.unlocking .ls-const, #lock-screen.unlocking .ls-sysdata { animation: slideOutRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+         #lock-screen.unlocking .ls-geo, #lock-screen.unlocking .ls-stardust-layer { animation: shatterFade 0.8s forwards; }
+         #lock-screen.unlocking .ls-flash { animation: whiteFlash 0.8s ease-out forwards; }
+         @keyframes pulseAbyss { 0% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
+         @keyframes glitchTear { 0%, 100% { transform: translateY(-50%) translateX(0); } 25% { transform: translateY(-52%) translateX(-10px) skewX(10deg); } 50% { transform: translateY(-48%) translateX(10px) skewX(-10deg); } 75% { transform: translateY(-50%) translateX(-5px); } }
+         @keyframes slideOutLeft { 100% { transform: translateX(-50px) scale(1.05); opacity: 0; } }
+         @keyframes slideOutRight { 100% { transform: translateX(50px) scale(1.05); opacity: 0; } }
+         @keyframes shatterFade { 100% { transform: scale(1.1) rotate(5deg); opacity: 0; } }
+         @keyframes whiteFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+         /* ================= 银白星轨开屏 CSS 结束 ================= */

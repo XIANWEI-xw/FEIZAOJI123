@@ -1,0 +1,130 @@
+/* SOAP OS - Global Style */
+
+:root {
+    --c-bg: #FFFFFF;
+    --c-card: #FFFFFF;
+    --c-gray-light: #F3F2EF;
+    --c-gray-mid: #D6D3CF; 
+    --c-gray-dark: #A8A39D;
+    --c-black: #4A4642;
+    --c-white: #FFFFFF;
+    --u-bg: #F9F8F6;
+    --u-color: #4A4642;
+    --safe-bottom: env(safe-area-inset-bottom, 20px); 
+    /* 🎯 核心修复：针对灵动岛优化，使用 env 变量并增加 10px 的呼吸感间距，防止文字贴死灵动岛边缘 */
+    --safe-top: env(safe-area-inset-top, 44px); 
+    --nav-height: 60px; 
+}
+
+/* 🚀 安卓端专用顶部偏移补丁 */
+/* 当 JS 检测到安卓设备并注入类名后，强制覆盖 safe-top 变量，将界面整体下压 30px */
+body.is-android {
+    --safe-top: 30px;
+}
+         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+         body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif; letter-spacing: 0.2px; }
+         body.hide-bubble-names .bubble-name { display: none !important; }
+         .chat-bg-preview-box { overflow: hidden; position: relative; width: 100%; border-radius: 12px; }
+         .c-avatar-wrap img, .msg-avatar img, .title-avatar img, .me-hero-avatar img, .avatar-upload-circle img, .ic-prev img, .c-avatar-box img, .chat-sq-avatar img, .chat-bg-preview-box img, .toast-avatar img, .list-avatar-inner img, .app-icon img { 
+         width: 100%; height: 100%; object-fit: cover; display: block; 
+         }
+         .app-icon.has-img { padding: 0 !important; border: none !important; }
+         .svg-icon { display: block; width: 100%; height: 100%; color: inherit; }
+         .avatar-svg { width: 60%; height: 60%; color: var(--c-gray-dark); }
+         .iphone-frame { 
+         width: 100vw; 
+         height: 100vh; 
+         max-width: 430px; 
+         max-height: 930px; 
+         background-color: var(--c-bg); 
+         position: relative; 
+         overflow: hidden; 
+         display: flex; 
+         transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+         border-radius: 46px; 
+         box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 10px #080808; 
+         margin: auto; 
+         }
+         @media (max-width: 450px), (max-height: 950px) {
+         .iphone-frame { 
+         height: 98dvh; width: 95vw; max-height: 930px; 
+         border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 0 8px #080808; 
+         } 
+         }
+/* 强制全局字体继承 */
+body, input, textarea, select, button {
+    font-family: inherit !important;
+}
+
+/* --- 核心全屏重置 (完美兼容 PWA Standalone + iOS Safari) --- */
+html, body {
+    width: 100%;
+    /* 🔪 终极修复：使用 var(--app-height) 统一高度，由 JS 动态计算 */
+    height: var(--app-height, 100vh);
+    height: 100dvh;
+    min-height: var(--app-height, 100vh);
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* 🔪 核心修复：将透明改为黑色，防止 iOS 全屏模式下露出白色/黑色系统背景 */
+    background-color: #FFFFFF;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 🔪 iOS Safari 和 PWA Standalone 专属全屏修复 */
+/* 注意：不再使用 -webkit-fill-available，因为它在 iOS PWA standalone 模式下经常计算错误导致留白/留黑 */
+@supports (-webkit-touch-callout: none) {
+    html {
+        /* iOS 上优先用 JS 动态计算的 --app-height，避免 -webkit-fill-available 的坑 */
+        height: var(--app-height, 100vh) !important;
+        min-height: var(--app-height, 100vh) !important;
+    }
+    body {
+        height: 100% !important;
+        min-height: 100% !important;
+    }
+    #app-root {
+        height: var(--app-height, 100vh) !important;
+        min-height: var(--app-height, 100vh) !important;
+    }
+    #activation-overlay {
+        height: var(--app-height, 100vh) !important;
+        min-height: var(--app-height, 100vh) !important;
+    }
+    #wc-view-phone-sim {
+        height: var(--app-height, 100vh) !important;
+        min-height: var(--app-height, 100vh) !important;
+    }
+    .screen {
+        height: var(--app-height, 100vh) !important;
+        min-height: var(--app-height, 100vh) !important;
+    }
+    .settings-modal {
+        height: var(--app-height, 100vh) !important;
+        min-height: var(--app-height, 100vh) !important;
+    }
+    .dream-fullscreen-view {
+        height: var(--app-height, 100vh) !important;
+        min-height: var(--app-height, 100vh) !important;
+    }
+}
+
+input, textarea, select {
+    -webkit-user-select: auto !important;
+    user-select: auto !important;
+}

@@ -1,0 +1,109 @@
+         /* 使用自定义虚拟刘海变量 --safe-top，彻底解决浏览器自带 env 导致的排版乱跳 */
+         /* 顶栏背景改为中性纯白玻璃 */
+         .nav-bar { height: auto; min-height: var(--nav-height); background: rgba(255,255,255,0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; z-index: 10; padding-top: calc(var(--safe-top) + 15px); position: relative; border-bottom: 0.5px solid rgba(0,0,0,0.05);}
+         .nav-header { height: var(--nav-height); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; background: transparent; padding-top: var(--safe-top); position: relative; letter-spacing: 0.5px; }
+         .nav-btn { color: var(--c-black); background: none; border: none; font-size: 15px; font-weight: 600; cursor: pointer; z-index: 2; position: relative; padding: 5px; display:flex; align-items:center; flex-shrink:0; transition: 0.2s;}
+         .nav-btn:active { opacity: 0.5; }
+         .nav-title-center { position: absolute; left: 50%; transform: translateX(-50%); font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; z-index: 1; width: 60%; text-align: center; letter-spacing: 0.3px; pointer-events: none; }
+         /* ================= 聊天历史懒加载提示 ================= */
+.chat-load-more-hint {
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+    padding: 12px 0 20px; width: 100%;
+    font-family: "Courier New", monospace; font-size: 10px; font-weight: 700;
+    color: #A8A39D; letter-spacing: 1.5px; text-transform: uppercase;
+    animation: hintFadeIn 0.4s ease;
+}
+.chat-load-more-hint.all-loaded { color: #D1D1D6; }
+.chat-load-more-hint.is-loading { color: #1C1C1E; }
+.chl-spinner {
+    width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.1);
+    border-top-color: #1C1C1E; border-radius: 50%;
+    animation: chlSpin 0.6s linear infinite;
+}
+@keyframes chlSpin { to { transform: rotate(360deg); } }
+@keyframes hintFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 聊天室顶栏：自适应刘海与灵动岛 */
+.chat-nav-bar { 
+    height: auto; 
+    min-height: calc(var(--nav-height) + var(--safe-top) + 15px);
+    padding-top: calc(var(--safe-top) + 15px); 
+    padding-bottom: 10px;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding-left: 10px; 
+    padding-right: 15px; 
+    background: rgba(255,255,255,0.85); 
+    backdrop-filter: blur(25px); 
+    -webkit-backdrop-filter: blur(25px);
+    border-bottom: 0.5px solid rgba(0,0,0,0.05); 
+    position: relative; 
+    z-index: 100; 
+}
+         .chat-title-center-block { 
+         position: absolute; left: 50%; top: calc(50% + var(--safe-top) / 2); 
+         transform: translate(-50%, -50%); width: 60%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; pointer-events: none;
+         }
+         /* 强制修复 HTML 内部直接写死 env() 导致的桌面组件间距和各类弹窗顶部偏移错位问题 */
+         #widget-wrapper { margin-top: calc(var(--safe-top) + 10px) !important; }
+         .home-widget { margin-top: calc(var(--safe-top) + 10px) !important; }
+         .toast-notification { top: calc(var(--safe-top) + 15px) !important; }
+         .drag-save-bar { top: var(--safe-top) !important; }
+         .chat-top-connection-row { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; pointer-events: auto; }
+         .chat-sq-avatar { 
+         width: 38px; height: 38px; border-radius: 10px; 
+         overflow: hidden; background: var(--c-gray-light); flex-shrink: 0;
+         border: 0.5px solid rgba(0,0,0,0.08); display: flex; justify-content: center; align-items: center;
+         box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+         }
+         .ecg-line-wrap { width: 60px; height: 26px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--c-black); transition: all 0.3s ease; }
+         .ecg-path { stroke-dasharray: 120; stroke-dashoffset: 120; animation: ecgBeat 2.2s linear infinite; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+         @keyframes ecgBeat { 0% { stroke-dashoffset: 120; opacity: 0.15; } 50% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: -120; opacity: 0.15; } }
+         @keyframes heartBeat { 0% { transform: scale(1); } 15% { transform: scale(1.15); } 30% { transform: scale(1); } 45% { transform: scale(1.08); } 60% { transform: scale(1); } }
+         @keyframes ghostAnim { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.6); opacity: 0; } }
+         .heart-container { position: relative; width: 40px; height: 40px; margin: 10px auto; display: flex; justify-content: center; align-items: center; }
+         .gap-heart-container { position: relative; width: 26px; height: 26px; display: flex; justify-content: center; align-items: center; }
+         .heart-main { stroke: var(--c-black); stroke-width: 1.5; fill: none; animation: heartBeat 1.2s infinite cubic-bezier(0.34, 1.56, 0.64, 1); stroke-linecap: round; stroke-linejoin: round; }
+         .heart-ghost { stroke: var(--c-black); stroke-width: 1.5; fill: none; position: absolute; opacity: 0.5; animation: ghostAnim 1.2s infinite cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; stroke-linecap: round; stroke-linejoin: round; }
+         .title-remark-text { 
+         font-size: 12px; font-weight: 700; color: var(--c-black); 
+         margin-top: 8px; cursor: pointer; padding: 4px 14px; 
+         background: rgba(0,0,0,0.05); border-radius: 100px; transition: all 0.2s ease;
+         max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.5px; pointer-events: auto;
+         }
+         .title-remark-text:active { background: rgba(0,0,0,0.1); transform: scale(0.95); }
+         .search-bar-wrap { padding: 5px 24px 20px 24px; background: transparent; z-index: 5; position: relative; flex-shrink: 0; }
+         .search-bar { 
+         background: var(--c-card); border-radius: 100px; padding: 12px 20px; 
+         display: flex; align-items: center; gap: 10px; color: var(--c-gray-dark); transition: 0.3s;
+         box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 0.5px solid rgba(0,0,0,0.03);
+         }
+         .search-bar:focus-within { box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+         .search-bar input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; font-weight: 500; color: var(--c-black); font-family: inherit;}
+         .search-bar input::placeholder { font-weight: 400; color: var(--c-gray-mid); }
+         .settings-group { background: var(--c-card); margin: 16px 20px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.03); overflow: hidden; }
+         .settings-item { padding: 18px 20px; border-bottom: 0.5px solid rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 8px; transition: background 0.2s;}
+         .settings-item:last-child { border-bottom: none; }
+         .settings-item label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--c-gray-dark); font-weight: 700; }
+         .settings-item input[type="text"], .settings-item input[type="password"], .settings-item input[type="number"], .settings-item select { width: 100%; border: none; font-size: 16px; font-weight: 500; outline: none; background: transparent; color: var(--c-black); font-family: inherit; padding: 2px 0;}
+         .settings-item input::placeholder { color: var(--c-gray-mid); font-weight: 400;}
+         #setting-lockcode:focus { background: rgba(0,0,0,0.06) !important; border-color: var(--c-black) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+         .switch-container { display: flex; justify-content: space-between; align-items: center; flex-direction: row; }
+         .switch-container label { text-transform: none; letter-spacing: normal; font-size: 15px; color: var(--c-black); font-weight: 600; }
+         .form-view { padding: 10px 0; overflow-y: auto; flex: 1; }
+         .form-group { margin-bottom: 20px; }
+         .form-group label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--c-gray-dark); margin-bottom: 8px; font-weight: 700; padding-left: 4px;}
+         .form-control { width: 100%; padding: 16px; border: 0.5px solid rgba(0,0,0,0.06); border-radius: 16px; outline: none; background: #FFFFFF; color: var(--c-black); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); font-family: inherit; font-size: 15px; font-weight: 500; box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
+         .form-control:focus { border-color: rgba(0,0,0,0.2); box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+         .btn-black, .btn-outline { display: block; width: calc(100% - 40px); margin: 0 auto; text-align: center; padding: 16px; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 15px; transition: transform 0.2s, opacity 0.2s; letter-spacing: 0.5px;}
+         .btn-black { background: var(--c-black); color: var(--c-white); border: none; box-shadow: 0 10px 25px rgba(28,28,30,0.2); }
+         .btn-black:active { transform: scale(0.97); opacity: 0.9; }
+         .btn-outline { background: transparent; color: var(--c-black); border: 1.5px solid var(--c-black); margin-bottom: 12px; box-shadow: none;}
+         .btn-outline:active { background: rgba(0,0,0,0.05); transform: scale(0.97); }
+         /* 胶囊按钮生态 */
+         .capsule-btn { background: rgba(0,0,0,0.05); color: var(--c-black); padding: 14px 24px; border-radius: 100px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; border: none; letter-spacing: 0.5px; }
+         .capsule-btn:active { transform: scale(0.96); opacity:0.9; }
+         .action-chip { background: rgba(0,0,0,0.05); padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--c-black); cursor: pointer; transition: 0.2s; user-select: none; white-space: nowrap;}
+         .action-chip:active { transform: scale(0.95); }
+         .action-chip.active { background: var(--c-black); color: var(--c-white); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }

@@ -1,0 +1,27 @@
+{
+  "name": "SOAP PHONE",
+  "short_name": "SOAP PHONE",
+  "id": "./index.html",
+  "description": "iOS Theme Studio Standalone App",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "lang": "zh-CN",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://nos.netease.com/ysf/547542b6a49930315c352e6a326bb876.png",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://nos.netease.com/ysf/547542b6a49930315c352e6a326bb876.png",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
