@@ -429,18 +429,24 @@
                         <svg class="cp-corner-cross cp-cc-bl" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
                         <svg class="cp-corner-cross cp-cc-br" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
 
-                        <div class="cp-aesthetic-header">
+                                <div class="cp-aesthetic-header">
                             <div class="cp-sub cp-mono">NEURAL PROTOCOL</div>
-                            <div class="cp-title cp-serif">CONNECTION</div>
+                            <div class="cp-title cp-serif">CONNECTION</div>    <div id="cp-stealth-toggle" style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:12px; cursor:pointer; padding:6px 14px; border-radius:20px; background:rgba(0,0,0,0.03); transition:0.3s; width:fit-content; margin-left:auto; margin-right:auto; border: 1px solid rgba(0,0,0,0.05); position:relative; z-index:100; pointer-events:auto;">
+    <svg id="cp-stealth-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4; transition:0.3s; pointer-events:none;">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+    </svg>
+    <span id="cp-stealth-label" class="cp-mono" style="font-size:8px; letter-spacing:2px; color:var(--c-gray); font-weight:800; transition:0.3s; pointer-events:none;">STEALTH: OFF</span>
+    <div id="cp-stealth-dot" style="width:5px; height:5px; border-radius:50%; background:#C3A772; opacity:0.3; transition:0.3s; pointer-events:none;"></div>
+</div>
                         </div>
 
                         <div class="cp-dossier-scroll-container" id="cp-scroll-container">
                             <!-- JS 动态渲染 -->
                         </div>
 
-                        <div class="cp-bottom-action-zone">
+                                <div class="cp-bottom-action-zone">
                             <button class="cp-btn-black-capsule cp-mono" onclick="cpConnectSoul()">AUTHORIZE LINK</button>
-                        </div>
+                </div>
                         <div class="cp-exit-btn" onclick="closeCurrentApps()">
                             <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z"/></svg>
                         </div>
@@ -645,8 +651,8 @@
 
                             <div class="cp-cd-input-bar">
                                 <div class="cp-cd-icon-btn"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
-                                <input type="text" class="cp-cd-input-box" placeholder="Message...">
-                                <div class="cp-cd-icon-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+                                <input type="text" class="cp-cd-input-box" id="cp-cd-msg-input" placeholder="以TA的身份发消息..." onkeydown="if(event.key==='Enter') cpSendMsgAsChar()">
+                                <div class="cp-cd-icon-btn" onclick="cpSendMsgAsChar()" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
                             </div>
                             <div class="cp-home-indicator" style="background-color: var(--c-black);" onclick="cpCloseApp()"></div>
                         </div>
@@ -1694,7 +1700,7 @@
          <div class="app-window" id="app-worldbook" style="background: #F4F3F0; padding: 0;">
             <div class="cs-full-wrapper" style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #F4F3F0;">
                 <!-- 顶部导航 -->
-                <header style="padding: calc(var(--safe-top) + 15px) 24px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.05); z-index: 10;">
+                <header style="padding: calc(var(--safe-top) + 15px) 24px 10px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.05); z-index: 10;">
                     <div onclick="closeCurrentApps()" style="cursor: pointer; padding: 5px;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="1.2"><path d="M15 18l-6-6 6-6"/></svg>
                     </div>
@@ -1706,8 +1712,10 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                     </div>
                 </header>
+                <!-- 分类过滤横栏 -->
+                <div id="wb-category-filter" style="padding: 0 20px 12px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; z-index: 10; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.05);"></div>
                 <!-- 列表区 -->
-                <div id="wb-list" style="flex: 1; overflow-y: auto; padding: 20px 20px 100px;"></div>
+                <div id="wb-list" style="flex: 1; overflow-y: auto; padding: 10px 20px 100px;"></div>
             </div>
          </div>
          <!-- ================= 高定商店 STORE APP ================= -->
@@ -1916,8 +1924,8 @@
                   </div>
                </div>
                <div class="capsule-list" id="track-list-container"></div>
-               <!-- 新增：主界面的返回按钮，防止卡在菜单出不来 -->
-               <div style="position:absolute; bottom: 40px; left: 60px; cursor: pointer; color: var(--c-dyn-text); opacity:0.6;" onclick="closeCurrentApps()">
+               <!-- 新增：主界面的返回按钮，固定在底部不跟随滚动 -->
+               <div style="position:fixed; bottom: calc(40px + var(--safe-bottom, 0px)); left: 60px; z-index: 100; cursor: pointer; color: var(--c-dyn-text); opacity:0.6;" onclick="closeCurrentApps()">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                      <path d="M15 18l-6-6 6-6"/>
                   </svg>
@@ -3223,6 +3231,16 @@
 
                     <section style="margin-bottom: 35px;">
                         <div class="cs-section-head">02. Logic & Trigger</div>
+                        <!-- 分类选择 -->
+                        <div class="cs-row-item">
+                            <label>所属分组 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">Category</small></label>
+                            <div style="display: flex; gap: 8px; align-items: center; width: 65%;">
+                                <select id="wb-category-select" class="cs-select-minimal" style="flex: 1;"></select>
+                                <div onclick="openWbCatManager()" style="cursor: pointer; background: #F4F3F0; width: 28px; height: 28px; border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 0.5px solid rgba(0,0,0,0.05);">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                                </div>
+                            </div>
+                        </div>
                         <div class="cs-row-item">
                             <label>插入位置 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">Position in Prompt</small></label>
                             <div style="display: flex; background: #F4F3F0; padding: 4px; border-radius: 100px; gap: 4px;">
@@ -3712,6 +3730,41 @@
                         <div class="cs-row-item">
                             <label>动作神态描写 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">Action & Expression</small></label>
                             <div class="cs-toggle"><input type="checkbox" id="cs-allow-action" class="cs-toggle-input"><label for="cs-allow-action"></label></div>
+                        </div>
+
+                        <!-- 新增：主动消息配置 -->
+                        <div style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <label style="font-size: 13px; font-weight: 800;">允许 AI 主动找我</label>
+                                <div class="cs-toggle"><input type="checkbox" id="cs-allow-proactive" class="cs-toggle-input"><label for="cs-allow-proactive"></label></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="font-size: 11px; font-weight: 800; color: #A8A196;">触发间隔 (分钟)</label>
+                                <input type="number" id="cs-proactive-interval" placeholder="10" class="cs-num-input" style="width: 80px;">
+                            </div>
+                            <p style="font-size: 9px; color: #A8A196; margin-top: 10px; line-height: 1.4;">开启后，若你长时间未回复，AI 将根据人设主动开启话题或追问。设置为 0 则不自动触发。</p>
+                        </div>
+
+                        <!-- 新增：双语模式配置 -->
+                        <div style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <label style="font-size: 13px; font-weight: 800;">双语翻译</label>
+                                <div class="cs-toggle"><input type="checkbox" id="cs-allow-bilingual" class="cs-toggle-input"><label for="cs-allow-bilingual"></label></div>
+                            </div>
+                            <div class="cs-row-item" style="padding: 0; border: none;">
+    <label style="font-size: 11px; font-weight: 800; color: #A8A196;">目标语言</label>
+    <select id="cs-target-lang" class="cs-select-minimal" onchange="toggleCustomLangInput(this.value)">
+        <option value="English">English (英文)</option>
+        <option value="Japanese">Japanese (日本語)</option>
+        <option value="Korean">Korean (한국어)</option>
+        <option value="French">French (Français)</option>
+        <option value="custom">自定义语言...</option>
+    </select>
+</div>
+<div id="custom-lang-input-wrap" style="display: none; margin-top: 10px;">
+    <input type="text" id="cs-custom-lang" class="cs-input-minimal" placeholder="输入自定义语言名称 (例如: 粤语、文言文、火星文)" style="width: 100%;">
+</div>
+                            <p style="font-size: 9px; color: #A8A196; margin-top: 10px; line-height: 1.4;">开启后 AI 将生成双语对白。点击气泡可展开/收起译文。</p>
                         </div>
                         
                         <!-- 强制线下高级组 -->
@@ -4762,5 +4815,17 @@
       </div>
    </div>
 </div>
+         <!-- 世界书分组管理弹窗 -->
+         <div class="modal-overlay" id="wb-cat-modal" style="z-index: 1100; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px);">
+            <div class="modal-box" style="width: 300px; background: #fff; border-radius: 28px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);">
+                <div style="font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; text-align: center; margin-bottom: 20px; letter-spacing: 1px;">分组管理</div>
+                <div id="wb-cat-manage-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none;"></div>
+                <div style="display: flex; gap: 10px; background: #F4F3F0; padding: 6px; border-radius: 12px;">
+                    <input type="text" id="wb-new-cat-input" placeholder="新分组名称..." style="flex: 1; border: none; background: transparent; padding: 8px; font-size: 12px; outline: none; font-weight: 700;">
+                    <button onclick="addWbCategory()" style="background: #1C1C1E; color: #fff; border: none; border-radius: 8px; padding: 0 15px; font-size: 11px; font-weight: 800;">添加</button>
+                </div>
+                <button onclick="closeWbCatManager()" style="width: 100%; margin-top: 20px; padding: 14px; border-radius: 16px; border: 0.5px solid rgba(0,0,0,0.1); background: #fff; font-size: 12px; font-weight: 900; letter-spacing: 1px;">完成</button>
+            </div>
+         </div>
    </body>
 </html>

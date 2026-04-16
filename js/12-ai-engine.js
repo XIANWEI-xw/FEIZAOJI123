@@ -161,6 +161,8 @@ if (aiPromptContent) {
              
              appendBubbleRow(newMsg, c.history.length - (aiPromptContent ? 2 : 1)); 
              saveData();
+             // 用户发消息后，重置 AI 主动找人的计时器
+             if (typeof resetProactiveTimer === 'function') resetProactiveTimer(c.id);
              if (c.autoSumFreq > 0 && (c.history.length - (c.lastSumIndex || 0)) > c.autoSumFreq) { performSummarize(c); }
          }
          
@@ -185,7 +187,7 @@ if (aiPromptContent) {
          }
          function manualSummarize() { const c = contacts.find(x => x.id === currentContactId); performSummarize(c, true); }
          
-         async function fetchAIReply(targetContactId = currentContactId) {
+         async function fetchAIReply(targetContactId = currentContactId, isProactive = false) {
              if (!targetContactId) return;
              const c = contacts.find(x => x.id === targetContactId);
              if (!c) return;
@@ -1132,11 +1134,12 @@ and the imperfect beauty that comes with being truly alive.
          // 🌟 核心修复：提取隐藏在 <span> 里的真实系统通报，剥离 HTML 标签，防止 AI 因为 display:none 导致无视或产生乱码幻觉！
          // 使用 [\s\S]*? 完美匹配多行文本，解决带换行的提示词无法被读取的 Bug！
          let match = m.content.match(/<span style="display:none;">([\s\S]*?)<\/span>/);
-         let hiddenText = match ? match[1] : m.content.replace(/<[^>]+>/g, '').trim();
-         if (hiddenText) {
-             // 强制伪装成 user 角色发送，彻底解决大模型无视中间 system 消息导致“看不到拍一拍”的问题！
-             apiMessages.push({ role: 'user', content: hiddenText });
-         }
+let hiddenText = match ? match[1] : m.content.replace(/<[^>]+>/g, '').trim();
+if (hiddenText) {
+    if (!hiddenText.includes('quote-bubble-block') && !hiddenText.includes('回复 ')) {
+        apiMessages.push({ role: 'user', content: hiddenText });
+    }
+}
                           } else { 
                      // 🎯 终极净化引擎：如果内容里有真图/表情包，把庞大到上万字的 Base64 代码替换成纯净的 "[图片]"，防止撑爆AI大脑！
                      let cleanText = m.content.replace(/<img[^>]*>/gi, '[图片]');
@@ -1155,7 +1158,14 @@ and the imperfect beauty that comes with being truly alive.
                          timePrefix = `[${msgMonth}-${msgDay} ${msgH}:${msgM}] `;
                      }
                      
-                     let pushContent = `${timePrefix}[消息ID: ${m._oid}] ${m.role === 'user' ? '【用户】' : '【你】'}\n${cleanText}`;
+                     const isLastUserMsg = m.role === 'user' && (() => {
+    for (let k = c.history.length - 1; k >= 0; k--) {
+        if (c.history[k].role === 'user') return c.history[k] === m;
+        if (c.history[k].role === 'assistant') break;
+    }
+    return false;
+})();
+let pushContent = `${timePrefix}[消息ID: ${m._oid}] ${m.role === 'user' ? (isLastUserMsg ? '【用户最新消息 ⚡ 必须优先回应此条】' : '【用户】') : '【你】'}\n${cleanText}`;
                      
                      // 【核心拦截】：将系统卡片转化为客观状态描述，修复 AI 搞错收发人导致抢红包/转账乱套的问题
                     let isUserSender = (m.role === 'user');
@@ -1284,23 +1294,48 @@ and the imperfect beauty that comes with being truly alive.
              let actionRuleText = c.allowAction 
                  ? "【动作极其克制法则】：如果真的有必要，允许用星号 *动作* 描写微表情，但【只能放在你的第一条消息对白的最前面出现一次】。绝对禁止在句子中间、结尾、或第二第三条消息里乱加动作！为了让对话像人类，请尽量克制动作，把所有的戏份全留给 <thought>！" 
                  : "【动作绝对封杀令】：当前用户已禁止动作描写，你的对白中【绝对、绝对、绝对不允许】出现任何星号 * 或括号包裹的动作描写！所有的心理活动必须全部锁在 <thought> 标签内！";
+
+             // 🚀 核心注入：双语互换引擎 (目标语言作为正文，中文作为翻译)
+             let bilingualRule = "";
+             if (c.allowBilingual === true) {
+                 const targetL = c.targetLang || 'English';
+                 bilingualRule = `\n\n[🚨 HARD-CODED OUTPUT CONSTRAINT: MANDATORY BILINGUAL CHANNEL 🚨]
+                 - YOUR PRIMARY OUTPUT LANGUAGE IS NOW LOCKED TO: ${targetL}.
+                 - YOU MUST OUTPUT ${targetL} AS THE MAIN TEXT, AND CHINESE AS THE TRANSLATION.
+                 - EVERY SINGLE BUBBLE MUST FOLLOW THIS PATTERN: [${targetL} Content] <translation> [Chinese Content]
+                 - MULTI-BUBBLE RULE: If you use <split>, EACH segment MUST have its own <translation> tag.
+                 - EXAMPLE (Target is ${targetL}): 
+                   I miss you. <translation> 我想你了。
+                   <split>
+                   How about you? <translation> 你呢？
+                 - DO NOT EXPLAIN. DO NOT USE PARENTHESES. JUST THE <translation> TAG.
+                 [FAILURE TO FOLLOW THIS FORMAT WILL CAUSE SYSTEM LOGIC PURGE]`;
+             }
          
              let finalFormatReminder = `\n\n[🚨 FINAL CHECKPOINT — READ THIS CAREFULLY]
+${c.allowBilingual === true ? `[⚠️ CRITICAL ALERT: BILINGUAL MODE IS ACTIVE! YOU MUST OUTPUT ${c.targetLang || 'English'} FIRST, THEN <translation> CHINESE! ⚠️]` : ''}
+
+[⚡ ABSOLUTE REPLY ANCHOR — HIGHEST PRIORITY]:
+Your reply MUST respond to the VERY LAST message marked 【用户最新消息 ⚡】.
+FORBIDDEN: Referencing or quoting any message older than the last 2 exchanges.
+FORBIDDEN: Repeating content from your previous reply.
+FORBIDDEN: Spontaneously quoting old messages with [Quote:] unless user explicitly asked you to reference something specific.
+If you feel the urge to quote something old → SUPPRESS IT. Just reply to what user said NOW.
 
 [OUTPUT STRUCTURE — MANDATORY ORDER, NO EXCEPTIONS]:
 LINE 1: <bpm>NUMBER</bpm><affection>NUMBER</affection><mood>NUMBER</mood>
 LINE 2: <thought>Character inner voice, 简体中文, ≤80 chars, NOT analysis report</thought>
 LINE 3+: Spoken dialogue. Use <split> to break into bubbles.
 
-[CORRECT OUTPUT EXAMPLE]:
+[CORRECT OUTPUT EXAMPLE (Bilingual Mode)]:
 <bpm>88</bpm><affection>72</affection><mood>65</mood>
 <thought>又发消息了...明明在等却不想承认</thought>
-你找我干嘛<split>没事别烦我
+Why are you looking for me? <translation> 你找我干嘛？ <split> Don't bother me. <translation> 没事别烦我。
 
 [WRONG OUTPUT — BANNED]:
-你找我干嘛<split><thought>blah</thought>没事别烦我 ← thought in WRONG position
-<thought>blah</thought><bpm>88</bpm>你好 ← bpm in WRONG position
-你找我干嘛 ← missing <bpm><affection><mood><thought> entirely
+你找我干嘛 <translation> Why are you looking for me? ← WRONG ORDER (Chinese must be in tag)
+Why are you looking for me? <split> <translation> 你找我干嘛 ← WRONG POSITION
+Why are you looking for me? ← MISSING <translation> tag
 
 [QUOTE FORMAT — FLEXIBLE RULES]:
 You can quote the user MULTIPLE TIMES in your reply to address different points.
@@ -1324,6 +1359,7 @@ WORLD_LAW: Strictly follow [WORLD_LAW] and [REALITY_ANCHOR] from the beginning.
 MEMORY: Reference 【核心记忆】 constantly. Do NOT forget past events.
 ACTIONS: ${c.allowAction ? 'Use <action>...</action> for physical movements. NO ASTERISKS.' : 'STRICTLY FORBIDDEN. No action tags, no asterisks.'}
 STICKERS: ${c.allowAiSticker ? 'Use <sticker name="ExactName"> freely.' : 'DISABLED. Do NOT use sticker tags.'}
+${bilingualRule}
 
 PRIORITY: Persona > Format > Everything else
 LANGUAGE: Simplified Chinese ONLY
@@ -1332,26 +1368,45 @@ MANDATORY: You MUST output spoken dialogue. Never output only <thought> with emp
              // 🚀 核心修复：记忆末尾强注引擎
              let memoryBlock = c.memory ? `\n\n【🚨 核心记忆锚点 (必须绝对服从) 🚨】：\n${c.memory}\n(警告：上述记忆是你们关系的真实历史，你的回复必须严格基于这些事实，严禁失忆！)` : "";
 
+             // 提取最后一条用户真实消息内容，强行钉在末尾防止AI漂移
+             let lastRealUserMsg = null;
+             for (let k = c.history.length - 1; k >= 0; k--) {
+                 if (c.history[k].role === 'user' && !c.history[k].isRevoked) {
+                     lastRealUserMsg = c.history[k].content.replace(/<[^>]+>/g, '').trim().slice(0, 100);
+                     break;
+                 }
+             }
+             let focusAnchor = lastRealUserMsg 
+                 ? `\n\n[🎯 CURRENT FOCUS LOCK]: User's latest message is: "${lastRealUserMsg}"\nYour ENTIRE reply must be a direct response to THIS. Do NOT drift. Do NOT repeat your previous reply. Do NOT spontaneously quote old messages.`
+                 : '';
+
              // 🚀 核心修复：防止连续两条 assistant 导致 API 爆炸！
              // 如果上下文最后一条是 assistant，说明用户想让 AI "续写/接着说"，
              // 必须插入一条隐形的 user 消息作为桥梁，否则大模型会拒绝响应。
              if (apiMessages.length > 0) {
                  let lastApiMsg = apiMessages[apiMessages.length - 1];
-                 if (lastApiMsg.role === 'assistant') {
+                 
+                 // 如果是 AI 主动找人逻辑
+                 if (isProactive) {
                      apiMessages.push({ 
                          role: 'user', 
-                         content: `[系统指令：用户没有输入新消息，但点击了"继续"按钮。请你自然地接着上一句话继续说下去、补充想法、或主动开启新话题。绝对不要重复你刚才说过的话！]${memoryBlock}${finalFormatReminder}` 
+                         content: `[🚨 系统强制指令：主动消息协议启动 🚨]\n用户已经有一段时间没理你了。请你根据当前的时间、你们的关系阶段、以及刚才聊到一半的话题，【主动】给用户发消息。你可以是追问、吐槽、撒娇、分享你正在做的事、或者开启一个全新的话题。请表现得像一个真实的人在等待回复后的自然反应，绝对不要提到“系统”或“主动消息”字眼！${memoryBlock}${finalFormatReminder}` 
+                     });
+                 } else if (lastApiMsg.role === 'assistant') {
+                     apiMessages.push({ 
+                         role: 'user', 
+                         content: `[系统指令：用户没有输入新消息，但点击了"继续"按钮。请你自然地接着上一句话继续说下去、补充想法、或主动开启新话题。绝对不要重复你刚才说过的话！]${memoryBlock}${focusAnchor}${finalFormatReminder}` 
                      });
                  } else {
                      // 正常情况：最后一条是 user，直接追加到末尾
                      if (typeof lastApiMsg.content === 'string') {
-                         lastApiMsg.content += memoryBlock + finalFormatReminder;
+                         lastApiMsg.content += memoryBlock + focusAnchor + finalFormatReminder;
                      } else if (Array.isArray(lastApiMsg.content)) {
-                         lastApiMsg.content[0].text += memoryBlock + finalFormatReminder;
+                         lastApiMsg.content[0].text += memoryBlock + focusAnchor + finalFormatReminder;
                      }
                  }
              } else {
-                 apiMessages.push({ role: 'user', content: memoryBlock + finalFormatReminder });
+                 apiMessages.push({ role: 'user', content: memoryBlock + (isProactive ? "\n[用户很久没说话了，请主动开场]" : focusAnchor) + finalFormatReminder });
              }
                  
              try {
@@ -2049,7 +2104,7 @@ rawReply = rawReply.replace(postTwRegex, '').trim();
                  }
 
                  // 🎯 核心修复：将 div 和 span 加入白名单，确保旁白节点不被抹除
-spokenText = spokenText.replace(/<(?!div\b|span\b|img\b|split\b|\/split\b|send_blackcard\b|send_transfer\b|send_redpacket\b|send_luckypacket\b|send_location\b|send_sync\b|send_photo\b|send_gift\b|send_luxury_box\b|override\b|\/override\b|q[1-3]\b|\/q[1-3]\b|force\b|\/force\b|nudge\b|set_nudge\b|post_twitter\b|\/post_twitter\b)[^>]+>/gi, '').trim();
+spokenText = spokenText.replace(/<(?!div\b|span\b|img\b|split\b|\/split\b|translation\b|\/translation\b|send_blackcard\b|send_transfer\b|send_redpacket\b|send_luckypacket\b|send_location\b|send_sync\b|send_photo\b|send_gift\b|send_luxury_box\b|override\b|\/override\b|q[1-3]\b|\/q[1-3]\b|force\b|\/force\b|nudge\b|set_nudge\b|post_twitter\b|\/post_twitter\b)[^>]+>/gi, '').trim();
                  
                  // 💥 变异数字粉碎机：如果它在句子末尾残留了类似 >75<, <50> 这种畸形的数字壳，全部切除掉！
                  spokenText = spokenText.replace(/(?:>|<|》|《|】|\[|\()\s*\d{2,3}\s*(?:>|<|》|《|】|\]|\))\s*$/g, '').trim();
@@ -2460,6 +2515,8 @@ let currentWid = gConfig.currentWorldviewId || 'default';
                  document.getElementById('btn-call-ai').disabled = false; document.getElementById('btn-send').disabled = false; document.querySelector('.btn-menu').disabled = false; 
                  if (topBarEcgWrap) topBarEcgWrap.innerHTML = originalTopBarHTML;
                  updateChatTopUI();
+                 // AI 回复完后，重新开始主动消息计时
+                 if (typeof resetProactiveTimer === 'function') resetProactiveTimer(targetContactId);
              }
          }
          

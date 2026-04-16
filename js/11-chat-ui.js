@@ -148,6 +148,25 @@ function isUserInChatRoom(targetContactId) {
              });
          }
          
+         // 全局主动消息计时器池
+         let proactiveTimers = {};
+
+         function resetProactiveTimer(contactId) {
+             if (proactiveTimers[contactId]) {
+                 clearTimeout(proactiveTimers[contactId]);
+                 delete proactiveTimers[contactId];
+             }
+             
+             const c = contacts.find(x => x.id === contactId);
+             if (!c || !c.allowProactive || !c.proactiveInterval || c.proactiveInterval <= 0) return;
+
+             const ms = c.proactiveInterval * 60 * 1000;
+             proactiveTimers[contactId] = setTimeout(() => {
+                 // 触发主动消息
+                 fetchAIReply(contactId, true);
+             }, ms);
+         }
+
          function openChatSettings() {
              const c = contacts.find(x => x.id === currentContactId); 
              if(!c) return;
@@ -169,6 +188,19 @@ function isUserInChatRoom(targetContactId) {
              document.getElementById('cs-allow-ai-sticker').checked = c.allowAiSticker === true;
              document.getElementById('cs-allow-action').checked = c.allowAction === true;
              document.getElementById('cs-allow-override').checked = c.allowOverride !== false;
+             document.getElementById('cs-allow-proactive').checked = c.allowProactive === true;
+             document.getElementById('cs-proactive-interval').value = c.proactiveInterval || 10;
+             document.getElementById('cs-allow-bilingual').checked = c.allowBilingual === true;
+const targetLang = c.targetLang || 'English';
+const presetLangs = ['English', 'Japanese', 'Korean', 'French'];
+if (presetLangs.includes(targetLang)) {
+    document.getElementById('cs-target-lang').value = targetLang;
+    document.getElementById('custom-lang-input-wrap').style.display = 'none';
+} else {
+    document.getElementById('cs-target-lang').value = 'custom';
+    document.getElementById('cs-custom-lang').value = targetLang;
+    document.getElementById('custom-lang-input-wrap').style.display = 'block';
+}
              
              // 3. 强制线下参数
              document.getElementById('cs-override-prob').value = c.overrideProb || 3;
@@ -343,8 +375,21 @@ function isUserInChatRoom(targetContactId) {
              c.allowAiSticker = document.getElementById('cs-allow-ai-sticker').checked;
              c.allowAction = document.getElementById('cs-allow-action').checked;
              c.allowOverride = document.getElementById('cs-allow-override').checked;
+             c.allowProactive = document.getElementById('cs-allow-proactive').checked;
+             c.proactiveInterval = parseInt(document.getElementById('cs-proactive-interval').value) || 0;
+             c.allowBilingual = document.getElementById('cs-allow-bilingual').checked;
+const selectedLang = document.getElementById('cs-target-lang').value;
+if (selectedLang === 'custom') {
+    const customLang = document.getElementById('cs-custom-lang').value.trim();
+    c.targetLang = customLang || 'English';
+} else {
+    c.targetLang = selectedLang;
+}
              c.overrideProb = parseInt(document.getElementById('cs-override-prob').value) || 3; 
              c.overrideModePref = document.getElementById('cs-override-mode-pref').value; 
+
+             // 修改设置后重置计时器
+             resetProactiveTimer(c.id);
 
              // 🚀 核心增加：神经链路同步引擎 (瞬间让 AI 反应过来)
              let syncLogs = [];
@@ -360,6 +405,11 @@ function isUserInChatRoom(targetContactId) {
              }
              if (c.awareTime !== oldAwareTime) {
                  syncLogs.push(c.awareTime ? `现实时空同步雷达已开启，你现在可以感知用户的真实时间。` : `时空同步已断开。`);
+             }
+             
+             // 🚀 核心增加：双语协议同步
+             if (c.allowBilingual) {
+                 syncLogs.push(`[🚨 紧急协议覆写]：双语翻译模块已【立即】激活！这是系统内核级的强制指令：从你的【下一句话】开始，必须严格执行 {中文} <translation> {${c.targetLang}} 格式！禁止任何纯中文回复，否则将触发链路重启！`);
              }
 
              if (syncLogs.length > 0) {
@@ -644,7 +694,36 @@ c.history[0].content = newPrompt;
                  bubbleDiv.classList.add('bubble-clear');
              }
          
-             if (text) { bubbleDiv.innerHTML = text; }
+             if (text) { 
+                 // 🚀 核心解析：双语翻译引擎 (增强版正则匹配)
+                 const transRegex = /<translation\s*>/i;
+                 if (transRegex.test(text)) {
+                     const parts = text.split(transRegex);
+                     const mainText = parts[0].trim();
+                     const transText = parts[1].trim();
+                     
+                     // 渲染主文本
+                     bubbleDiv.innerHTML = `<div>${mainText}</div>`;
+                     
+                     // 创建隐藏的翻译层
+                     const transDiv = document.createElement('div');
+                     transDiv.className = 'bubble-translation';
+                     transDiv.style.cssText = `display:none; margin-top:8px; padding-top:8px; border-top:0.5px solid ${isUser ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}; font-family:'Courier New', monospace; font-size:11px; color:${isUser ? 'rgba(255,255,255,0.5)' : '#A8A196'}; line-height:1.3;`;
+                     transDiv.innerHTML = `<span style="opacity:0.5; margin-right:4px;">›</span> ${transText}`;
+                     bubbleDiv.appendChild(transDiv);
+                     
+                     // 绑定点击切换逻辑 (仅当非多选模式时)
+                     bubbleDiv.addEventListener('click', (e) => {
+                         if (!document.getElementById('chat-area').classList.contains('multi-select-mode')) {
+                             e.stopPropagation();
+                             const isHidden = transDiv.style.display === 'none';
+                             transDiv.style.display = isHidden ? 'block' : 'none';
+                         }
+                     });
+                 } else {
+                     bubbleDiv.innerHTML = text; 
+                 }
+             }
          
              if (c.chatTimestampMode === 'bubble' && msg.timestamp) {
                  const tSpan = document.createElement('span'); tSpan.className = 'ts-bubble'; tSpan.innerText = formatTime(msg.timestamp);

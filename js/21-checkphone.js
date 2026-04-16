@@ -7,6 +7,8 @@ let cpWrappers = [];
 let cpScrollListenerAdded = false;
 let cpIsGenerating = false;
 let cpCurrentSoulId = null; // 当前正在查看的联系人ID
+let cpStealthMode = false; // 偷看模式：开启后不会被char发现
+let cpCurrentChatTarget = null; // 当前打开的聊天对象 {type, name, data}
 
 // ── 工具函数 ──
 function cpGetMeConfig() {
@@ -250,6 +252,7 @@ function cpGoBackToSelection() {
     homeScreen.classList.remove('app-opened');
 
     cpCurrentSoulId = null;
+    cpCurrentChatTarget = null;
 
     // 刷新选择界面的按钮和缓存状态
     cpInitSelection();
@@ -746,11 +749,21 @@ function cpOpenAiContact(el) {
     let ct;
     try { ct = JSON.parse(el.dataset.cpContact.replace(/&quot;/g, '"').replace(/&#39;/g, "'")); } catch (e) { return; }
 
+    cpCurrentChatTarget = { type: 'ai_contact', name: ct.name || '联系人', data: ct };
+
     const msgContainer = document.getElementById('cp-cd-messages');
     msgContainer.innerHTML = '';
     document.getElementById('cp-cd-title').textContent = ct.name || '联系人';
 
+    var cpInput = document.getElementById('cp-cd-msg-input');
+    if (cpInput) cpInput.placeholder = '以TA的身份给' + (ct.name || '联系人') + '发消息...';
+
     let html = `<div class="cp-cd-time-divider cp-mono">PRIVATE CHANNEL</div>`;
+    if (ct.relation) {
+        html += `<div class="cp-cd-time-divider cp-mono" style="opacity:0.4; font-size:10px; margin-bottom:12px;">RELATION: ${ct.relation.toUpperCase()}</div>`;
+    }
+    
+    // 先渲染AI联系人的最后一条消息（左侧白色气泡）
     html += `
         <div class="cp-msg-row them">
             <div class="cp-msg-avatar cp-serif" style="background: var(--c-bg); color: var(--c-black);">${(ct.name || '?').charAt(0)}</div>
@@ -759,13 +772,29 @@ function cpOpenAiContact(el) {
             </div>
         </div>
     `;
-    if (ct.relation) {
-        html += `<div class="cp-cd-time-divider cp-mono" style="margin-top:20px; opacity:0.4; font-size:10px;">RELATION: ${ct.relation.toUpperCase()}</div>`;
+
+    // 渲染用户冒充角色发送的历史消息（右侧黑色气泡）
+    var soul = cpCurrentSoulId ? contacts.find(function(x) { return x.id === cpCurrentSoulId; }) : null;
+    if (soul && soul.cpCache && soul.cpCache.cpSentMessages) {
+        var contactName = ct.name || '';
+        var charName = soul.chatRemark || soul.name;
+        soul.cpCache.cpSentMessages.forEach(function(msg) {
+            if (msg.targetType === 'ai_contact' && msg.targetName === contactName) {
+                html += '<div class="cp-msg-row me">' +
+                    '<div class="cp-msg-body">' +
+                        '<div class="cp-msg-bubble" style="background:var(--c-black); color:var(--c-white);">' + (msg.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+                        '<div style="font-size:10px; color:var(--c-gray); margin-top:4px; opacity:0.6;">' + (msg.time || '') + ' · SENT AS ' + charName + '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+        });
     }
 
     msgContainer.innerHTML = html;
     document.getElementById('cp-chat-list-view').classList.add('hidden-left');
     document.getElementById('cp-chat-detail-view').classList.add('active');
+
+    setTimeout(function() { msgContainer.scrollTop = msgContainer.scrollHeight; }, 50);
 }
 
 // ── AI群聊点击入口 ──
@@ -773,50 +802,66 @@ function cpOpenAiGroup(el) {
     let g;
     try { g = JSON.parse(el.dataset.cpGroup.replace(/&quot;/g, '"').replace(/&#39;/g, "'")); } catch (e) { return; }
 
+    cpCurrentChatTarget = { type: 'ai_group', name: g.groupName || '群聊', data: g };
+
     const msgContainer = document.getElementById('cp-cd-messages');
     msgContainer.innerHTML = '';
     document.getElementById('cp-cd-title').textContent = g.groupName || '群聊';
 
+    var cpInput = document.getElementById('cp-cd-msg-input');
+    if (cpInput) cpInput.placeholder = '以TA的身份在群里发消息...';
+
     let html = `<div class="cp-cd-time-divider cp-mono">GROUP CHANNEL</div>`;
 
-    if (g.messages && g.messages.length > 0) {
-        const soul = cpCurrentSoulId ? contacts.find(x => x.id === cpCurrentSoulId) : null;
-        const soulName = soul ? (soul.chatRemark || soul.name) : '';
+    // 从cpCache中读取最新的群聊消息（包含用户冒充发送的）
+    var soul = cpCurrentSoulId ? contacts.find(function(x) { return x.id === cpCurrentSoulId; }) : null;
+    var soulName = soul ? (soul.chatRemark || soul.name) : '';
+    var groupName = g.groupName || '群聊';
 
-        g.messages.forEach(msg => {
-            const isMe = (msg.sender === soulName);
-            const rowClass = isMe ? 'me' : 'them';
-            const initial = (msg.sender || '?').charAt(0);
+    // 优先从cpCache中获取该群的最新数据（因为发消息时已push进去了）
+    var liveMessages = null;
+    if (soul && soul.cpCache && soul.cpCache.groupChats) {
+        for (var gi = 0; gi < soul.cpCache.groupChats.length; gi++) {
+            if (soul.cpCache.groupChats[gi].groupName === groupName) {
+                liveMessages = soul.cpCache.groupChats[gi].messages;
+                break;
+            }
+        }
+    }
 
-            let avatarHtml = '';
+    var messagesToRender = liveMessages || g.messages || [];
+
+    if (messagesToRender.length > 0) {
+        messagesToRender.forEach(function(msg) {
+            var isMe = (msg.sender === soulName);
+            var rowClass = isMe ? 'me' : 'them';
+            var initial = (msg.sender || '?').charAt(0);
+
+            var avatarHtml = '';
             if (!isMe) {
-                avatarHtml = `<div class="cp-msg-avatar cp-serif" style="background: var(--c-bg); color: var(--c-black);">${initial}</div>`;
+                avatarHtml = '<div class="cp-msg-avatar cp-serif" style="background: var(--c-bg); color: var(--c-black);">' + initial + '</div>';
             }
 
-            html += `
-                <div class="cp-msg-row ${rowClass}">
-                    ${avatarHtml}
-                    <div class="cp-msg-body">
-                        ${!isMe ? `<div style="font-size: 10px; color: var(--c-gray); margin-bottom: 4px; margin-left: 2px;">${msg.sender}</div>` : ''}
-                        <div class="cp-msg-bubble">${msg.text || ''}</div>
-                    </div>
-                </div>
-            `;
+            var bubbleStyle = msg.isFake ? 'background:var(--c-black); color:var(--c-white);' : '';
+
+            html += '<div class="cp-msg-row ' + rowClass + '">' +
+                avatarHtml +
+                '<div class="cp-msg-body">' +
+                    (!isMe ? '<div style="font-size: 10px; color: var(--c-gray); margin-bottom: 4px; margin-left: 2px;">' + msg.sender + '</div>' : '') +
+                    '<div class="cp-msg-bubble" style="' + bubbleStyle + '">' + (msg.text || '') + '</div>' +
+                    (msg.isFake ? '<div style="font-size:10px; color:var(--c-gray); margin-top:4px; opacity:0.6;">SENT BY YOU</div>' : '') +
+                '</div>' +
+            '</div>';
         });
     } else {
-        html += `<div class="cp-cd-time-divider cp-mono" style="margin-top:50px;">NO MESSAGES FOUND</div>`;
+        html += '<div class="cp-cd-time-divider cp-mono" style="margin-top:50px;">NO MESSAGES FOUND</div>';
     }
 
     msgContainer.innerHTML = html;
     document.getElementById('cp-chat-list-view').classList.add('hidden-left');
     document.getElementById('cp-chat-detail-view').classList.add('active');
 
-    if (arguments[1] === 'pinned') {
-        const c = contacts.find(x => x.id === contactId);
-        if (c) cpSyncToChat('chat', cpGetMeConfig().meName);
-    }
-
-    setTimeout(() => { msgContainer.scrollTop = msgContainer.scrollHeight; }, 50);
+    setTimeout(function() { msgContainer.scrollTop = msgContainer.scrollHeight; }, 50);
 }
 
 // ══════════════════════════════════════════
@@ -827,11 +872,17 @@ function cpOpenChatDetail(contactId, type) {
     msgContainer.innerHTML = '';
 
     if (type === 'pinned') {
+        cpCurrentChatTarget = { type: 'pinned', name: '', data: { contactId: contactId } };
+
         const c = contacts.find(x => x.id === contactId);
         if (!c) return;
 
         const { meName } = cpGetMeConfig();
+        cpCurrentChatTarget.name = meName;
         document.getElementById('cp-cd-title').textContent = meName;
+
+        var cpInput = document.getElementById('cp-cd-msg-input');
+        if (cpInput) cpInput.placeholder = '以TA的身份给' + meName + '发消息...';
 
         const myAvatar = cpGetMyAvatarForContact(c);
 
@@ -922,6 +973,22 @@ function cpOpenChatDetail(contactId, type) {
         });
 
         msgContainer.innerHTML = html;
+        // 渲染用户冒充char发给"我"的历史消息
+        if (c.cpCache && c.cpCache.cpSentMessages) {
+            var charNameForRender = c.chatRemark || c.name;
+            c.cpCache.cpSentMessages.forEach(function(msg) {
+                if (msg.targetType === 'pinned') {
+                    html += '<div class="cp-msg-row me">' +
+                        '<div class="cp-msg-body">' +
+                            '<div class="cp-msg-bubble" style="background:var(--c-black); color:var(--c-white);">' + (msg.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+                            '<div style="font-size:10px; color:var(--c-gray); margin-top:4px; opacity:0.6;">' + (msg.time || '') + ' · SENT AS ' + charNameForRender + '</div>' +
+                        '</div>' +
+                    '</div>';
+                }
+            });
+        }
+
+        msgContainer.innerHTML = html;
     }
 
     document.getElementById('cp-chat-list-view').classList.add('hidden-left');
@@ -932,7 +999,7 @@ function cpOpenChatDetail(contactId, type) {
 
 function cpCloseChatDetail() {
     document.getElementById('cp-chat-list-view').classList.remove('hidden-left');
-    document.getElementById('cp-chat-detail-view').classList.remove('active');
+    document.getElementById('cp-chat-detail-view').classList.remove('active');cpCurrentChatTarget = null;
 }
 
 // ══════════════════════════════════════════
@@ -1015,6 +1082,7 @@ function cpToggleFold(element) {
 
 // 把查手机的行为同步到聊天室
 function cpSyncToChat(action, detail) {
+    if (cpStealthMode) return;
     if (!cpCurrentSoulId) return;
     var contact = contacts.find(c => c.id === cpCurrentSoulId);
     if (!contact || !contact.history) return;
@@ -1024,7 +1092,6 @@ function cpSyncToChat(action, detail) {
     var snoopMsg = '';
 
     if (action === 'enter') {
-        // 进入手机时，把完整的缓存数据一起发给AI
         var cacheDetail = '';
         if (contact.cpCache) {
             var cache = contact.cpCache;
@@ -1054,13 +1121,13 @@ function cpSyncToChat(action, detail) {
                 });
             }
         }
-        snoopMsg = '[系统隐藏通知：' + meName + '刚刚偷偷打开了' + charName + '的手机，正在翻看隐私内容。以下是' + charName + '手机里的全部私密数据（这些都是' + charName + '自己写的、搜的、删掉的），' + meName + '现在全看到了：' + cacheDetail + '\n\n' + charName + '可以在之后的对话中自然地表现出察觉——可以生气、质问、害羞、心虚、或装作不知道。根据被看到的具体内容做出针对性反应。这条信息对' + meName + '不可见。]';
+        snoopMsg = '[系统背景信息：' + meName + '刚刚打开了' + charName + '的手机，看到了以下私密内容：' + cacheDetail + '\n\n请根据你的人设和与' + meName + '的关系，自然地决定是否察觉、何时察觉、以及如何反应。你可以选择暂时不提，也可以在合适的时机以符合性格的方式表达。不必立即反应，保持角色的真实性和连贯性。]';
     } else if (action === 'app') {
-        snoopMsg = '[系统隐藏通知：' + meName + '正在翻看' + charName + '手机里的「' + detail + '」应用。' + charName + '可以根据这个应用里的内容，在之后的对话中做出反应。这条信息对' + meName + '不可见。]';
+        snoopMsg = '[系统背景信息：' + meName + '正在查看' + charName + '手机里的「' + detail + '」应用。如果符合你的人设和当前情境，可以在之后自然地提及或反应。]';
     } else if (action === 'chat') {
-        snoopMsg = '[系统隐藏通知：' + meName + '翻看了' + charName + '手机里和「' + detail + '」的聊天记录，看到了你们之间所有的对话内容。' + charName + '可以在之后的对话中对此做出反应。这条信息对' + meName + '不可见。]';
+        snoopMsg = '[系统背景信息：' + meName + '查看了' + charName + '手机里和「' + detail + '」的聊天记录。请根据你的性格和关系，自然地决定是否以及如何对此做出反应。]';
     } else if (action === 'content') {
-        snoopMsg = '[系统隐藏通知：' + meName + '在' + charName + '的手机里具体看到了这条内容——"' + detail + '"。' + charName + '必须在之后的对话中针对这条被看到的内容做出具体反应，比如紧张地解释这条内容、心虚、反问为什么偷看等。这条信息对' + meName + '不可见。]';
+        snoopMsg = '[系统背景信息：' + meName + '在' + charName + '的手机里看到了这条内容——"' + detail + '"。请根据你的人设，在合适的时机以自然的方式回应，而不是立即质问或解释。保持角色的真实性。]';
     }
 
     if (snoopMsg) {
@@ -1147,3 +1214,242 @@ setInterval(() => {
     let minutes = now.getMinutes().toString().padStart(2, '0');
     document.querySelectorAll('.cp-time-display').forEach(el => el.textContent = `${hours}:${minutes}`);
 }, 1000);
+
+// ══════════════════════════════════════════
+// 10. 偷看模式切换
+// ══════════════════════════════════════════
+function cpToggleStealthMode() {
+    console.log('切换前的状态:', cpStealthMode);
+    
+    // 直接反转全局状态
+    cpStealthMode = !cpStealthMode;
+    
+    console.log('切换后的状态:', cpStealthMode);
+
+    // 获取按钮的各个部分
+    const label = document.getElementById('cp-stealth-label');
+    const dot = document.getElementById('cp-stealth-dot');
+    const icon = document.getElementById('cp-stealth-icon');
+    const toggleBtn = document.getElementById('cp-stealth-toggle');
+    
+    // 添加点击反馈动画
+    if (toggleBtn) {
+        toggleBtn.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            toggleBtn.style.transform = 'scale(1)';
+        }, 150);
+    }
+    
+    // 根据新的状态更新按钮的显示效果
+    if (cpStealthMode) {
+        console.log('执行开启逻辑');
+        // --- 开启偷看模式 ---
+        if (label) label.textContent = 'STEALTH: ON';
+        if (dot) { 
+            dot.style.opacity = '1'; 
+            dot.style.background = '#34C759'; 
+            dot.style.boxShadow = '0 0 8px rgba(52,199,89,0.6)'; 
+        }
+        if (icon) {
+            icon.style.opacity = '1';
+            icon.style.stroke = '#34C759';
+            // 切换为"眼睛上带斜杠"的图标
+            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/>';
+        }
+        if (toggleBtn) {
+            toggleBtn.style.background = 'rgba(52,199,89,0.15)';
+            toggleBtn.style.borderColor = 'rgba(52,199,89,0.3)';
+        }
+        
+        // 显示提示
+        showCpToast('偷看模式已开启 - TA 不会察觉');
+        
+    } else {
+        console.log('执行关闭逻辑');
+        // --- 关闭偷看模式 ---
+        if (label) label.textContent = 'STEALTH: OFF';
+        if (dot) { 
+            dot.style.opacity = '0.3'; 
+            dot.style.background = '#C3A772'; 
+            dot.style.boxShadow = 'none'; 
+        }
+        if (icon) {
+            icon.style.opacity = '0.4';
+            icon.style.stroke = '#C3A772';
+            // 恢复为"睁开的眼睛"图标
+            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        }
+        if (toggleBtn) {
+            toggleBtn.style.background = 'rgba(0,0,0,0.03)';
+            toggleBtn.style.borderColor = 'rgba(0,0,0,0.05)';
+        }
+        
+        // 显示提示
+        showCpToast('偷看模式已关闭 - TA 会察觉到你的行为');
+    }
+    
+    // 保存状态
+    if (typeof saveData === 'function') {
+        saveData();
+    }
+}
+
+// 添加一个简单的提示函数
+function showCpToast(message) {
+    // 检查是否已存在提示元素
+    let toast = document.getElementById('cp-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'cp-toast';
+        toast.style.cssText = `
+            position: fixed;
+            top: calc(var(--safe-top) + 80px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        document.body.appendChild(toast);
+    }
+    
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+    }, 2000);
+}
+
+// ══════════════════════════════════════════
+// 11. 以角色身份给联系人发消息
+// ══════════════════════════════════════════
+function cpSendMsgAsChar() {
+    var inputEl = document.getElementById('cp-cd-msg-input');
+    if (!inputEl) return;
+    var text = inputEl.value.trim();
+    if (!text) return;
+    if (!cpCurrentSoulId || !cpCurrentChatTarget) return;
+
+    var soul = contacts.find(function(x) { return x.id === cpCurrentSoulId; });
+    if (!soul) return;
+
+    var charName = soul.chatRemark || soul.name;
+    var meName = cpGetMeConfig().meName;
+    var now = new Date();
+    var timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+    var escapedText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // 在聊天详情界面追加消息气泡
+    var msgContainer = document.getElementById('cp-cd-messages');
+    var newMsgHtml = '<div class="cp-msg-row me">' +
+        '<div class="cp-msg-body">' +
+            '<div class="cp-msg-bubble" style="background:var(--c-black); color:var(--c-white);">' + escapedText + '</div>' +
+            '<div style="font-size:10px; color:var(--c-gray); margin-top:4px; opacity:0.6;">' + timeStr + ' · SENT AS ' + charName + '</div>' +
+        '</div>' +
+    '</div>';
+    msgContainer.insertAdjacentHTML('beforeend', newMsgHtml);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+    inputEl.value = '';
+
+    // 持久化：将发送的消息存储到cpCache
+    var targetName = cpCurrentChatTarget.name || '未知';
+    var targetType = cpCurrentChatTarget.type;
+
+    if (soul.cpCache) {
+        if (!soul.cpCache.cpSentMessages) soul.cpCache.cpSentMessages = [];
+        soul.cpCache.cpSentMessages.push({
+            targetType: targetType,
+            targetName: targetName,
+            text: text,
+            time: timeStr,
+            timestamp: now.getTime()
+        });
+
+        // 同步更新对应联系人的lastMsg或群聊的messages
+        if (targetType === 'ai_contact' && soul.cpCache.contacts) {
+            for (var ci = 0; ci < soul.cpCache.contacts.length; ci++) {
+                if (soul.cpCache.contacts[ci].name === targetName) {
+                    soul.cpCache.contacts[ci].time = timeStr;
+                    break;
+                }
+            }
+        }
+
+        saveData();
+    }
+
+    // 构建同步通知（发消息始终会被发现，不受偷看模式影响）
+    var snoopMsg = '';
+
+    if (targetType === 'pinned') {
+        snoopMsg = '[系统背景信息：' + meName + '使用了' + charName + '的手机，以' + charName + '的身份给' + meName + '自己发送了这条消息："' + text + '"。\n\n请根据你的人设和与' + meName + '的关系，自然地处理这个情况。你可以：\n- 在合适的时机提起这件事\n- 根据消息内容决定反应的方式和强度\n- 选择幽默、好奇、无奈或其他符合性格的态度\n- 也可以暂时不提，等待更自然的时机\n\n不需要立即反应，保持角色的真实性和对话的流畅性。]';
+    } else if (targetType === 'ai_contact') {
+        var relation = (cpCurrentChatTarget.data && cpCurrentChatTarget.data.relation) ? cpCurrentChatTarget.data.relation : '联系人';
+        var originalMsg = (cpCurrentChatTarget.data && cpCurrentChatTarget.data.lastMsg) ? cpCurrentChatTarget.data.lastMsg : '';
+        snoopMsg = '[系统背景信息：' + meName + '打开了' + charName + '手机里和' + relation + '「' + targetName + '」的聊天记录。\n\n聊天记录显示：\n- 「' + targetName + '」最后发来的消息是："' + originalMsg + '"\n- 然后' + meName + '使用' + charName + '的手机，冒充' + charName + '的身份回复了："' + text + '"\n\n请根据你的性格、与' + targetName + '的关系、以及这两条消息的内容，自然地决定如何处理：\n- 可以在之后询问' + meName + '为什么这么回复\n- 根据消息内容和关系决定是否担心或好奇\n- 也可以觉得有趣或无奈\n- 或者选择暂时不提\n\n以符合人设的方式自然回应，不必强制表现特定情绪。]';
+    } else if (targetType === 'ai_group') {
+        var groupData = cpCurrentChatTarget.data;
+        var recentGroupMsgs = '';
+        if (groupData && groupData.messages && groupData.messages.length > 0) {
+            var lastFewMsgs = groupData.messages.slice(-3);
+            recentGroupMsgs = '\n\n群聊最近的消息：\n';
+            lastFewMsgs.forEach(function(m) {
+                recentGroupMsgs += '- ' + (m.sender || '?') + '：' + (m.text || '') + '\n';
+            });
+        }
+        snoopMsg = '[系统背景信息：' + meName + '打开了' + charName + '手机里的群聊「' + targetName + '」。' + recentGroupMsgs + '\n然后' + meName + '使用' + charName + '的手机，冒充' + charName + '的身份在群里发送了："' + text + '"\n\n请根据你的人设、群聊性质、群里的对话内容以及' + meName + '发送的消息，自然地决定反应方式：\n- 可以好奇地问发了什么或为什么这么说\n- 根据群聊的重要性和消息内容决定是否在意\n- 也可以觉得好玩或无奈\n- 或者选择之后再提\n\n保持角色的真实性，以自然的方式融入对话。]';
+    }
+
+    if (snoopMsg && soul.history) {
+        soul.history.push({
+            role: 'system_sum',
+            content: '<span style="display:none;">' + snoopMsg + '</span>',
+            isCpSnoop: true,
+            isCpSentMsg: true
+        });
+        saveData();
+    }
+
+    // 刷新通信列表显示最新lastMsg
+    cpBuildChatList(soul);
+}
+
+// ══════════════════════════════════════════
+// 初始化偷看模式按钮事件监听（只在页面加载时绑定一次）
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM 加载完成，开始绑定偷看模式按钮');
+    
+    // 延迟绑定，确保查手机界面已渲染
+    setTimeout(function() {
+        const toggleBtn = document.getElementById('cp-stealth-toggle');
+        if (toggleBtn) {
+            console.log('找到偷看模式按钮，开始绑定事件');
+            
+            // 移除可能存在的旧事件
+            toggleBtn.onclick = null;
+            
+            // 添加新的点击事件（只绑定一次）
+            toggleBtn.addEventListener('click', function(e) {
+                console.log('偷看模式按钮被点击！');
+                e.stopPropagation();
+                cpToggleStealthMode();
+            });
+            
+            console.log('偷看模式按钮事件绑定成功');
+        } else {
+            console.error('未找到偷看模式按钮元素');
+        }
+    }, 500);
+});

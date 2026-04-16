@@ -505,3 +505,30 @@
     width: 16px; height: 16px; fill: none; stroke: var(--c-black); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
     pointer-events: none;
 }
+/* 🚀 修复偷看模式按钮的交互层级 */
+#cp-stealth-toggle {
+    position: relative !important;
+    z-index: 100 !important;
+    pointer-events: auto !important;
+}
+
+#cp-stealth-toggle * {
+    pointer-events: none !important;
+}
+
+/* 确保选择界面的其他元素不会遮挡按钮 */
+#cp-selection-screen {
+    position: relative;
+}
+
+.cp-aesthetic-header {
+    position: relative;
+    z-index: 50;
+}
+
+/* 确保背景装饰不会遮挡交互元素 */
+.cp-bg-stripes,
+.cp-bg-watermark,
+.cp-corner-cross {
+    pointer-events: none !important;
+}

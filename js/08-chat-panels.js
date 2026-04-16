@@ -181,3 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
                   renderSumPresets();
               }
           }
+function toggleCustomLangInput(value) {
+    const wrap = document.getElementById('custom-lang-input-wrap');
+    if (value === 'custom') {
+        wrap.style.display = 'block';
+    } else {
+        wrap.style.display = 'none';
+    }
+}
+          
