@@ -235,6 +235,9 @@ if (presetLangs.includes(targetLang)) {
              document.getElementById('sum-prompt-wrap').style.display = 'none';
              document.getElementById('cursor-menu-wrap').style.display = 'none';
              
+             // 8. 刷新记忆库统计预览
+             if (typeof mvUpdateSettingsPreview === 'function') mvUpdateSettingsPreview(c);
+             
              document.getElementById('chat-settings-modal').classList.add('active');
          }
          function closeChatSettings() { document.getElementById('chat-settings-modal').classList.remove('active'); }
@@ -259,6 +262,9 @@ if (presetLangs.includes(targetLang)) {
                  if(!keepMemory) {
                      // 【彻底失忆】：毁灭性清理一切可能导致幻觉的外部状态
                      c.memory = ''; 
+                     c.memoryEntries = [];
+                     c.memoryFreeText = '';
+                     c._memoryMigrated = false;
                      c.theaterHistory = [];
                      c.lastTheaterSumIndex = 0;
                  }
@@ -409,7 +415,9 @@ if (selectedLang === 'custom') {
              
              // 🚀 核心增加：双语协议同步
              if (c.allowBilingual) {
-                 syncLogs.push(`[🚨 紧急协议覆写]：双语翻译模块已【立即】激活！这是系统内核级的强制指令：从你的【下一句话】开始，必须严格执行 {中文} <translation> {${c.targetLang}} 格式！禁止任何纯中文回复，否则将触发链路重启！`);
+                 syncLogs.push(`[🚨 紧急协议覆写]：双语翻译模块已【立即】激活！这是系统内核级的强制指令：从你的【下一句话】开始，必须严格执行 ${c.targetLang} 正文 + <translation> 中文翻译 格式！禁止任何纯中文回复，否则将触发链路重启！`);
+             } else if (c.allowBilingual === false) {
+                 syncLogs.push(`[🚨 紧急协议覆写]：双语翻译模块已【立即关闭】！从你的【下一句话】开始，必须恢复纯简体中文回复！严禁继续使用 <translation> 标签或任何外语！违反将触发链路重启！`);
              }
 
              if (syncLogs.length > 0) {
@@ -433,7 +441,13 @@ if (selectedLang === 'custom') {
              let newPrompt = document.getElementById('cs-prompt').value.trim() || c.history[0].content;
 if (newPrompt !== c.history[0].content && c.cpCache) { delete c.cpCache; }
 c.history[0].content = newPrompt;
-             c.memory = document.getElementById('cs-memory').value.trim(); 
+             let rawMemoryVal = document.getElementById('cs-memory').value.trim();
+             if (rawMemoryVal && rawMemoryVal !== c.memory) {
+                 c.memory = rawMemoryVal;
+                 if (c.memoryEntries && c.memoryEntries.length > 0 && typeof mvSyncMemoryField === 'function') {
+                     mvSyncMemoryField(c);
+                 }
+             }
              c.autoSumFreq = parseInt(document.getElementById('cs-auto-sum').value) || 0; 
              c.sumPrompt = document.getElementById('cs-sum-prompt').value.trim() || c.sumPrompt; 
     

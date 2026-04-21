@@ -450,7 +450,10 @@ ${theaterSummary ? `【线下见面记录】：\n${theaterSummary}\n` : ''}
     {"time": "TODAY // xx:xx PM", "sent": "角色实际发出去的消息（简短、克制、符合人设的表面表达）", "draft": "角色打了又删掉的草稿（暴露真心话，比发出去的版本更真实、更脆弱、更炽热）"}
   ],
   "contacts": [
-    {"name": "联系人名字", "relation": "与角色的关系（如：同事/闺蜜/前任/暗恋对象/家人等）", "lastMsg": "最后一条聊天消息预览", "time": "xx:xx"}
+    {"name": "联系人名字", "relation": "与角色的关系（如：同事/闺蜜/前任/暗恋对象/家人等）", "lastMsg": "最后一条聊天消息预览", "time": "xx:xx", "chatHistory": [
+      {"sender": "发言人", "text": "消息内容"},
+      {"sender": "另一方", "text": "回复内容"}
+    ]}
   ],
   "groupChats": [
     {"groupName": "群聊名称", "members": ["成员1", "成员2", "成员3"], "messages": [
@@ -475,7 +478,7 @@ ${theaterSummary ? `【线下见面记录】：\n${theaterSummary}\n` : ''}
 5. explore的搜索记录必须暴露角色不想让别人知道的一面。
 6. secret的draft（删掉的草稿）是整个功能的灵魂高潮，必须写得让人心动或心疼，和sent形成强烈反差。
 7. calls中至少有一条和${meName}相关的通话记录。通话记录中的transcript_speaker必须是${charName}自己说的话，transcript_text只写${charName}在电话里说的那句台词。绝对禁止替${meName}写台词！你不知道${meName}在电话里说了什么，你只能写${charName}自己说的部分。
-8. contacts中「${meName}」必须排在第一位且是置顶的。注意：「${meName}」是手机主人心里最重要的那个人，不是手机主人自己！即使这个名字是"我"，它也代表另一个人！lastMsg要从聊天记录中提取真实内容。
+8. contacts中「${meName}」必须排在第一位且是置顶的。注意：「${meName}」是手机主人心里最重要的那个人，不是手机主人自己！即使这个名字是"我"，它也代表另一个人！lastMsg要从聊天记录中提取真实内容。每个联系人必须附带chatHistory数组，包含5-10条来回的聊天记录，内容要像真实微信聊天一样自然（有废话、有表情、有已读不回、有语音转文字等），体现角色和该联系人的真实关系和互动方式。
 9. groupChats的群名和成员要符合角色的社交圈。群聊消息要自然真实。注意：群成员中如果出现「${meName}」，代表的是那个特别的人在群里说话，不是手机主人自己！手机主人自己在群里的发言者名字应该是「${charName}」。
 10. 如果聊天记录中有具体事件（吵架、告白、约会等），必须在notes和secret中有所体现。`;
 
@@ -763,15 +766,33 @@ function cpOpenAiContact(el) {
         html += `<div class="cp-cd-time-divider cp-mono" style="opacity:0.4; font-size:10px; margin-bottom:12px;">RELATION: ${ct.relation.toUpperCase()}</div>`;
     }
     
-    // 先渲染AI联系人的最后一条消息（左侧白色气泡）
-    html += `
-        <div class="cp-msg-row them">
-            <div class="cp-msg-avatar cp-serif" style="background: var(--c-bg); color: var(--c-black);">${(ct.name || '?').charAt(0)}</div>
-            <div class="cp-msg-body">
-                <div class="cp-msg-bubble">${ct.lastMsg || '...'}</div>
-            </div>
-        </div>
-    `;
+    // 渲染AI生成的完整聊天记录
+    var soulForRender = cpCurrentSoulId ? contacts.find(function(x) { return x.id === cpCurrentSoulId; }) : null;
+    var charNameForChat = soulForRender ? (soulForRender.chatRemark || soulForRender.name) : '';
+
+    if (ct.chatHistory && ct.chatHistory.length > 0) {
+        ct.chatHistory.forEach(function(msg) {
+            var isMe = (msg.sender === charNameForChat);
+            var rowClass = isMe ? 'me' : 'them';
+            var avatarHtml = '';
+            if (!isMe) {
+                avatarHtml = '<div class="cp-msg-avatar cp-serif" style="background: var(--c-bg); color: var(--c-black);">' + (msg.sender || '?').charAt(0) + '</div>';
+            }
+            html += '<div class="cp-msg-row ' + rowClass + '">' +
+                avatarHtml +
+                '<div class="cp-msg-body">' +
+                    '<div class="cp-msg-bubble">' + (msg.text || '') + '</div>' +
+                '</div>' +
+            '</div>';
+        });
+    } else {
+        html += '<div class="cp-msg-row them">' +
+            '<div class="cp-msg-avatar cp-serif" style="background: var(--c-bg); color: var(--c-black);">' + (ct.name || '?').charAt(0) + '</div>' +
+            '<div class="cp-msg-body">' +
+                '<div class="cp-msg-bubble">' + (ct.lastMsg || '...') + '</div>' +
+            '</div>' +
+        '</div>';
+    }
 
     // 渲染用户冒充角色发送的历史消息（右侧黑色气泡）
     var soul = cpCurrentSoulId ? contacts.find(function(x) { return x.id === cpCurrentSoulId; }) : null;

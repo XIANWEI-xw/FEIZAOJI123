@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="css/16-inline-sticker-notif.css">
     <link rel="stylesheet" href="css/17-inline-chat-settings.css">
     <link rel="stylesheet" href="css/21-checkphone.css">
+    <link rel="stylesheet" href="css/22-memory-vault.css">
+    <link rel="stylesheet" href="css/23-music-import.css">
     
 </head>
 <body>
@@ -1940,6 +1942,69 @@
                   <div class="mini-cap-artist" id="mini-cap-artist">Artist</div>
                </div>
                <div class="mini-eq" id="mini-eq"><span></span><span></span><span></span></div>
+            </div>
+            <!-- ==================== 云端导入面板 ==================== -->
+            <div class="mi-overlay" id="mi-overlay">
+                <div class="mi-bg-deco">Import</div>
+                <div class="mi-header">
+                    <div class="mi-header-back" onclick="closeMusicImport()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </div>
+                    <div class="mi-header-center">
+                        <div class="mi-header-title">IMPORT TRACKS</div>
+                        <div class="mi-header-sub">CLOUD ARCHIVE</div>
+                    </div>
+                    <div style="width:36px;"></div>
+                </div>
+                <div class="mi-api-bar" id="mi-api-bar"></div>
+                <div id="mi-login-status" style="padding: 0 20px 10px; flex-shrink: 0;"></div>
+                <div id="mi-qr-modal" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:300; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+                    <div style="font-size:14px; font-weight:800; color:#E8E0D4; letter-spacing:2px;">网易云音乐扫码登录</div>
+                    <img id="mi-qr-img" src="" style="width:200px; height:200px; border-radius:16px; background:#fff; padding:10px;">
+                    <div id="mi-qr-status" style="font-size:12px; color:#C3A772; font-weight:700;">正在生成二维码...</div>
+                    <div onclick="document.getElementById('mi-qr-modal').style.display='none'; if(ncmLoginTimer){clearInterval(ncmLoginTimer);ncmLoginTimer=null;}" style="font-size:11px; color:#666; cursor:pointer; padding:10px; margin-top:10px;">取消</div>
+                </div>
+                <div class="mi-target-bar">
+                    <span class="mi-target-label">导入至 →</span>
+                    <div class="mi-target-chips" id="mi-target-chips"></div>
+                </div>
+                <div class="mi-search-wrap">
+                    <div class="mi-search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="搜索歌名、歌手..." id="mi-search-input" onkeydown="if(event.key==='Enter') miDoSearch()">
+                        <button class="mi-search-btn" onclick="miDoSearch()">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mi-results" id="mi-results">
+                    <div class="mi-empty">
+                        <div class="mi-empty-icon">♪</div>
+                        <div class="mi-empty-title">SEARCH TO IMPORT</div>
+                        <div class="mi-empty-desc">输入歌名或歌手名称<br>从云端曲库中检索并导入</div>
+                    </div>
+                </div>
+                <div class="mi-preview-bar" id="mi-preview-bar">
+                    <img class="mi-preview-cover" id="mi-pv-cover" src="">
+                    <div class="mi-preview-info">
+                        <div class="mi-preview-title" id="mi-pv-title">歌名</div>
+                        <div class="mi-preview-artist" id="mi-pv-artist">歌手</div>
+                    </div>
+                    <button class="mi-preview-btn" id="mi-pv-btn" onclick="miTogglePreview()">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <div class="mi-preview-close" onclick="miClosePreview()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                </div>
+                <div class="mi-footer">
+                    <div class="mi-footer-info">
+                        <div class="mi-footer-count" id="mi-select-count">已选 0 首</div>
+                        <div class="mi-footer-hint">点击歌曲可试听，勾选后导入</div>
+                    </div>
+                    <button class="mi-import-btn" id="mi-import-btn" disabled onclick="miImportSelected()">IMPORT</button>
+                </div>
+                <audio id="mi-preview-audio" style="display:none;"></audio>
             </div>
             <!-- ==================== 模态框 ==================== -->
             <div class="settings-modal-wrap" id="config-modal">
@@ -3855,11 +3920,31 @@
                         </div>
                         <textarea id="cs-prompt" class="cs-textarea-minimal" style="height: 100px;"></textarea>
 
-                        <div class="cs-row-item" style="border:none; padding-bottom:10px; margin-top:20px;">
-                            <label>核心记忆系统</label>
-                            <span class="cs-text-btn" onclick="manualSummarize()">手动提取 ✧</span>
+                        <div class="cs-row-item" style="margin-top:20px;">
+                            <label>核心记忆库 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">点击进入管理所有记忆条目</small></label>
+                            <span class="cs-text-btn" onclick="openMemoryVault()">打开记忆库 ›</span>
                         </div>
-                        <textarea id="cs-memory" class="cs-textarea-dark" style="height: 120px;" placeholder="AI 永远不会忘记的事..."></textarea>
+                        <div style="background: #F9F9F7; border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 0.5px solid rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div style="font-size: 10px; font-weight: 800; color: #A8A196; letter-spacing: 1px;">VAULT STATUS</div>
+                                <div style="font-family: 'Courier New', monospace; font-size: 11px; font-weight: 900; color: #C3A772;" id="cs-memory-count">0 条记忆</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="flex:1; background: rgba(0,0,0,0.03); border-radius: 10px; padding: 10px; text-align: center;">
+                                    <div style="font-size: 16px; font-weight: 900; color: #1C1C1E;" id="cs-memory-key-count">0</div>
+                                    <div style="font-size: 8px; font-weight: 800; color: #A8A196; letter-spacing: 1px; margin-top: 2px;">关键</div>
+                                </div>
+                                <div style="flex:1; background: rgba(0,0,0,0.03); border-radius: 10px; padding: 10px; text-align: center;">
+                                    <div style="font-size: 16px; font-weight: 900; color: #1C1C1E;" id="cs-memory-ai-count">0</div>
+                                    <div style="font-size: 8px; font-weight: 800; color: #A8A196; letter-spacing: 1px; margin-top: 2px;">AI提取</div>
+                                </div>
+                                <div style="flex:1; background: rgba(0,0,0,0.03); border-radius: 10px; padding: 10px; text-align: center;">
+                                    <div style="font-size: 16px; font-weight: 900; color: #1C1C1E;" id="cs-memory-manual-count">0</div>
+                                    <div style="font-size: 8px; font-weight: 800; color: #A8A196; letter-spacing: 1px; margin-top: 2px;">手动</div>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="cs-memory" style="display:none;"></textarea>
                         
                         <div class="cs-row-item">
                             <label>自动总结频率 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">每 N 条消息总结一次</small></label>
@@ -3892,6 +3977,72 @@
             </div>
          </div>
 
+         <!-- ================= 记忆库全屏页 ================= -->
+         <div class="modal-overlay" id="memory-vault-modal" style="z-index: 580; padding: 0;">
+            <div class="mv-wrapper">
+                <div class="mv-bg-deco">Memory</div>
+                <div class="mv-header">
+                    <div class="mv-header-back" onclick="closeMemoryVault()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="1.2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </div>
+                    <div class="mv-header-center">
+                        <div class="mv-header-title">MEMORY VAULT</div>
+                        <div class="mv-header-sub">NEURAL ARCHIVE</div>
+                    </div>
+                    <div class="mv-header-actions">
+                        <button class="mv-header-btn" title="AI 智能提取" onclick="mvAIExtract()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                        </button>
+                        <button class="mv-header-btn primary" title="手动添加" onclick="mvOpenAddModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="mv-stats-bar" id="mv-stats-bar">
+                    <div class="mv-stat-chip"><i class="fa-solid fa-brain"></i><span>共 <span class="stat-num" id="mv-stat-total">0</span> 条</span></div>
+                    <div class="mv-stat-chip"><i class="fa-solid fa-star"></i><span>关键 <span class="stat-num" id="mv-stat-key">0</span></span></div>
+                    <div class="mv-stat-chip"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI提取 <span class="stat-num" id="mv-stat-ai">0</span></span></div>
+                </div>
+                <div class="mv-filter-bar" id="mv-filter-bar"></div>
+                <div class="mv-list" id="mv-list"></div>
+                <div class="mv-footer">
+                    <button class="mv-btn-secondary" onclick="mvAIExtract()">✧ AI 智能提取记忆</button>
+                    <button class="mv-btn-primary" onclick="mvSaveAndClose()">SAVE & CLOSE</button>
+                </div>
+                <div class="mv-modal-overlay" id="mv-edit-modal">
+                    <div class="mv-modal-box">
+                        <div class="mv-modal-glow"></div>
+                        <div class="mv-modal-header-sub">MEMORY FORGE</div>
+                        <div class="mv-modal-title" id="mv-modal-title">添加记忆</div>
+                        <input type="hidden" id="mv-edit-id" value="">
+                        <div class="mv-modal-field">
+                            <label class="mv-modal-label">标题 / Title</label>
+                            <input type="text" class="mv-modal-input" id="mv-edit-title" placeholder="简短概括这条记忆...">
+                        </div>
+                        <div class="mv-modal-field">
+                            <label class="mv-modal-label">内容 / Content</label>
+                            <textarea class="mv-modal-textarea" id="mv-edit-content" placeholder="详细描述..."></textarea>
+                        </div>
+                        <div class="mv-modal-field">
+                            <label class="mv-modal-label">分类标签 / Category</label>
+                            <div class="mv-tag-selector" id="mv-tag-selector"></div>
+                        </div>
+                        <div class="mv-modal-field">
+                            <label class="mv-modal-label">关键词触发 / Keywords (可选，逗号分隔)</label>
+                            <input type="text" class="mv-modal-input" id="mv-edit-keywords" placeholder="吃饭, 川菜, 辣">
+                        </div>
+                        <div class="mv-modal-field">
+                            <label class="mv-modal-label">重要度 / Priority</label>
+                            <div class="mv-star-selector" id="mv-star-selector"></div>
+                        </div>
+                        <div class="mv-modal-btns">
+                            <button class="mv-modal-btn cancel" onclick="mvCloseEditModal()">取消</button>
+                            <button class="mv-modal-btn save" onclick="mvSaveEntry()">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </div>
          <!-- 清空聊天记录选项弹窗 -->
          <div class="modal-overlay" id="clear-history-modal" style="z-index: 600;">
             <div class="modal-content" style="text-align: center;">
@@ -4778,6 +4929,8 @@
          <script src="js/19-moments.js"></script>
          <script src="js/20-twitter.js"></script>
          <script src="js/21-checkphone.js"></script>
+         <script src="js/22-memory-vault.js"></script>
+         <script src="js/23-music-import.js"></script>
          <script src="js/04-app-init.js"></script>
    <!-- 🚀 终极修复：将动态样式表移至文档最末尾，确保 100% 覆盖系统样式 -->
    <style id="dynamic-user-style"></style>
@@ -4801,9 +4954,9 @@
       <div class="log-scroll" id="logContent">
    <div class="log-page">
       <p class="log-text">
-         · 加了通知栏 现在调取中也可以切出去了<br>
-         · 改了长按消息 <br>
-         · 新加了回溯<br>
+         · 听歌可以搜索导入啦<br>
+         · 做了联系人记忆库 在聊天室的设置里 <br>
+         · 查手机<br>
          · 修复了点bug<br>
          <span style="color:var(--c-gray); font-size:11px; font-style: italic;">——————罒ω罒——————</span>
       </p>

@@ -463,19 +463,19 @@
          }
          
          function handleContextMenu(e, el) { e.preventDefault(); if (isCuratorMode) return; isLongPressing = true; setTimeout(() => isLongPressing = false, 500); document.querySelectorAll('#app-music .show-actions').forEach(n => { if (n !== el) n.classList.remove('show-actions'); }); el.classList.add('show-actions'); }
-         function handleItemClick(e, cat, index, el) { if (isLongPressing) { e.preventDefault(); e.stopPropagation(); return; } if(e.target.closest('.cap-add-btn') || e.target.closest('.sq-add-btn')) { e.stopPropagation(); addToPlaylist(cat, index, e.target.closest('.cap-add-btn') || e.target.closest('.sq-add-btn')); return; } if (isCuratorMode) openConfigModal(cat, index); else playFromMenu(cat, index); }
+         function handleItemClick(e, cat, index, el) { if (isLongPressing) { e.preventDefault(); e.stopPropagation(); return; } if(e.target.closest('.capsule-import')) { e.stopPropagation(); return; } if(e.target.closest('.cap-add-btn') || e.target.closest('.sq-add-btn')) { e.stopPropagation(); addToPlaylist(cat, index, e.target.closest('.cap-add-btn') || e.target.closest('.sq-add-btn')); return; } if (isCuratorMode) openConfigModal(cat, index); else playFromMenu(cat, index); }
          
          function toggleCuratorMode() { isCuratorMode = !isCuratorMode; const menu = document.getElementById('master-menu'); if (isCuratorMode) menu.classList.add('is-curator'); else menu.classList.remove('is-curator'); renderDailyPicks(); renderTrackList(currentCategory); }
          function renderDailyPicks() { const container = document.getElementById('daily-gallery'); container.innerHTML = ''; m_db.daily.forEach((item, index) => { container.innerHTML += `<div class="sq-card" onclick="handleItemClick(event, 'daily', ${index}, this)" oncontextmenu="handleContextMenu(event, this)"><img src="${item.img}"><div class="sq-title">${item.title}</div><div class="sq-add-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div>`; }); }
          function switchCategory(cat) { currentCategory = cat; document.querySelectorAll('#app-music .cat-item').forEach(el => el.classList.remove('active')); document.getElementById(`cat-${cat}`).classList.add('active'); const container = document.getElementById('track-list-container'); container.style.animation = 'none'; container.offsetHeight; container.style.animation = null; renderTrackList(cat); }
-         function renderTrackList(cat) { const container = document.getElementById('track-list-container'); let html = ''; m_db.tracks[cat].forEach((item, index) => { const btnText = isCuratorMode ? 'EDIT ✎' : 'PLAY ↗'; html += `<div class="capsule-item" onclick="handleItemClick(event, '${cat}', ${index}, this)" oncontextmenu="handleContextMenu(event, this)"><div class="cap-cover"><img src="${item.img}"></div><div class="cap-meta"><div class="cap-title">${item.title}</div><div class="cap-artist">${item.artist}</div></div><div class="cap-actions"><div class="cap-add-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="cap-play-btn">${btnText}</div></div></div>`; }); html += `<label class="capsule-item capsule-import" onclick="openCreateModal()"><div class="cap-title">+ IMPORT LOCAL AUDIO</div></label>`; container.innerHTML = html; }
+         function renderTrackList(cat) { const container = document.getElementById('track-list-container'); let html = ''; m_db.tracks[cat].forEach((item, index) => { const btnText = isCuratorMode ? 'EDIT ✎' : 'PLAY ↗'; html += `<div class="capsule-item" onclick="handleItemClick(event, '${cat}', ${index}, this)" oncontextmenu="handleContextMenu(event, this)"><div class="cap-cover"><img src="${item.img}"></div><div class="cap-meta"><div class="cap-title">${item.title}</div><div class="cap-artist">${item.artist}</div></div><div class="cap-actions"><div class="cap-add-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="cap-play-btn">${btnText}</div></div></div>`; }); html += `<div class="capsule-item capsule-import" onclick="openMusicImport()"><div class="cap-title">☁ CLOUD IMPORT</div></div>`; html += `<div class="capsule-item capsule-import" onclick="openCreateModal()"><div class="cap-title">+ LOCAL AUDIO</div></div>`; container.innerHTML = html; }
          
          function addToPlaylist(cat, index, btnEl) { const track = cat === 'daily' ? m_db.daily[index] : m_db.tracks[cat][index]; playlist.push(track); const originalHTML = btnEl.innerHTML; btnEl.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2" fill="none"/></svg>'; setTimeout(() => btnEl.innerHTML = originalHTML, 1000); renderPlaylistSidebar(); }
          function removeFromPlaylist(e, index) { e.stopPropagation(); playlist.splice(index, 1); if (currentPlaylistIndex === index) currentPlaylistIndex = -1; else if (currentPlaylistIndex > index) currentPlaylistIndex--; renderPlaylistSidebar(); }
          function togglePlaylist() { document.getElementById('playlist-sidebar').classList.toggle('show'); renderPlaylistSidebar(); }
          function renderPlaylistSidebar() { const container = document.getElementById('pl-list-container'); if (playlist.length === 0) { container.innerHTML = '<div style="opacity:0.3; font-size:10px; font-family:var(--font-mono); letter-spacing:2px; text-align:center; margin-top:20px;">LIST IS EMPTY.</div>'; return; } let html = ''; playlist.forEach((item, index) => { const isActive = (currentPlaylistIndex === index) ? 'active' : ''; html += `<div class="pl-item ${isActive}" onclick="playFromPlaylist(${index})"><img class="pl-cover" src="${item.img}"><div class="pl-info"><div class="pl-title">${item.title}</div><div class="pl-artist">${item.artist}</div></div><div class="pl-remove-btn" onclick="removeFromPlaylist(event, ${index})" title="Remove"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>`; }); container.innerHTML = html; }
          
-         function executePlay(track) {
+         async function executePlay(track) {
              currentPlayingData = track;
              document.getElementById('player-title').innerText = track.title; document.getElementById('player-artist').innerText = track.artist;
              if (!isBgPinned) { document.getElementById('bg-image-layer').style.backgroundImage = `url(${track.img})`; analyzeBgBrightness(track.img); }
@@ -483,10 +483,18 @@
              document.getElementById('audio-progress-circle').style.strokeDashoffset = 226;
              if (!track.parsedLyrics && track.lyric) track.parsedLyrics = parseRawLyrics(track.lyric);
              globalIsPlaying = true;
-             if (track.audio) { audio.src = track.audio; audio.play().then(() => { btn.innerText = '||'; updateMiniCapsuleState(true); }).catch(e => { globalIsPlaying = false; btn.innerText = '▶'; updateMiniCapsuleState(false); }); } else { audio.pause(); audio.removeAttribute('src'); btn.innerText = '||'; updateMiniCapsuleState(true); }
+
+             let audioSrc = track.audio;
+             if (!audioSrc && track.ncmId && typeof miGetSongUrl === 'function') {
+                 document.getElementById('player-artist').innerText = track.artist + ' (加载中...)';
+                 audioSrc = await miGetSongUrl(track.ncmId);
+                 if (audioSrc) document.getElementById('player-artist').innerText = track.artist;
+                 else document.getElementById('player-artist').innerText = track.artist + ' (无源)';
+             }
+
+             if (audioSrc) { audio.src = audioSrc; audio.play().then(() => { btn.innerText = '||'; updateMiniCapsuleState(true); }).catch(e => { globalIsPlaying = false; btn.innerText = '▶'; updateMiniCapsuleState(false); }); } else { audio.pause(); audio.removeAttribute('src'); btn.innerText = '||'; updateMiniCapsuleState(true); }
              startLyricsSync(audio, track.parsedLyrics); renderPlaylistSidebar();
              
-             // 核心修复：如果悬浮窗开着，切歌时必须瞬间同步更新悬浮窗里的封面、名字和歌词！
              if (document.getElementById('soapFloatPlayer').classList.contains('show')) {
                  updateFloatingPlayerUI();
              }
@@ -723,7 +731,7 @@
              closeConfigModal(); 
          }
          
-         function enterPlayer() { document.getElementById('master-menu').classList.add('hidden'); document.getElementById('mini-player-capsule').classList.remove('show'); }
+         function enterPlayer() { document.getElementById('master-menu').classList.add('hidden'); document.getElementById('mini-player-capsule').classList.remove('show'); let miOverlay = document.getElementById('mi-overlay'); if (miOverlay) miOverlay.style.display = 'none'; }
          function exitPlayer() { document.getElementById('master-menu').classList.remove('hidden'); document.getElementById('playlist-sidebar').classList.remove('show'); if (currentPlayingData) { const cap = document.getElementById('mini-player-capsule'); document.getElementById('mini-cap-img').src = currentPlayingData.img; document.getElementById('mini-cap-title').innerText = currentPlayingData.title; document.getElementById('mini-cap-artist').innerText = currentPlayingData.artist || 'Curation Selection'; cap.classList.add('show'); updateMiniCapsuleState(globalIsPlaying); } }
          function updateMiniCapsuleState(isPlaying) { const eq = document.getElementById('mini-eq'); if(isPlaying) eq.classList.remove('paused'); else eq.classList.add('paused'); }
          

@@ -181,8 +181,20 @@ if (aiPromptContent) {
              try {
                  const response = await fetch(`${gConfig.apiUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Authorization': `Bearer ${gConfig.apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: gConfig.model, messages: apiMessages, temperature: Number(gConfig.temperature || 0.7), stream: false }) });
                  if (!response.ok) throw new Error("总结失败"); const data = await response.json(); const summary = data.choices[0].message.content;
-                 c.memory = (c.memory ? c.memory + "\n\n" : "") + `[此前历史摘要]: ${summary}`; c.lastSumIndex = c.history.length;
-                 saveData(); if(isManual) { document.getElementById('cs-memory').value = c.memory; alert("总结成功！已追加至上方记忆框。聊天记录完好保留。"); }
+                 if (!c.memoryEntries) c.memoryEntries = [];
+                 c.memoryEntries.push({
+                     id: 'mv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                     title: '对话摘要 #' + (c.memoryEntries.filter(e => e.source === 'summary').length + 1),
+                     content: summary,
+                     tag: '事件',
+                     stars: 2,
+                     source: 'summary',
+                     keywords: '',
+                     createdAt: Date.now()
+                 });
+                 if (typeof mvSyncMemoryField === 'function') mvSyncMemoryField(c);
+                 c.lastSumIndex = c.history.length;
+                 saveData(); if(isManual) { if (typeof mvUpdateSettingsPreview === 'function') mvUpdateSettingsPreview(c); alert("总结成功！已作为新条目存入记忆库。"); }
              } catch (e) { if(isManual) alert("总结出错: "+e.message); } finally { if(btn) btn.innerText = "手动总结"; }
          }
          function manualSummarize() { const c = contacts.find(x => x.id === currentContactId); performSummarize(c, true); }
@@ -229,26 +241,30 @@ if (aiPromptContent) {
             const lastUserText = lastUserMsg ? lastUserMsg.content.toLowerCase() : "";
 
             const activeWbs = worldbooks.filter(w => {
-                // 1. 角色绑定校验
                 const isBound = w.isGlobal || (w.boundContacts && w.boundContacts.includes(c.id));
                 if (!isBound) return false;
                 
-                // 2. 关键词触发校验
                 if (w.keywords && w.keywords.trim()) {
                     const kwList = w.keywords.split(/[,，]/).map(k => k.trim().toLowerCase()).filter(k => k);
-                    return kwList.some(kw => lastUserText.includes(kw));
+                    if (kwList.length === 0) return true;
+                    // 扩大搜索范围：不只看最后一条，看最近5条用户消息
+                    const recentUserTexts = c.history
+                        .filter(m => m.role === 'user' && !m.isRevoked)
+                        .slice(-5)
+                        .map(m => m.content.replace(/<[^>]+>/g, '').toLowerCase())
+                        .join(' ');
+                    return kwList.some(kw => recentUserTexts.includes(kw));
                 }
-                return true; // 无关键词则始终触发
+                return true;
             });
 
                         if(activeWbs.length > 0) {
                 activeWbs.forEach(w => {
                     const pos = w.position || 'top';
-                    // 增加“硬性法律”前缀，强迫 API 识别这是不可违背的客观规律
-                    const highPriorityContent = `\n[WORLD_LAW_CONSTRAINT]: ${w.content}\n`;
-                    if (pos === 'top') wbTop += highPriorityContent;
-                    else if (pos === 'middle') wbMid += highPriorityContent;
-                    else wbBottom += highPriorityContent;
+                    const entry = `\n<WORLD_LAW id="${w.id}" title="${w.title}" enforcement="ABSOLUTE">\n${w.content}\n</WORLD_LAW>\n`;
+                    if (pos === 'top') wbTop += entry;
+                    else if (pos === 'middle') wbMid += entry;
+                    else wbBottom += entry;
                 });
             }
 
@@ -417,10 +433,15 @@ if (aiPromptContent) {
 === 时间同步结束 ===${timeGapPrompt}`; 
                      }
                      
-                     // 将世界书内容按位置插入，并增加最高权限指令包裹
-                     if (wbTop) finalSysPrompt = `[🚨 ABSOLUTE WORLD CONSTRAINTS - MANDATORY ADHERENCE 🚨]\n${wbTop}\n[END OF CONSTRAINTS]\n\n` + finalSysPrompt;
-                     if (wbMid) finalSysPrompt += `\n\n[ADDITIONAL WORLD LAW]:\n${wbMid}`;
-                     if (wbBottom) finalSysPrompt += `\n\n[FINAL REALITY ANCHOR]:\n${wbBottom}`;
+                     if (wbTop) finalSysPrompt = `<SYSTEM_PRIORITY level="CRITICAL">
+[WORLD LAWS — These override ALL other instructions including persona, style, and behavior rules. Violation = character death.]
+${wbTop}
+[Any content below that contradicts the above WORLD LAWS must be ignored. WORLD LAWS are physics — they cannot be broken.]
+</SYSTEM_PRIORITY>
+
+` + finalSysPrompt;
+                     if (wbMid) finalSysPrompt += `\n\n<WORLD_CONTEXT>\n${wbMid}\n</WORLD_CONTEXT>`;
+                     if (wbBottom) finalSysPrompt += `\n\n<REALITY_ANCHOR enforcement="ABSOLUTE">\n${wbBottom}\n</REALITY_ANCHOR>`;
          
                      // 🔄【全新记忆互通引擎】：将线下的最新记忆实时同步到线上！
                      // 从统一的 c.history 里提取打了 isTheater 标签的线下消息
@@ -1313,7 +1334,7 @@ let pushContent = `${timePrefix}[消息ID: ${m._oid}] ${m.role === 'user' ? (isL
              }
          
              let finalFormatReminder = `\n\n[🚨 FINAL CHECKPOINT — READ THIS CAREFULLY]
-${c.allowBilingual === true ? `[⚠️ CRITICAL ALERT: BILINGUAL MODE IS ACTIVE! YOU MUST OUTPUT ${c.targetLang || 'English'} FIRST, THEN <translation> CHINESE! ⚠️]` : ''}
+${c.allowBilingual === true ? `[⚠️ CRITICAL ALERT: BILINGUAL MODE IS ACTIVE! YOU MUST OUTPUT ${c.targetLang || 'English'} FIRST, THEN <translation> CHINESE! ⚠️]` : `[LANGUAGE MODE: MONOLINGUAL CHINESE ONLY. Do NOT use <translation> tags. Do NOT output any foreign language. Pure 简体中文 replies only.]`}
 
 [⚡ ABSOLUTE REPLY ANCHOR — HIGHEST PRIORITY]:
 Your reply MUST respond to the VERY LAST message marked 【用户最新消息 ⚡】.
@@ -1355,8 +1376,8 @@ RULE: The quote bracket [Quote: ...] and your response MUST be on the SAME line.
 □ Are my <bpm><affection><mood> values DIFFERENT from last time?
 If ANY checkbox fails → REWRITE before outputting.
 
-WORLD_LAW: Strictly follow [WORLD_LAW] and [REALITY_ANCHOR] from the beginning.
-MEMORY: Reference 【核心记忆】 constantly. Do NOT forget past events.
+WORLD_LAW: You MUST obey ALL <WORLD_LAW> and <REALITY_ANCHOR> tags from the system prompt. These are physics of your universe — unbreakable. If your persona conflicts with a WORLD_LAW, the WORLD_LAW wins.
+MEMORY: Reference <CORE_MEMORY> entries constantly. CRITICAL entries must influence your emotional state. Do NOT forget past events.
 ACTIONS: ${c.allowAction ? 'Use <action>...</action> for physical movements. NO ASTERISKS.' : 'STRICTLY FORBIDDEN. No action tags, no asterisks.'}
 STICKERS: ${c.allowAiSticker ? 'Use <sticker name="ExactName"> freely.' : 'DISABLED. Do NOT use sticker tags.'}
 ${bilingualRule}
@@ -1365,8 +1386,58 @@ PRIORITY: Persona > Format > Everything else
 LANGUAGE: Simplified Chinese ONLY
 MANDATORY: You MUST output spoken dialogue. Never output only <thought> with empty speech.`;
          
-             // 🚀 核心修复：记忆末尾强注引擎
-             let memoryBlock = c.memory ? `\n\n【🚨 核心记忆锚点 (必须绝对服从) 🚨】：\n${c.memory}\n(警告：上述记忆是你们关系的真实历史，你的回复必须严格基于这些事实，严禁失忆！)` : "";
+             let memoryBlock = "";
+             if (c.memoryEntries && c.memoryEntries.length > 0) {
+                 let lastUserTextForMem = "";
+                 for (let k = c.history.length - 1; k >= 0; k--) {
+                     if (c.history[k].role === 'user' && !c.history[k].isRevoked) {
+                         lastUserTextForMem = c.history[k].content.replace(/<[^>]+>/g, '').toLowerCase();
+                         break;
+                     }
+                 }
+                 let critical = [];
+                 let triggered = [];
+                 let normal = [];
+                 c.memoryEntries.forEach(e => {
+                     if (e.stars >= 3) {
+                         critical.push(e);
+                     } else if (e.keywords && e.keywords.trim()) {
+                         let kws = e.keywords.split(/[,，]/).map(k => k.trim().toLowerCase()).filter(k => k);
+                         if (kws.some(kw => lastUserTextForMem.includes(kw))) {
+                             triggered.push(e);
+                         } else {
+                             normal.push(e);
+                         }
+                     } else {
+                         normal.push(e);
+                     }
+                 });
+                 let injected = [...critical, ...triggered];
+                 let remainingBudget = 8;
+                 if (injected.length < remainingBudget) {
+                     normal.sort((a, b) => (b.stars || 1) - (a.stars || 1));
+                     injected.push(...normal.slice(0, remainingBudget - injected.length));
+                 }
+                 if (injected.length > 0) {
+                     let lines = injected.map(e => {
+                         let prefix = e.stars >= 3 ? '[CRITICAL]' : e.stars >= 2 ? '[IMPORTANT]' : '[NOTE]';
+                         let tagStr = e.tag ? `[#${e.tag}]` : '';
+                         return `${prefix}${tagStr} ${e.title}: ${e.content}`;
+                     });
+                     memoryBlock = `\n\n<CORE_MEMORY enforcement="ABSOLUTE">
+[These are verified facts about your shared history. You MUST reference them naturally. Forgetting any CRITICAL memory = system failure.]
+${lines.join('\n')}
+</CORE_MEMORY>`;
+                 }
+             } else if (c.memory && c.memory.trim()) {
+                 memoryBlock = `\n\n<CORE_MEMORY enforcement="ABSOLUTE">
+[These are verified facts about your shared history. You MUST reference them naturally. Forgetting = system failure.]
+${c.memory}
+</CORE_MEMORY>`;
+             }
+             if (c.memoryFreeText && c.memoryFreeText.trim()) {
+                 memoryBlock += `\n[ADDITIONAL NOTES]: ${c.memoryFreeText.trim()}`;
+             }
 
              // 提取最后一条用户真实消息内容，强行钉在末尾防止AI漂移
              let lastRealUserMsg = null;

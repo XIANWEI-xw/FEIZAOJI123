@@ -189,4 +189,13 @@ function toggleCustomLangInput(value) {
         wrap.style.display = 'none';
     }
 }
+
+function mvRefreshSettingsPreview() {
+    if (!currentContactId) return;
+    let c = contacts.find(x => x.id === currentContactId);
+    if (!c) return;
+    if (typeof mvUpdateSettingsPreview === 'function') {
+        mvUpdateSettingsPreview(c);
+    }
+}
           

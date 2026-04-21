@@ -3652,7 +3652,7 @@ function analyzeHomeBgBrightness(imageSrc) {
 // ================= 更新公告逻辑 (版本化强制弹出) =================
 function checkUpdateNotice() {
     // 🚀 升级为 v1_1_4，确保所有用户刷新后都会再次看到公告
-    const isHidden = localStorage.getItem('soap_hide_update_v1_1_8');
+    const isHidden = localStorage.getItem('soap_hide_update_v1_1_9');
     if (isHidden !== 'true') {
         document.getElementById('update-notice-modal').classList.add('active');
     }
@@ -3660,7 +3660,7 @@ function checkUpdateNotice() {
 
 function closeUpdateNotice(neverShowAgain) {
     if (neverShowAgain) {
-        localStorage.setItem('soap_hide_update_v1_1_8', 'true');
+        localStorage.setItem('soap_hide_update_v1_1_9', 'true');
     }
     document.getElementById('update-notice-modal').classList.remove('active');
 }
@@ -3718,9 +3718,9 @@ function switchUpdateTab(type) {
         content.innerHTML = `
             <div class="log-page">
                 <p class="log-text">
-         · 加了通知栏 现在调取中也可以切出去了<br>
-         · 改了长按消息 <br>
-         · 新加了回溯<br>
+· 听歌可以搜索导入啦<br>
+         · 做了联系人记忆库 在聊天室的设置里 <br>
+         · 查手机<br>
          · 修复了点bug<br>
          <span style="color:var(--c-gray); font-size:11px; font-style: italic;">——————罒ω罒——————</span>
                 </p>

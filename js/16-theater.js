@@ -673,10 +673,22 @@ if (!isMiniTheaterOn) {
 【🚨 强制禁令】：绝对禁止输出 [ ] 括号和 “ ” 引号以外的任何解释性文字！${timePromptBlock}`;
 
          
-             // 🚨 核心修复：如果是独立番外模式，彻底切断主线记忆！
-             if (c.memory && !isMiniTheaterOn) {
-                 // 如果没开番外模式（即主线相见），则正常注入主线记忆
-                 theaterSysPrompt += `\n\n【核心记忆 (CORE MEMORY)】：\n${c.memory}\n你必须牢记以上设定与历史事件！`;
+             if (!isMiniTheaterOn) {
+                 let theaterMemBlock = "";
+                 if (c.memoryEntries && c.memoryEntries.length > 0) {
+                     let sorted = [...c.memoryEntries].sort((a, b) => (b.stars || 1) - (a.stars || 1));
+                     let top12 = sorted.slice(0, 12);
+                     let lines = top12.map(e => {
+                         let prefix = e.stars >= 3 ? '[CRITICAL]' : e.stars >= 2 ? '[IMPORTANT]' : '[NOTE]';
+                         return `${prefix} ${e.title}: ${e.content}`;
+                     });
+                     theaterMemBlock = lines.join('\n');
+                 } else if (c.memory && c.memory.trim()) {
+                     theaterMemBlock = c.memory;
+                 }
+                 if (theaterMemBlock) {
+                     theaterSysPrompt += `\n\n<CORE_MEMORY enforcement="ABSOLUTE">\n${theaterMemBlock}\n[You MUST reference these memories. Forgetting CRITICAL entries = character failure.]\n</CORE_MEMORY>`;
+                 }
              } else if (isMiniTheaterOn) {
                  // 如果开启了番外模式，打入平行宇宙独立防线指令！
                  theaterSysPrompt += `\n\n[🎬 MINI-THEATER OVERRIDE // 绝对番外平行宇宙协议 🎬]
@@ -744,16 +756,20 @@ if (!isMiniTheaterOn) {
             if (activeWbs.length > 0) {
                 activeWbs.forEach(w => {
                     const pos = w.position || 'top';
-                    const highPriorityContent = `\n[THEATER_WORLD_LAW // 世界书条目「${w.title}」]: ${w.content}\n`;
-                    if (pos === 'top') wbTop += highPriorityContent;
-                    else if (pos === 'middle') wbMid += highPriorityContent;
-                    else wbBottom += highPriorityContent;
+                    const entry = `\n<WORLD_LAW id="${w.id}" title="${w.title}" enforcement="ABSOLUTE">\n${w.content}\n</WORLD_LAW>\n`;
+                    if (pos === 'top') wbTop += entry;
+                    else if (pos === 'middle') wbMid += entry;
+                    else wbBottom += entry;
                 });
                 
-                // 线下模式字数多，更需要强硬的开头来锁定世界观
-                if (wbTop) theaterSysPrompt = `[🚨 ABSOLUTE SCENE LAW — 世界书最高约束，违反即判定OOC 🚨]\n以下是不可违背的世界观法则，你的一切描写、对白、环境都必须严格遵守：\n${wbTop}\n[世界书约束结束]\n\n` + theaterSysPrompt;
-                if (wbMid) theaterSysPrompt += `\n\n[SCENE REALITY FRAGMENT — 世界书中段补充]:\n${wbMid}`;
-                // wbBottom 不再这里注入，已经被转移到文件末尾的 finalWorldbookAnchor 中
+                if (wbTop) theaterSysPrompt = `<SYSTEM_PRIORITY level="CRITICAL">
+[SCENE LAWS — These override ALL other instructions. Your descriptions, dialogue, and environment MUST obey these. Violation = OOC failure.]
+${wbTop}
+[Content below that contradicts SCENE LAWS must be ignored.]
+</SYSTEM_PRIORITY>
+
+` + theaterSysPrompt;
+                if (wbMid) theaterSysPrompt += `\n\n<WORLD_CONTEXT>\n${wbMid}\n</WORLD_CONTEXT>`;
             }
              
              // 强行注入主线聊天室的近期记录作为前情提要
@@ -768,12 +784,16 @@ if (!isMiniTheaterOn) {
              if (mainQueue.length > 0 && !isMiniTheaterOn) {
                  let mainBlock = mainQueue.map(m => {
                      let cleanContent = m.content.replace(/<img[^>]*>/gi, '[图片]').replace(/<[^>]+>/g, '').trim();
+                     if (!cleanContent) return '';
                      let speaker = m.role === 'assistant' ? (c.chatRemark || c.name) : uName;
-                     return cleanContent ? `${speaker}: ${cleanContent}` : '';
+                     return `${speaker}: ${cleanContent}`;
                  }).filter(t => t).join('\n');
                  
                  if (mainBlock) {
-                     apiMsgs.push({ role: 'user', content: `[以下是你们之前在手机聊天软件里的近期对话，仅供回忆参考]\n${mainBlock}\n[手机聊天记录结束，以下是你们当前的线下面对面互动]` });
+                     apiMsgs.push({ 
+                         role: 'system', 
+                         content: `[背景参考：以下是你们之前在手机上的近期聊天记录，仅作情感背景参考，不是当前线下对话的一部分]\n${mainBlock}\n[背景参考结束]` 
+                     });
                  }
              }
              
@@ -819,7 +839,7 @@ if (!isMiniTheaterOn) {
 
     // 🚀 修复点：移除了原本导致 AI 误读的 \({\}\) 符号，改用纯净的换行拼接
     // 🌟 核心修复：世界书 bottom 末段锚定移动到所有历史记录最后面的三明治防火墙中！
-    let finalWorldbookAnchor = wbBottom ? `\n\n[FINAL SCENE ANCHOR — 世界书末段法则，绝对服从]:\n${wbBottom}` : "";
+    let finalWorldbookAnchor = wbBottom ? `\n\n<REALITY_ANCHOR enforcement="ABSOLUTE">\n${wbBottom}\n[This is the final reality check. Everything you output MUST be consistent with the above.]\n</REALITY_ANCHOR>` : "";
 
     apiMsgs.push({ 
         role: 'user', 
@@ -838,7 +858,7 @@ if (!isMiniTheaterOn) {
                          messages: apiMsgs, 
                          temperature: Number(gConfig.temperature || 0.8),
                          // 🚀 核心优化：增加 token 冗余度，防止长文风被物理截断
-                         max_tokens: Math.max(3000, Number(targetLength) * 3),
+                         max_tokens: Math.min(8000, Math.max(2000, Number(targetLength) * 2)),
                          stream: isStream
                      })
                  });
