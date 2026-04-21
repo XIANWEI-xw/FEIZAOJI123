@@ -30,12 +30,13 @@ async function exportData(type = 'all') {
                 if (i % 5 === 0) await new Promise(r => setTimeout(r, 10)); // 每5个条目喘息一次
             }
             db.close();
+            blobParts.push(',"wbCategories":' + (localStorage.getItem('wbCategories') || '["默认","设定","人物","物品"]'));
             blobParts.push('},"localStorage":' + JSON.stringify(localStorage));
         } else {
             // 局部导出也采用分段法
             blobParts.push(',"data":');
             let partialData = {};
-            if (type === 'chat') { partialData = { contacts, masks, worldbooks, phoneLogs }; fileNamePrefix = 'SOAP_Chat_Backup'; }
+            if (type === 'chat') { partialData = { contacts, masks, worldbooks, phoneLogs, wbCategories: JSON.parse(localStorage.getItem('wbCategories') || '[]') }; fileNamePrefix = 'SOAP_Chat_Backup'; }
             else if (type === 'social') { partialData = { twData, momentsData, followedUsers: Array.from(followedUsers) }; fileNamePrefix = 'SOAP_Social_Backup'; }
             else if (type === 'sys') { partialData = { gConfig, wgData, artWidgetData }; fileNamePrefix = 'SOAP_Sys_Backup'; }
             blobParts.push(JSON.stringify(partialData));
@@ -138,6 +139,17 @@ async function importData(e) {
             for (let sourceKey in dataPool) {
                 if (['_isSoapBackup', 'exportTime', 'exportType', 'localStorage'].includes(sourceKey)) continue;
                 
+                // 世界书分类数据直接写入 localStorage，不进 IndexedDB
+                if (sourceKey === 'wbCategories') {
+                    let catData = dataPool[sourceKey];
+                    if (typeof catData === 'string') {
+                        localStorage.setItem('wbCategories', catData);
+                    } else if (Array.isArray(catData)) {
+                        localStorage.setItem('wbCategories', JSON.stringify(catData));
+                    }
+                    continue;
+                }
+
                 let targetKey = legacyMap[sourceKey] || sourceKey;
                 let rawValue = dataPool[sourceKey];
                 let finalData = rawValue;
