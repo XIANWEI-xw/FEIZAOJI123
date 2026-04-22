@@ -167,7 +167,6 @@ if (aiPromptContent) {
          }
          
          async function performSummarize(c, isManual = false) {
-    alert('[调试1] performSummarize被调用了! isManual=' + isManual + ' historyLen=' + c.history.length);
     if(!gConfig.apiUrl || !gConfig.apiKey) { if(isManual) alert("需配置API"); return; }
     const btn = document.getElementById('btn-manual-sum'); if(btn) btn.innerText = "正在总结...";
     const startIdx = c.lastSumIndex || 1;
@@ -310,8 +309,6 @@ ${contextText}`
 
         if (!Array.isArray(entries)) entries = [entries];
 
-        alert('[调试2] AI返回解析完毕!\n条目数=' + entries.length + '\n第一条=' + JSON.stringify(entries[0] || '空').substring(0, 200));
-
         if (!c.memoryEntries) c.memoryEntries = [];
 
         let addedCount = 0;
@@ -379,8 +376,6 @@ ${contextText}`
         });
 
         if (typeof mvSyncMemoryField === 'function') mvSyncMemoryField(c);
-
-        alert('[调试3] 写入完成!\n新增=' + addedCount + '条\n记忆库总数=' + c.memoryEntries.length + '\n最后一条内容=' + (c.memoryEntries.length > 0 ? c.memoryEntries[c.memoryEntries.length-1].content.substring(0, 150) : '空'));
 
         c.lastSumIndex = c.history.length;
         saveData();
