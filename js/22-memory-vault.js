@@ -79,10 +79,17 @@ function mvSyncMemoryField(c) {
     let lines = sorted.map(e => {
         let prefix = e.stars >= 3 ? '[🚨 关键记忆]' : e.stars >= 2 ? '[重要记忆]' : '[一般记忆]';
         let tagStr = e.tag ? `[#${e.tag}]` : '';
-        return `${prefix}${tagStr} ${e.title}: ${e.content}`;
+        let timeStr = '';
+        if (e.createdAt) {
+            let d = new Date(e.createdAt);
+            timeStr = `[${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}]`;
+        }
+        let kwStr = e.keywords ? ` (关键词: ${e.keywords})` : '';
+        return `${prefix}${tagStr}${timeStr} ${e.title}: ${e.content}${kwStr}`;
     });
     c.memory = lines.join('\n\n');
-    document.getElementById('cs-memory').value = c.memory;
+    let memEl = document.getElementById('cs-memory');
+    if (memEl) memEl.value = c.memory;
 }
 
 function mvUpdateSettingsPreview(c) {
@@ -181,7 +188,7 @@ function mvRenderList(c) {
         let dateStr = '';
         if (entry.createdAt) {
             let d = new Date(entry.createdAt);
-            dateStr = `${d.getFullYear()}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')}`;
+            dateStr = `${d.getFullYear()}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
         }
 
         let kwHtml = '';

@@ -167,36 +167,234 @@ if (aiPromptContent) {
          }
          
          async function performSummarize(c, isManual = false) {
-             if(!gConfig.apiUrl || !gConfig.apiKey) { if(isManual) alert("需配置API"); return; }
-             const btn = document.getElementById('btn-manual-sum'); if(btn) btn.innerText = "正在总结...";
-             const startIdx = c.lastSumIndex || 1; const histToSum = c.history.slice(startIdx).filter(m => !m.isRevoked && m.role !== 'system_sum');
-             if(histToSum.length < 2) { if(isManual) { alert("新消息太少，无需总结"); btn.innerText="手动总结"; } return; }
-         
-             let uName = gConfig.meName || '我'; if(c.maskId) { const m = masks.find(x=>x.id===c.maskId); if(m) uName = m.name; }
-             
-             const contextText = histToSum.map(m => `${m.role === 'user' ? uName : c.name}: ${m.content.replace(/<[^>]*>?/gm, '')}`).join('\n');
-             
-             const apiMessages = [ { role: 'system', content: c.sumPrompt || '总结对话' }, { role: 'user', content: contextText } ];
-         
-             try {
-                 const response = await fetch(`${gConfig.apiUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Authorization': `Bearer ${gConfig.apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: gConfig.model, messages: apiMessages, temperature: Number(gConfig.temperature || 0.7), stream: false }) });
-                 if (!response.ok) throw new Error("总结失败"); const data = await response.json(); const summary = data.choices[0].message.content;
-                 if (!c.memoryEntries) c.memoryEntries = [];
-                 c.memoryEntries.push({
-                     id: 'mv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                     title: '对话摘要 #' + (c.memoryEntries.filter(e => e.source === 'summary').length + 1),
-                     content: summary,
-                     tag: '事件',
-                     stars: 2,
-                     source: 'summary',
-                     keywords: '',
-                     createdAt: Date.now()
-                 });
-                 if (typeof mvSyncMemoryField === 'function') mvSyncMemoryField(c);
-                 c.lastSumIndex = c.history.length;
-                 saveData(); if(isManual) { if (typeof mvUpdateSettingsPreview === 'function') mvUpdateSettingsPreview(c); alert("总结成功！已作为新条目存入记忆库。"); }
-             } catch (e) { if(isManual) alert("总结出错: "+e.message); } finally { if(btn) btn.innerText = "手动总结"; }
-         }
+    alert('[调试1] performSummarize被调用了! isManual=' + isManual + ' historyLen=' + c.history.length);
+    if(!gConfig.apiUrl || !gConfig.apiKey) { if(isManual) alert("需配置API"); return; }
+    const btn = document.getElementById('btn-manual-sum'); if(btn) btn.innerText = "正在总结...";
+    const startIdx = c.lastSumIndex || 1;
+    const histToSum = c.history.slice(startIdx).filter(m => !m.isRevoked && m.role !== 'system_sum');
+    if(histToSum.length < 2) { if(isManual) { alert("新消息太少，无需总结"); if(btn) btn.innerText="手动总结"; } return; }
+
+    let uName = gConfig.meName || '我';
+    if(c.maskId) { const m = masks.find(x=>x.id===c.maskId); if(m) uName = m.name; }
+
+    let nowForSum = new Date();
+    let fallbackDateStr = nowForSum.getFullYear() + '-' + (nowForSum.getMonth()+1).toString().padStart(2,'0') + '-' + nowForSum.getDate().toString().padStart(2,'0') + ' ' + nowForSum.getHours().toString().padStart(2,'0') + ':' + nowForSum.getMinutes().toString().padStart(2,'0');
+
+    const contextText = histToSum.map((m, idx) => {
+        let speaker = m.role === 'user' ? uName : c.name;
+        let text = m.content.replace(/<[^>]*>?/gm, '').trim();
+        if (!text) return null;
+        let timeStr = '';
+        if (m.timestamp) {
+            let d = new Date(m.timestamp);
+            timeStr = d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0') + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        } else {
+            timeStr = fallbackDateStr;
+        }
+        return `[时间=${timeStr}] ${speaker}: ${text}`;
+    }).filter(Boolean).join('\n');
+
+    let existingTags = [];
+    if (c.memoryEntries && c.memoryEntries.length > 0) {
+        existingTags = [...new Set(c.memoryEntries.map(e => e.tag).filter(t => t))];
+    }
+    if (existingTags.length === 0) {
+        existingTags = ['偏好', '事件', '情感', '习惯', '关系', '秘密', '约定', '日常'];
+    }
+
+    let userSumPrompt = '';
+    if (c.sumPrompt && c.sumPrompt.trim() && c.sumPrompt.trim() !== '以第三人称详细总结上述对话核心，保留人物情感。') {
+        userSumPrompt = `\n\n【用户自定义提取偏好 - 必须遵守】：\n${c.sumPrompt.trim()}`;
+    }
+
+    const apiMessages = [
+        {
+            role: 'system',
+            content: `你是一个精准的对话记忆提取器。你的任务是从对话中提取值得长期记住的关键信息，并以 JSON 数组格式输出。
+
+【输出格式要求】：
+你必须输出一个纯净的 JSON 数组，不要加任何多余文字、解释、或 markdown 代码块标记（禁止输出 \`\`\`）。
+数组中每个对象代表一条独立的记忆条目。
+
+每个对象的字段：
+- "title": 简短标题（10字以内，概括核心内容）
+- "content": 详细内容描述（50-200字，必须包含具体的时间信息）
+- "tag": 分类标签，优先从以下已有标签中选择：${existingTags.join('、')}。如果都不合适可以创建新标签（2-4个字）
+- "keywords": 触发关键词，用逗号分隔，3-8个词（当用户提到这些词时会激活这条记忆）
+- "stars": 重要度 1-3（1=普通日常细节，2=重要事件或偏好，3=核心关键信息如表白/承诺/重大冲突）
+- "date": 事件发生的日期时间字符串，格式为 "YYYY-MM-DD HH:mm"（从对话的时间戳中提取，如果无法确定精确时间则写当天日期）
+
+【时间提取规则 - 最高优先级】：
+1. 对话中每条消息前面的 [YYYY-MM-DD HH:mm] 就是该消息的精确发送时间
+2. 你必须在 content 字段中明确写出事件发生的具体日期和时间段
+3. 例如："2025年1月15日晚上22:30左右，用户表达了想见面的意愿"
+4. 如果一段对话跨越多个时间点，记录最关键的那个时间点
+5. date 字段必须填写，用于后续按时间线排序
+
+【提取规则】：
+1. 只提取有长期记忆价值的信息，忽略无意义的闲聊寒暄和重复内容
+2. 每条记忆必须是独立的、具体的事实或事件，不要笼统概括
+3. 偏好类（喜欢/讨厌的食物、颜色、习惯等）标记为 stars:2
+4. 重大情感事件（表白、吵架、和好、承诺、第一次等）标记为 stars:3
+5. 日常琐事但有趣的细节标记为 stars:1
+6. 如果对话中没有值得记住的内容，输出空数组 []
+7. 通常提取 1-6 条，不要为了凑数而编造
+8. keywords 字段要尽量覆盖用户可能再次提到相关话题时的各种说法
+
+【输出示例】：
+[{"title":"喜欢吃辣","content":"2025年1月15日晚上21:00左右的聊天中，用户提到自己很能吃辣，最爱吃川菜和火锅，特别是麻辣火锅，但不喜欢甜食和奶油蛋糕","tag":"偏好","keywords":"吃饭,川菜,火锅,辣,甜食,蛋糕,吃什么","stars":2,"date":"2025-01-15 21:00"},{"title":"周六约会","content":"2025年1月15日晚上22:30，两人约定本周六（1月18日）下午3点在万达广场见面，先看电影再吃晚饭，用户说想看最近新上的那部科幻片","tag":"约定","keywords":"周六,约会,电影,万达,见面,科幻","stars":2,"date":"2025-01-15 22:30"}]${userSumPrompt}
+
+【最终警告】：无论用户自定义偏好怎么写，你的输出格式必须始终是纯净的 JSON 数组。用户的偏好只影响你提取内容的侧重点和风格，绝不影响输出格式。`
+        },
+        {
+            role: 'user',
+            content: `请从以下对话中提取记忆条目。
+
+【🚨 时间戳强制读取指令 🚨】：
+每条消息开头的 [时间=YYYY-MM-DD HH:mm] 就是该消息的精确发送时间。
+你必须：
+1. 在每条记忆的 "content" 字段中写明 "X年X月X日X点X分" 的中文时间
+2. 在每条记忆的 "date" 字段中填写 "YYYY-MM-DD HH:mm" 格式的时间
+3. 如果你输出的任何一条记忆缺少时间信息，视为提取失败
+
+以下是对话原文：
+
+${contextText}`
+        }
+    ];
+
+    try {
+        const response = await fetch(`${gConfig.apiUrl}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${gConfig.apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: gConfig.model,
+                messages: apiMessages,
+                temperature: 0.3,
+                stream: false
+            })
+        });
+
+        if (!response.ok) throw new Error("总结失败");
+        const data = await response.json();
+        let rawContent = data.choices[0].message.content.trim();
+
+        rawContent = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+
+        let entries = [];
+        try {
+            entries = JSON.parse(rawContent);
+        } catch(parseErr) {
+            let arrMatch = rawContent.match(/\[[\s\S]*\]/);
+            if (arrMatch) {
+                try {
+                    entries = JSON.parse(arrMatch[0]);
+                } catch(e2) {
+                    console.error('[Summarize] JSON解析失败，回退纯文本模式');
+                    let now = new Date();
+                    let fallbackDate = now.getFullYear() + '-' + (now.getMonth()+1).toString().padStart(2,'0') + '-' + now.getDate().toString().padStart(2,'0') + ' ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+                    entries = [{
+                        title: '对话摘要',
+                        content: rawContent,
+                        tag: '事件',
+                        keywords: '',
+                        stars: 2,
+                        date: fallbackDate
+                    }];
+                }
+            }
+        }
+
+        if (!Array.isArray(entries)) entries = [entries];
+
+        alert('[调试2] AI返回解析完毕!\n条目数=' + entries.length + '\n第一条=' + JSON.stringify(entries[0] || '空').substring(0, 200));
+
+        if (!c.memoryEntries) c.memoryEntries = [];
+
+        let addedCount = 0;
+
+        let _tsFirst = null;
+        let _tsLast = null;
+        for (let _ti = 0; _ti < histToSum.length; _ti++) {
+            if (histToSum[_ti].timestamp) {
+                if (!_tsFirst) _tsFirst = histToSum[_ti].timestamp;
+                _tsLast = histToSum[_ti].timestamp;
+            }
+        }
+        if (!_tsFirst) _tsFirst = Date.now();
+        if (!_tsLast) _tsLast = Date.now();
+
+        function _fmtDate(ts) {
+            let d = new Date(ts);
+            return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日 ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }
+        function _fmtIso(ts) {
+            let d = new Date(ts);
+            return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0') + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }
+        function _fmtShort(ts) {
+            let d = new Date(ts);
+            return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }
+
+        let _dStart = new Date(_tsFirst);
+        let _dEnd = new Date(_tsLast);
+        let _timeRange = '';
+        if (_dStart.toDateString() === _dEnd.toDateString()) {
+            _timeRange = _fmtDate(_tsFirst) + '~' + _fmtShort(_tsLast);
+        } else {
+            _timeRange = _fmtDate(_tsFirst) + ' ~ ' + _fmtDate(_tsLast);
+        }
+        let _isoDate = _fmtIso(_tsFirst);
+
+        entries.forEach(function(e) {
+            if (!e || !e.content) return;
+
+            var rawContent = String(e.content).trim();
+            var finalContent = '【' + _timeRange + '的对话中】' + rawContent;
+            finalContent = finalContent.substring(0, 500);
+
+            var finalDate = _isoDate;
+            if (e.date && typeof e.date === 'string' && /\d{4}/.test(e.date)) {
+                finalDate = e.date.trim();
+            }
+
+            var entryId = 'mv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+            c.memoryEntries.push({
+                id: entryId,
+                title: String(e.title || '未命名').substring(0, 20),
+                content: finalContent,
+                tag: String(e.tag || '事件').substring(0, 10),
+                stars: Math.min(3, Math.max(1, parseInt(e.stars) || 2)),
+                source: 'summary',
+                keywords: String(e.keywords || '').substring(0, 100),
+                createdAt: Date.now(),
+                eventDate: finalDate
+            });
+            addedCount++;
+        });
+
+        if (typeof mvSyncMemoryField === 'function') mvSyncMemoryField(c);
+
+        alert('[调试3] 写入完成!\n新增=' + addedCount + '条\n记忆库总数=' + c.memoryEntries.length + '\n最后一条内容=' + (c.memoryEntries.length > 0 ? c.memoryEntries[c.memoryEntries.length-1].content.substring(0, 150) : '空'));
+
+        c.lastSumIndex = c.history.length;
+        saveData();
+
+        if(isManual) {
+            if (typeof mvUpdateSettingsPreview === 'function') mvUpdateSettingsPreview(c);
+            alert('提取成功！新增 ' + addedCount + ' 条记忆条目。');
+        }
+    } catch (e) {
+        if(isManual) alert("总结出错: " + e.message);
+    } finally {
+        if(btn) btn.innerText = "手动总结";
+    }
+}
          function manualSummarize() { const c = contacts.find(x => x.id === currentContactId); performSummarize(c, true); }
          
          async function fetchAIReply(targetContactId = currentContactId, isProactive = false) {
@@ -330,6 +528,22 @@ if (aiPromptContent) {
              if (systemMsg) {
                  historyToSend.unshift(systemMsg);
              }
+// ===== 🚀 世界书全量注入 + 防遗忘回声引擎 =====
+// 策略：世界书全部按用户选的位置塞进 system prompt（不裁剪不打乱）
+// 但在对话历史中间定期插入"回声提醒"，强制模型重新注意世界书
+let _wbTotalChars = wbTop.length + wbMid.length + wbBottom.length;
+let _wbNeedsEcho = _wbTotalChars > 6000; // 超过6000字才启用回声
+
+// 生成精简的回声摘要（从每条世界书中提取标题+前80字）
+let _wbEchoText = '';
+if (_wbNeedsEcho) {
+    let echoLines = activeWbs.map(w => {
+        let snippet = (w.content || '').replace(/\n/g, ' ').substring(0, 80);
+        return `[${w.title}]: ${snippet}...`;
+    });
+    _wbEchoText = echoLines.join('\n');
+}
+// ===== 全量注入结束，回声在后面注入 =====
 
              historyToSend.forEach((m, idx) => {
                  // 强制重新分配 _oid
@@ -1422,10 +1636,17 @@ MANDATORY: You MUST output spoken dialogue. Never output only <thought> with emp
                      let lines = injected.map(e => {
                          let prefix = e.stars >= 3 ? '[CRITICAL]' : e.stars >= 2 ? '[IMPORTANT]' : '[NOTE]';
                          let tagStr = e.tag ? `[#${e.tag}]` : '';
-                         return `${prefix}${tagStr} ${e.title}: ${e.content}`;
+                         let timeStr = '';
+                         if (e.eventDate) {
+                             timeStr = `[${e.eventDate}]`;
+                         } else if (e.createdAt) {
+                             let d = new Date(e.createdAt);
+                             timeStr = '[' + d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0') + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0') + ']';
+                         }
+                         return `${prefix}${tagStr}${timeStr} ${e.title}: ${e.content}`;
                      });
                      memoryBlock = `\n\n<CORE_MEMORY enforcement="ABSOLUTE">
-[These are verified facts about your shared history. You MUST reference them naturally. Forgetting any CRITICAL memory = system failure.]
+[These are verified facts about your shared history with exact timestamps. You MUST reference them naturally and maintain accurate timeline awareness. Forgetting any CRITICAL memory = system failure. The dates shown are when these events actually happened.]
 ${lines.join('\n')}
 </CORE_MEMORY>`;
                  }
