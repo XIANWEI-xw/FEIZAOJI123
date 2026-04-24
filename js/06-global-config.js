@@ -405,15 +405,20 @@ gConfig.enableStream = document.getElementById('setting-stream').checked;
          }
          
          function renderDesktopApps() { 
-    ['g1','g2','g3','twitter','d1','d2','d3'].forEach(k => { const el = document.getElementById(`icon-${k}`); if(el) { if(gConfig.apps[k] && (gConfig.apps[k].startsWith('data:') || gConfig.apps[k].startsWith('http'))) el.classList.add('has-img'); else el.classList.remove('has-img'); } });
+    ['g1','g2','g3','twitter','d1','d2','d3','checkphone'].forEach(k => { const el = document.getElementById(`icon-${k}`); if(el) { if(gConfig.apps[k] && (gConfig.apps[k].startsWith('data:') || gConfig.apps[k].startsWith('http'))) el.classList.add('has-img'); else el.classList.remove('has-img'); } });
     document.getElementById('icon-g1').innerHTML = renderIconHTML(gConfig.apps.g1, SVG_BOOK); 
     document.getElementById('icon-g2').innerHTML = renderIconHTML(gConfig.apps.g2, SVG_PHOTO); 
-    document.getElementById('icon-g3').innerHTML = renderIconHTML(gConfig.apps.g3, SVG_SET); if(gConfig.apps.g3) { document.getElementById('icon-g3').classList.remove('dark'); document.getElementById('icon-g3').style.border='none'; } 
+    document.getElementById('icon-g3').innerHTML = renderIconHTML(gConfig.apps.g3, SVG_SET); if(gConfig.apps.g3) { document.getElementById('icon-g3').classList.remove('dark'); } 
     document.getElementById('icon-twitter').innerHTML = renderIconHTML(gConfig.apps.twitter, '<i class="fa-brands fa-twitter" style="font-size:30px;"></i>');
     document.getElementById('icon-d1').innerHTML = renderIconHTML(gConfig.apps.d1, SVG_PHONE); 
     document.getElementById('icon-d2').innerHTML = renderIconHTML(gConfig.apps.d2, SVG_MSG); if(gConfig.apps.d2) document.getElementById('icon-d2').classList.remove('dark'); 
     document.getElementById('icon-d3').innerHTML = renderIconHTML(gConfig.apps.d3, SVG_MUSIC); 
+    const cpIcon = document.getElementById('icon-checkphone');
+    if(cpIcon) {
+        cpIcon.innerHTML = renderIconHTML(gConfig.apps.checkphone, '<i class="fa-solid fa-mobile-screen" style="font-size:24px;"></i>');
+        if(gConfig.apps.checkphone) cpIcon.classList.remove('dark');
+    }
 }
-function openAppIconEditor() { ['g1','g2','g3','twitter','d1','d2','d3'].forEach(k => { document.getElementById(`ic-${k}-data`).value = gConfig.apps[k] || ''; document.getElementById(`ic-${k}-prev`).innerHTML = renderIconHTML(gConfig.apps[k], '选择'); }); document.getElementById('app-icons-modal').classList.add('active'); }
-function saveAppIcons() { ['g1','g2','g3','twitter','d1','d2','d3'].forEach(k => { gConfig.apps[k] = document.getElementById(`ic-${k}-data`).value || gConfig.apps[k]; }); saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }
-function resetAppIcons() { if(!confirm('确定恢复所有应用默认图标吗？')) return; gConfig.apps = { g1:'', g2:'', g3:'', twitter:'', d1:'', d2:'', d3:'' }; saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }
+function openAppIconEditor() { ['g1','g2','g3','twitter','d1','d2','d3','checkphone'].forEach(k => { const dataEl = document.getElementById(`ic-${k}-data`); const prevEl = document.getElementById(`ic-${k}-prev`); if(dataEl) dataEl.value = gConfig.apps[k] || ''; if(prevEl) prevEl.innerHTML = renderIconHTML(gConfig.apps[k], '选择'); }); document.getElementById('app-icons-modal').classList.add('active'); }
+function saveAppIcons() { ['g1','g2','g3','twitter','d1','d2','d3','checkphone'].forEach(k => { const dataEl = document.getElementById(`ic-${k}-data`); if(dataEl) gConfig.apps[k] = dataEl.value || gConfig.apps[k]; }); saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }
+function resetAppIcons() { if(!confirm('确定恢复所有应用默认图标吗？')) return; gConfig.apps = { g1:'', g2:'', g3:'', twitter:'', d1:'', d2:'', d3:'', checkphone:'' }; saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }
