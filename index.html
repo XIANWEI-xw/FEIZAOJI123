@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="css/21-checkphone.css">
     <link rel="stylesheet" href="css/22-memory-vault.css">
     <link rel="stylesheet" href="css/23-music-import.css">
+    <link rel="stylesheet" href="css/gallery.css">
     
 </head>
 <body>
@@ -378,7 +379,12 @@
       </div>
       <div class="app-label" id="label-checkphone">查手机</div>
    </div>
-   <div class="draggable-app" style="left:29%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
+   <div class="draggable-app" id="app-gallery-icon" onclick="openGallery()" style="left:29%;top:5%;">
+      <div class="app-icon" id="icon-gallery" style="background:#F4F3F0; color:#1a1816; border:0.5px solid rgba(30,27,23,0.08); display:flex; justify-content:center; align-items:center;">
+         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <div class="app-label">Gallery</div>
+   </div>
    <div class="draggable-app" style="left:53%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
    <div class="draggable-app" style="left:77%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
 </div>
@@ -661,6 +667,190 @@
                     </div>
                 </div>
             </div>
+         </div>
+         <!-- ================= App: Gallery 图库 ================= -->
+         <div id="galleryApp">
+            <div class="gal-status">
+               <div class="gal-status-time" id="galStatusTime">00:00</div>
+            </div>
+            <div class="gal-header">
+               <div class="gal-header-top">
+                  <div class="gal-back" onclick="closeGallery()">
+                     <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                  </div>
+                  <div class="gal-header-actions">
+                     <label class="gal-header-btn" title="上传头像">
+                        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="file" hidden accept="image/*" onchange="galHandleAvatarUpload(event)">
+                     </label>
+                     <label class="gal-header-btn" title="上传壁纸">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <input type="file" hidden accept="image/*" onchange="galHandleWallUpload(event)">
+                     </label>
+                  </div>
+               </div>
+               <div class="gal-kicker"><div class="gal-kicker-dot"></div>STUDIO ZERO · ARCHIVE</div>
+               <div class="gal-title">Gallery<i>.</i></div>
+               <div class="gal-subtitle">VISUAL ASSET MANAGEMENT SYSTEM</div>
+            </div>
+            <div class="gal-stats">
+               <div class="gal-stat">
+                  <div class="gal-stat-num" id="galStatAvatars">0</div>
+                  <div class="gal-stat-label">Avatars</div>
+               </div>
+               <div class="gal-stat">
+                  <div class="gal-stat-num" id="galStatWalls">0</div>
+                  <div class="gal-stat-label">Walls</div>
+               </div>
+               <div class="gal-stat">
+                  <div class="gal-stat-num" id="galStatVision">0</div>
+                  <div class="gal-stat-label">Scans</div>
+               </div>
+            </div>
+            <div class="gal-tabs">
+               <div class="gal-tab active" onclick="switchGalTab(0,this)">ALL</div>
+               <div class="gal-tab" onclick="switchGalTab(1,this)">AVATARS</div>
+               <div class="gal-tab" onclick="switchGalTab(2,this)">WALLS</div>
+               <div class="gal-tab" onclick="switchGalTab(3,this)">VISION</div>
+               <div class="gal-tab" onclick="switchGalTab(4,this)">LOG</div>
+            </div>
+            <div class="gal-content">
+               <!-- Tab 0: ALL -->
+               <div class="gal-view active">
+                  <div class="gal-section-head">
+                     <div class="gal-section-title">Avatars</div>
+                     <div class="gal-section-count" id="galStatAvatarsAll">0</div>
+                  </div>
+                  <div class="gal-avatar-grid" id="galAvatarGrid"></div>
+                  <div class="gal-section-head" style="margin-top:20px;">
+                     <div class="gal-section-title">Walls</div>
+                  </div>
+                  <div class="gal-wall-scroll" id="galWallScroll">
+                     <div class="gal-wall-card gal-wall-add">
+                        <label style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+                           <svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:rgba(30,27,23,0.12);fill:none;stroke-width:1.5;"><path d="M12 5v14M5 12h14"/></svg>
+                           <div class="gal-wall-add-text">ADD</div>
+                           <input type="file" hidden accept="image/*" onchange="galHandleWallUpload(event)">
+                        </label>
+                     </div>
+                  </div>
+               </div>
+               <!-- Tab 1: AVATARS -->
+               <div class="gal-view">
+                  <div class="gal-section-head">
+                     <div class="gal-section-title">All Avatars</div>
+                     <div class="gal-section-count" id="galAvatarCount">0 SAVED</div>
+                  </div>
+                  <div class="gal-avatar-grid gal-avatar-grid-wrap" id="galAvatarGridFull"></div>
+                  <div style="text-align:center;padding:20px 0 10px;">
+                     <label style="display:inline-flex;align-items:center;width:auto;padding:0 20px;height:36px;border-radius:20px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:#1a1816;cursor:pointer;gap:8px;background:rgba(30,27,23,0.04);border:1px solid rgba(30,27,23,0.08);">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        ADD AVATAR
+                        <input type="file" hidden accept="image/*" onchange="galHandleAvatarUpload(event)">
+                     </label>
+                  </div>
+               </div>
+               <!-- Tab 2: WALLS -->
+               <div class="gal-view">
+                  <div class="gal-section-head">
+                     <div class="gal-section-title">Wallpapers</div>
+                     <div class="gal-section-count" id="galWallCount">0 SAVED</div>
+                  </div>
+                  <div id="galWallList" style="padding:0 24px;display:flex;flex-direction:column;gap:12px;position:relative;"></div>
+                  <div style="text-align:center;padding:20px 0 10px;">
+                     <label style="display:inline-flex;align-items:center;width:auto;padding:0 20px;height:36px;border-radius:20px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:#1a1816;cursor:pointer;gap:8px;background:rgba(30,27,23,0.04);border:1px solid rgba(30,27,23,0.08);">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        ADD WALLPAPER
+                        <input type="file" hidden accept="image/*" onchange="galHandleWallUpload(event)">
+                     </label>
+                  </div>
+               </div>
+               <!-- Tab 3: VISION -->
+               <div class="gal-view">
+                  <div class="gal-v-card">
+                     <div class="gal-v-header">
+                        <div class="gal-v-left">
+                           <div class="gal-v-icon">
+                              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                           </div>
+                           <div>
+                              <div class="gal-v-title">VISION SCAN</div>
+                              <div class="gal-v-sub">AI 情头配对系统</div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="gal-v-body">
+                        <div class="gal-v-time-row">
+                           <div class="gal-v-time-label">GLOBAL INTERVAL</div>
+                           <div class="gal-v-hm-group">
+                              <div class="gal-v-hm-block">
+                                 <input type="number" class="gal-v-hm-input" id="galVH" value="6" min="0" max="999">
+                                 <div class="gal-v-hm-unit">H</div>
+                              </div>
+                              <div class="gal-v-hm-sep">:</div>
+                              <div class="gal-v-hm-block">
+                                 <input type="number" class="gal-v-hm-input" id="galVM" value="0" min="0" max="59">
+                                 <div class="gal-v-hm-unit">M</div>
+                              </div>
+                              <div class="gal-v-hm-btns">
+                                 <div class="gal-v-hm-btn" onclick="galAdjVGlobal(1)"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></div>
+                                 <div class="gal-v-hm-btn" onclick="galAdjVGlobal(-1)"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="gal-v-presets">
+                           <div class="gal-v-preset" onclick="galSetVGlobal(0,30,this)">30M</div>
+                           <div class="gal-v-preset" onclick="galSetVGlobal(1,0,this)">1H</div>
+                           <div class="gal-v-preset" onclick="galSetVGlobal(3,0,this)">3H</div>
+                           <div class="gal-v-preset active" onclick="galSetVGlobal(6,0,this)">6H</div>
+                           <div class="gal-v-preset" onclick="galSetVGlobal(12,0,this)">12H</div>
+                           <div class="gal-v-preset" onclick="galSetVGlobal(24,0,this)">24H</div>
+                        </div>
+                        <div class="gal-v-countdown">
+                           <div class="gal-v-cd-ring">
+                              <svg viewBox="0 0 40 40">
+                                 <circle class="gal-v-cd-ring-track" cx="20" cy="20" r="15"/>
+                                 <circle class="gal-v-cd-ring-progress" id="galVRing" cx="20" cy="20" r="15" style="stroke-dasharray:94.25;stroke-dashoffset:0;"/>
+                              </svg>
+                              <div class="gal-v-cd-ring-text" id="galVRT">6:00</div>
+                           </div>
+                           <div class="gal-v-cd-info">
+                              <div class="gal-v-cd-label">NEXT SCAN</div>
+                              <div class="gal-v-cd-time" id="galVNT">calculating...</div>
+                           </div>
+                           <div class="gal-v-cd-status">ACTIVE</div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="gal-v-card" style="margin-top:0;">
+                     <div class="gal-v-header">
+                        <div class="gal-v-left">
+                           <div class="gal-v-icon" style="background:rgba(30,27,23,0.06);">
+                              <svg viewBox="0 0 24 24" style="stroke:#1a1816;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                           </div>
+                           <div>
+                              <div class="gal-v-title" style="color:#1a1816;">CHARACTERS</div>
+                              <div class="gal-v-sub">独立计时配置</div>
+                           </div>
+                        </div>
+                        <div style="font-family:'Space Mono',monospace;font-size:8px;font-weight:700;color:#8a8179;cursor:pointer;padding:6px 12px;background:rgba(30,27,23,0.04);border:1px solid rgba(30,27,23,0.06);border-radius:16px;" onclick="galVisionScan(null)">SCAN ALL</div>
+                     </div>
+                     <div class="gal-v-body">
+                        <div class="gal-v-char-list" id="galVCharList"></div>
+                        <div class="gal-v-hint">点击 <strong>GLB</strong> 切换为独立计时。独立计时不受全局倒计时影响，单独为每个角色维护扫描节奏。</div>
+                     </div>
+                  </div>
+               </div>
+               <!-- Tab 4: LOG -->
+               <div class="gal-view">
+                  <div class="gal-section-head">
+                     <div class="gal-section-title">Scan Log</div>
+                     <div class="gal-section-count" id="galVisionLogCount">0 SCANS</div>
+                  </div>
+                  <div id="galVisionLog" style="padding:0 24px;"></div>
+               </div>
+            </div>
+            <div id="galToast" class="gal-toast"></div>
          </div>
          <!-- ================= App: 推特 Twitter ================= -->
 <div class="app-window light" id="app-twitter" style="padding: 0; background: var(--c-bg);">
@@ -3864,9 +4054,18 @@
                         </div>
                     </section>
 
-                    <!-- 板块 3：Visuals (视觉微调) -->
+                    <!-- 板块：Couple Avatar -->
                     <section style="margin-bottom: 40px;">
-                        <div class="cs-section-head">03. Visual Aesthetics</div>
+                        <div class="cs-section-head">03. Couple Avatar</div>
+                        <div class="cs-row-item" style="border:none;">
+                            <label>情侣头像配对 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">AI 从图库中挑选情侣头像发入聊天</small></label>
+                            <button onclick="galSyncAndTriggerCouple()" style="background:#d97a8d; color:#fff; border:none; padding:8px 18px; border-radius:20px; font-family:'Space Mono',monospace; font-size:8px; font-weight:700; letter-spacing:1px; cursor:pointer;">SEND</button>
+                        </div>
+                    </section>
+
+                    <!-- 板块 4：Visuals (视觉微调) -->
+                    <section style="margin-bottom: 40px;">
+                        <div class="cs-section-head">04. Visual Aesthetics</div>
                         
                         <div class="cs-row-item">
                             <label>时间戳显示模式</label>
@@ -4940,6 +5139,313 @@
    <!-- 🚀 终极修复：将动态样式表移至文档最末尾，确保 100% 覆盖系统样式 -->
    <style id="dynamic-user-style"></style>
    <style id="dynamic-chat-style"></style>
+   <script src="js/gallery.js"></script>
+   <script>
+   // ===== Gallery 适配桥接层 (安全版，不劫持任何全局变量) =====
+   (function() {
+
+      // 状态时钟
+      setInterval(function() {
+         var el = document.getElementById('galStatusTime');
+         if (!el) return;
+         var now = new Date();
+         el.textContent = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+      }, 1000);
+
+      // 获取联系人列表（只在调用时计算，不劫持全局）
+      function galGetContacts() {
+         if (typeof contacts === 'undefined') return [];
+         return contacts.map(function(c) {
+            return {
+               name: c.chatRemark || c.name,
+               avatar: c.chatAvatar || c.avatar || '',
+               persona: c.prompt || '',
+               id: c.id
+            };
+         });
+      }
+
+      // 获取当前聊天对象
+      function galGetCurrentContact() {
+         if (typeof currentContactId === 'undefined' || !currentContactId) return null;
+         if (typeof contacts === 'undefined') return null;
+         var c = contacts.find(function(x) { return x.id === currentContactId; });
+         if (!c) return null;
+         return {
+            name: c.chatRemark || c.name,
+            avatar: c.chatAvatar || c.avatar || '',
+            persona: c.prompt || '',
+            id: c.id
+         };
+      }
+
+      // 同步 API 配置到 localStorage 供 gallery.js 读取
+      function galSyncSettings() {
+         if (typeof gConfig === 'undefined') return;
+         var existing = {};
+         try { existing = JSON.parse(localStorage.getItem('systemSettings') || '{}'); } catch(e) {}
+         var base = (gConfig.apiUrl || '').trim().replace(/\/+$/, '');
+         if (!base.endsWith('/v1')) base = base + '/v1';
+         existing.apiUrl = base;
+         existing.apiToken = gConfig.apiKey || '';
+         existing.apiModel = gConfig.model || '';
+         localStorage.setItem('systemSettings', JSON.stringify(existing));
+      }
+
+      // 同步联系人到 wcContacts 供 gallery.js 读取
+      function galSyncContacts() {
+         window.wcContacts = galGetContacts();
+      }
+
+      // 同步当前聊天对象
+      function galSyncCurrentContact() {
+         window.currentChatContact = galGetCurrentContact();
+      }
+
+      // openGallery：每次打开时同步一次所有数据
+      var _origOpenGallery = window.openGallery;
+      window.openGallery = function() {
+         galSyncSettings();
+         galSyncContacts();
+         galSyncCurrentContact();
+         if (typeof _origOpenGallery === 'function') _origOpenGallery();
+      };
+
+      // galSyncAndTriggerCouple：同步数据后触发情头卡片
+      window.galSyncAndTriggerCouple = function() {
+         galSyncSettings();
+         galSyncContacts();
+         galSyncCurrentContact();
+
+         // 先关闭聊天室设置面板，让卡片发出后用户能看到
+         var settingsModal = document.getElementById('chat-settings-modal');
+         if (settingsModal) settingsModal.classList.remove('active');
+
+         if (!window.currentChatContact) {
+            alert('请先打开一个聊天窗口再发情头卡片');
+            return;
+         }
+
+         if (typeof galSendCoupleCard === 'function') {
+            // 先检查头像数量
+            galDbGet('galAvatars').then(function(custom) {
+               var customAvatars = custom || [];
+               var contactAvatars = (window.wcContacts || []).filter(function(c) { return c.avatar && c.avatar.length > 10; });
+               var totalAvatars = customAvatars.length + contactAvatars.length;
+               if (totalAvatars < 2) {
+                  alert('请先在 Gallery 图库里上传至少 2 张头像图片，AI 才能从中挑选情侣头像组合。\n\n当前头像数量：' + totalAvatars + ' 张（联系人头像 ' + contactAvatars.length + ' 张 + 上传头像 ' + customAvatars.length + ' 张）');
+                  return;
+               }
+               // 有足够头像，在聊天区显示加载气泡
+               var ca = document.getElementById('chat-area');
+               if (ca) {
+                  var loader = document.createElement('div');
+                  loader.id = 'gal-couple-loader';
+                  loader.className = 'msg-row bot';
+                  loader.innerHTML = '<div class="msg-avatar-wrap"><div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:100%;height:100%;padding:6px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div></div><div class="bubble-body"><div class="bubble bubble-bot" style="display:flex;align-items:center;gap:8px;"><div class="soap-loader"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div><span style="font-size:11px;color:var(--c-gray-dark);font-weight:700;letter-spacing:0.5px;">正在从图库挑选情侣头像...</span></div></div>';
+                  ca.appendChild(loader);
+                  if (typeof scrollToBottom === 'function') scrollToBottom();
+               }
+
+               // 覆盖 appendChatMessageToDOM 让它在卡片出来时自动移除加载气泡
+               var _origAppend = window.appendChatMessageToDOM;
+               window.appendChatMessageToDOM = function(msg) {
+                  var loaderEl = document.getElementById('gal-couple-loader');
+                  if (loaderEl) loaderEl.remove();
+                  window.appendChatMessageToDOM = _origAppend;
+                  _origAppend(msg);
+               };
+
+               setTimeout(function() {
+                  galSendCoupleCard(window.currentChatContact.name);
+               }, 400);
+            }).catch(function() {
+               // IndexedDB 读取失败，直接尝试发送
+               setTimeout(function() {
+                  galSendCoupleCard(window.currentChatContact.name);
+               }, 400);
+            });
+         } else {
+            alert('Gallery 模块未加载');
+         }
+      };
+
+      // saveWeChatData 桥接
+      window.saveWeChatData = function() {
+         if (typeof saveData === 'function') saveData();
+      };
+
+      // 覆盖 galApplyCoupleFromChat，接管卡片的"应用"逻辑
+      window.galApplyCoupleFromChat = function(btn) {
+         var card = btn.closest('.gal-couple-chat-card');
+         if (!card) return;
+         if (card.classList.contains('gal-applied')) return;
+
+         var picked = card.querySelector('.gal-ccc-opt.picked');
+         if (!picked) return;
+
+         var halves = picked.querySelectorAll('.gal-ccc-half');
+         var hisImgEl = halves[0] ? halves[0].querySelector('img') : null;
+         var hersImgEl = halves[1] ? halves[1].querySelector('img') : null;
+         if (!hisImgEl || !hersImgEl) { if (typeof galToast === 'function') galToast('Missing image data'); return; }
+
+         var hisData = hisImgEl.getAttribute('src');
+         var hersData = hersImgEl.getAttribute('src');
+         var pairName = picked.querySelector('.gal-ccc-tag-name') ? picked.querySelector('.gal-ccc-tag-name').textContent : '情侣头像';
+
+         // 找到对应联系人
+         var contactName = card.getAttribute('data-contact') || '';
+         if (typeof contacts === 'undefined') return;
+
+         var c = contacts.find(function(x) {
+            return (x.chatRemark || x.name) === contactName || x.name === contactName;
+         });
+         if (!c && typeof currentContactId !== 'undefined') {
+            c = contacts.find(function(x) { return x.id === currentContactId; });
+         }
+         if (!c) { if (typeof galToast === 'function') galToast('找不到联系人'); return; }
+
+         // 更新对方头像
+         c.chatAvatar = hisData;
+         c.avatar = hisData;
+
+         // 更新我的头像（专属聊天头像）
+         c.chatMeAvatar = hersData;
+         if (typeof gConfig !== 'undefined') gConfig.meAvatar = hersData;
+
+         // 写入系统提示让AI知道
+         var timeStr = (typeof getCurrentTime === 'function') ? getCurrentTime() : (new Date().getHours().toString().padStart(2,'0') + ':' + new Date().getMinutes().toString().padStart(2,'0'));
+         c.history.push({
+            role: 'system_sum',
+            content: '<i>✧ 情侣头像已配对：' + pairName + '</i>\n<span style="display:none;">[系统提示：用户刚刚选择了情侣头像"' + pairName + '"，你们现在都换上了配套的情侣头像。请在之后的对话中自然地提及这件事。]</span>'
+         });
+
+         if (typeof saveData === 'function') saveData();
+
+         // 刷新聊天顶栏头像
+         if (typeof updateChatTopUI === 'function') updateChatTopUI();
+
+         // 刷新联系人列表
+         if (typeof renderContactList === 'function') renderContactList();
+         if (typeof renderContacts === 'function') renderContacts();
+
+         // 刷新聊天记录（让系统提示显示出来）
+         if (typeof renderChatHistory === 'function') renderChatHistory();
+
+         // 标记卡片为已应用
+         card.classList.add('gal-applied');
+         card.style.opacity = '0.45';
+         card.style.pointerEvents = 'none';
+         btn.textContent = '✓ Applied';
+         btn.disabled = true;
+         btn.style.background = '#2d5a2d';
+         btn.style.color = '#7cfc7c';
+         var regenBtn = card.querySelector('.gal-ccc-regen');
+         var skipBtn = card.querySelector('.gal-ccc-skip');
+         if (regenBtn) { regenBtn.disabled = true; regenBtn.style.opacity = '0.3'; }
+         if (skipBtn) { skipBtn.disabled = true; skipBtn.style.opacity = '0.3'; }
+
+         if (typeof galToast === 'function') galToast('情侣头像已应用！', 'green');
+      };
+
+      // renderContacts / renderChats：不覆盖，保留主系统原有函数
+
+      // 强制渲染钩子：gallery.js 生成卡片后会调此函数
+      // 无论异步时序如何，强制写入 history 并渲染
+      window.appendChatMessageToDOM = function(msg) {
+         if (typeof contacts === 'undefined') return;
+
+         var targetName = window.currentChatContact ? window.currentChatContact.name : null;
+         var c = null;
+         if (targetName) {
+            c = contacts.find(function(x) {
+               return (x.chatRemark || x.name) === targetName || x.name === targetName;
+            });
+         }
+         if (!c && typeof currentContactId !== 'undefined') {
+            c = contacts.find(function(x) { return x.id === currentContactId; });
+         }
+         if (!c) return;
+
+         var newEntry = {
+            role: msg.role === 'bot' ? 'assistant' : msg.role,
+            content: msg.text || '',
+            isRevoked: false,
+            timestamp: Date.now(),
+            isCoupleCard: msg.isCoupleCard || false,
+            isVisionScan: msg.isVisionScan || false
+         };
+         c.history.push(newEntry);
+
+         // 如果是情头卡片，追加一条隐形系统提示防止AI认错
+         if (newEntry.isCoupleCard) {
+            c.history.push({
+               role: 'system_sum',
+               content: '<span style="display:none;">[🚨 系统最高优先级标注：上面那张"情侣头像配对卡片"是【你主动发给用户的】！不是用户发给你的！这是你从图库里挑选出来推荐给用户的情侣头像组合。用户还没有做出选择。请不要对这张卡片做出任何回应，也不要误以为用户给你发了什么东西。继续正常聊天即可。]</span>'
+            });
+         }
+
+         if (typeof saveData === 'function') saveData();
+
+         // 强制重渲染并滚到底部，不管 isInRoom 判断结果
+         if (typeof appendBubbleRow === 'function') {
+            appendBubbleRow(newEntry, c.history.length - 1);
+            setTimeout(function() {
+               if (typeof scrollToBottom === 'function') scrollToBottom();
+            }, 100);
+         } else if (typeof renderChatHistory === 'function') {
+            // 兜底：全量重渲染
+            setTimeout(function() {
+               renderChatHistory();
+               if (typeof scrollToBottom === 'function') scrollToBottom();
+            }, 200);
+         }
+      };
+
+      // pushHcNotification 桥接
+      window.pushHcNotification = function(contact, text) {
+         if (typeof showToast !== 'function') return;
+         var name = contact ? (contact.name || '') : '';
+         var avatar = contact ? (contact.avatar || '') : '';
+         showToast(name, text, avatar, null, 4000);
+      };
+
+      // getCurrentTime 桥接
+      window.getCurrentTime = function() {
+         var now = new Date();
+         return now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+      };
+
+   })();
+   </script>
+   <style>
+   /* 修复情头卡片：去除主系统气泡的边框和背景，并让卡片居中 */
+   .bubble-bot:has(.gal-couple-chat-card),
+   .bubble-bot:has(.gal-avatar-pick-card) {
+       background: transparent !important;
+       border: none !important;
+       box-shadow: none !important;
+       padding: 0 !important;
+   }
+   .msg-row.bot:has(.gal-couple-chat-card),
+   .msg-row.bot:has(.gal-avatar-pick-card) {
+       justify-content: center !important;
+   }
+   .msg-row.bot:has(.gal-couple-chat-card) .msg-avatar-wrap,
+   .msg-row.bot:has(.gal-avatar-pick-card) .msg-avatar-wrap {
+       display: none !important;
+   }
+   .msg-row.bot:has(.gal-couple-chat-card) .bubble-body,
+   .msg-row.bot:has(.gal-avatar-pick-card) .bubble-body {
+       width: 100% !important;
+       display: flex !important;
+       justify-content: center !important;
+       align-items: center !important;
+   }
+   .gal-couple-chat-card {
+       margin: 8px auto !important;
+   }
+   </style>
    <!-- ================= 弹性艺术更新公告 (支持往期切换) ================= -->
 <div id="update-notice-modal" class="modal-overlay" style="z-index: 9000; background: rgba(250, 250, 252, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
    <div class="update-card" id="updateCard">
