@@ -1163,3 +1163,104 @@ c.history[0].content = newPrompt;
                  saveData(); renderChatHistory(); 
              }
          }
+// ================= 全新：共读系统卡片全局渲染引擎 =================
+window.pushCoReadCard = function(contactId, bookName, bookCover, isStart) {
+    if (!contactId || typeof contacts === 'undefined') return;
+    const c = contacts.find(x => x.id === contactId);
+    if (!c) return;
+
+    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
+
+    let iconInner = '';
+    if (bookCover) {
+        iconInner = `<img class="crn-ico-cover" src="${bookCover}" ${!isStart ? 'style="filter:grayscale(0.6) brightness(0.85);"' : ''}>`;
+    } else {
+        iconInner = isStart
+            ? `<svg class="crn-ico-fallback" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`
+            : `<svg class="crn-ico-fallback" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="1.6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`;
+    }
+
+    let cardHtml = '';
+    let aiPrompt = '';
+
+    if (isStart) {
+        cardHtml = `<div class="cr-notice-wrap"><div class="cr-notice-card" onclick="if(typeof CoRead !== 'undefined') CoRead.openPip()">
+            <div class="crn-bar"></div>
+            <div class="crn-inner">
+                <div class="crn-ico">${iconInner}</div>
+                <div class="crn-info">
+                    <div class="crn-eyebrow"><div class="crn-dot"></div>CO-READING · SYNCED</div>
+                    <div class="crn-book">${escapeHtml(bookName)}</div>
+                    <div class="crn-desc">已开启共读 · 点击唤出小窗</div>
+                </div>
+            </div>
+        </div></div>`;
+        aiPrompt = `[📖 系统通知:用户邀请你一起共读小说《${bookName}》。从此刻起，你与用户进入"一起看"状态。当用户聊到书中内容时，你会自动看到当前阅读到的段落。请基于该段落与用户自然讨论剧情、人物、文笔，禁止剧透未读部分。保持你的人设。]`;
+    } else {
+        // 🚀 核心修复：结束共读时，倒序遍历历史记录，剥夺之前发的所有"开始共读"卡片的点击事件并强行置灰
+        for (let i = c.history.length - 1; i >= 0; i--) {
+            let msg = c.history[i];
+            if (msg.isCoRead && msg.content && msg.content.includes('cr-notice-card') && !msg.content.includes('cr-notice-card end')) {
+                msg.content = msg.content
+                    .replace(/onclick=["'][^"']*CoRead\.openPip\(\)[^"']*["']/g, '') // 切断点击事件
+                    .replace(/class=["']cr-notice-card["']/g, 'class="cr-notice-card end"') // 强行附加变灰变暗样式
+                    .replace('已开启共读 · 点击唤出小窗', '共读已失效') // 更改提示文字
+                    .replace(/<div class=["']crn-dot["']><\/div>/g, '<div class="crn-dot" style="background:#C7C7CC;box-shadow:none;"></div>'); // 熄灭绿点
+            }
+        }
+
+        cardHtml = `<div class="cr-notice-wrap"><div class="cr-notice-card end">
+            <div class="crn-bar"></div>
+            <div class="crn-inner">
+                <div class="crn-ico">${iconInner}</div>
+                <div class="crn-info">
+                    <div class="crn-eyebrow"><div class="crn-dot" style="background:#C7C7CC;box-shadow:none;"></div>CO-READING · ENDED</div>
+                    <div class="crn-book" style="color:#5A5A5A;">${escapeHtml(bookName)}</div>
+                    <div class="crn-desc">共读会话已结束</div>
+                </div>
+            </div>
+        </div></div>`;
+        aiPrompt = `[📖 系统通知:用户结束了与你的小说共读《${bookName}》。从此刻起，"一起看"状态解除，AI 不再接收书中段落。请按正常聊天继续。]`;
+    }
+
+    c.history.push({
+        role: 'system_sum',
+        content: `${cardHtml}\n<span style="display:none;">${aiPrompt}</span>`,
+        isCoRead: true,
+        timestamp: Date.now()
+    });
+
+    if (typeof saveData === 'function') saveData();
+
+    // 在自己的主场调用渲染引擎，绝不会被拦截！
+    const isInRoom = (typeof currentContactId !== 'undefined' && currentContactId === contactId);
+    if (isInRoom) {
+        // 如果是结束共读，同步将 DOM 里面还存在的“正在共读”旧卡片瞬间变成灰掉的失效状态，不用等刷新
+        if (!isStart) {
+            const activeCards = document.querySelectorAll('#chat-area .cr-notice-card:not(.end)');
+            activeCards.forEach(card => {
+                card.classList.add('end');
+                card.removeAttribute('onclick');
+                const desc = card.querySelector('.crn-desc');
+                if (desc) desc.innerText = '共读已失效';
+                const dot = card.querySelector('.crn-dot');
+                if (dot) dot.style.cssText = 'background:#C7C7CC;box-shadow:none;';
+            });
+        }
+
+        const idx = c.history.length - 1;
+        if (typeof appendBubbleRow === 'function') {
+            appendBubbleRow(c.history[idx], idx);
+            if (typeof updateBubbleGrouping === 'function') updateBubbleGrouping();
+            if (typeof scrollToBottom === 'function') setTimeout(() => scrollToBottom(), 50);
+            
+            // 强制洗掉丑陋的系统胶囊背景
+            setTimeout(() => {
+                const sysBubble = document.querySelector(`#msg-item-${idx} .bubble-sys`);
+                const sysRow = document.querySelector(`#msg-item-${idx}`);
+                if (sysBubble) sysBubble.style.cssText = 'background:transparent!important; padding:0!important; box-shadow:none!important; border:none!important; max-width:100%!important; border-radius:0!important;';
+                if (sysRow) sysRow.style.cssText = 'justify-content:center!important; width:100%!important; display:flex!important;';
+            }, 30);
+        }
+    }
+};

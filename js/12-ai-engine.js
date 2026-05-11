@@ -695,6 +695,12 @@ ${wbTop}
          3. 绝不允许生硬地背诵歌词、强行解析乐器编排或强行把话题扯回音乐上！`;
                      }
                      
+                     // 📖【共读小说雷达】：当用户与你正处于"一起看"状态时，把当前页正文塞进上下文
+                     if (typeof CoRead !== 'undefined' && typeof CoRead.getPromptForContact === 'function') {
+                         let coreadPrompt = CoRead.getPromptForContact(c.id);
+                         if (coreadPrompt) finalSysPrompt += coreadPrompt;
+                     }
+                     
                      // 【核心修复】：提取最近一次的情绪数据，作为 AI 当前的基础状态！
                      let curB = 75, curA = 50, curM = 60;
                      for(let k = c.history.length - 1; k >= 0; k--) {
