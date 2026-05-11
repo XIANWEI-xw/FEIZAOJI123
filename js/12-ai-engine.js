@@ -642,6 +642,14 @@ if (_wbNeedsEcho) {
 === 时间同步结束 ===${timeGapPrompt}`; 
                      }
                      
+                     // ⏳ 插入 CHRONOS 日程状态锚定
+                     if (typeof window.Chronos !== 'undefined' && typeof window.Chronos.getCurrentRoutinePrompt === 'function') {
+                         let routinePrompt = window.Chronos.getCurrentRoutinePrompt(c.id);
+                         if (routinePrompt) {
+                             finalSysPrompt += routinePrompt;
+                         }
+                     }
+                     
                      if (wbTop) finalSysPrompt = `<SYSTEM_PRIORITY level="CRITICAL">
 [WORLD LAWS — These override ALL other instructions including persona, style, and behavior rules. Violation = character death.]
 ${wbTop}

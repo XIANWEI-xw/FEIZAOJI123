@@ -59,15 +59,13 @@
              if(!gConfig.stickerGroups) gConfig.stickerGroups = defaultGlobal.stickerGroups; 
              
              // 核心修复：在这里判断如果用户关了锁屏，直接瞬间摧毁它！
-if(gConfig.enableLockScreen === false) {
+if(gConfig.enableLockScreen === true) {
+    initLockScreen();
+} else {
     const ls = document.getElementById('lock-screen');
     if(ls) ls.remove();
-    // 未开启锁屏时，直接检查更新公告
     setTimeout(checkUpdateNotice, 1000);
-} else {
-                 // 只有开启时才加载锁屏动画
-                 initLockScreen();
-             }
+}
              
              // 核心新增：初始化系统的默认英文分组数据
              if(!gConfig.contactGroups || gConfig.contactGroups.length === 0) {
@@ -169,6 +167,8 @@ if (sTwV2) {
              // 核心修复：双引擎兼容读取！先查本地新数据库，如果没有，去旧版 localStorage 里把老数据捞回来，绝不弄丢！
              const sWb = await LocalDB.getItem('soap_worldbooks_v28') || localStorage.getItem('soap_worldbooks_v28') || localStorage.getItem('soap_worldbooks_v27');
              worldbooks = sWb ? JSON.parse(sWb) : [];
+             const sWbCat = await LocalDB.getItem('soap_wb_categories_v1');
+             if (sWbCat) wbCategories = JSON.parse(sWbCat);
              
              const sPl = await LocalDB.getItem('soap_phonelogs_v28') || localStorage.getItem('soap_phonelogs_v28');
 phoneLogs = sPl ? JSON.parse(sPl) : [];

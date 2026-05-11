@@ -64,7 +64,7 @@ if (gConfig.twTrendingEnabled === false) {
 }
 
 // 读取并应用锁屏开关状态 (默认开启)
-const isLockEnabled = gConfig.enableLockScreen !== false;
+const isLockEnabled = gConfig.enableLockScreen === true;
 document.getElementById('setting-lockscreen').checked = isLockEnabled;
 document.getElementById('lock-code-row').style.display = isLockEnabled ? 'block' : 'none';
 document.getElementById('setting-lockcode').value = gConfig.lockScreenCode || '0101';
@@ -405,7 +405,7 @@ gConfig.enableStream = document.getElementById('setting-stream').checked;
          }
          
          function renderDesktopApps() { 
-    ['g1','g2','g3','twitter','d1','d2','d3','checkphone'].forEach(k => { const el = document.getElementById(`icon-${k}`); if(el) { if(gConfig.apps[k] && (gConfig.apps[k].startsWith('data:') || gConfig.apps[k].startsWith('http'))) el.classList.add('has-img'); else el.classList.remove('has-img'); } });
+    ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos'].forEach(k => { const el = document.getElementById(`icon-${k}`); if(el) { if(gConfig.apps[k] && (gConfig.apps[k].startsWith('data:') || gConfig.apps[k].startsWith('http'))) el.classList.add('has-img'); else el.classList.remove('has-img'); } });
     document.getElementById('icon-g1').innerHTML = renderIconHTML(gConfig.apps.g1, SVG_BOOK); 
     document.getElementById('icon-g2').innerHTML = renderIconHTML(gConfig.apps.g2, SVG_PHOTO); 
     document.getElementById('icon-g3').innerHTML = renderIconHTML(gConfig.apps.g3, SVG_SET); if(gConfig.apps.g3) { document.getElementById('icon-g3').classList.remove('dark'); } 
@@ -418,7 +418,15 @@ gConfig.enableStream = document.getElementById('setting-stream').checked;
         cpIcon.innerHTML = renderIconHTML(gConfig.apps.checkphone, '<i class="fa-solid fa-mobile-screen" style="font-size:24px;"></i>');
         if(gConfig.apps.checkphone) cpIcon.classList.remove('dark');
     }
+    const galIcon = document.getElementById('icon-gallery');
+    if(galIcon) {
+        galIcon.innerHTML = renderIconHTML(gConfig.apps.gallery, '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/><path d="M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="currentColor"/><path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><path d="M14 14.5l1.086-1.086a2 2 0 0 1 2.828 0L21 16.5"/></svg>');
+    }
+    const chrIcon = document.getElementById('icon-chronos');
+    if(chrIcon) {
+        chrIcon.innerHTML = renderIconHTML(gConfig.apps.chronos, '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/></svg>');
+    }
 }
-function openAppIconEditor() { ['g1','g2','g3','twitter','d1','d2','d3','checkphone'].forEach(k => { const dataEl = document.getElementById(`ic-${k}-data`); const prevEl = document.getElementById(`ic-${k}-prev`); if(dataEl) dataEl.value = gConfig.apps[k] || ''; if(prevEl) prevEl.innerHTML = renderIconHTML(gConfig.apps[k], '选择'); }); document.getElementById('app-icons-modal').classList.add('active'); }
-function saveAppIcons() { ['g1','g2','g3','twitter','d1','d2','d3','checkphone'].forEach(k => { const dataEl = document.getElementById(`ic-${k}-data`); if(dataEl) gConfig.apps[k] = dataEl.value || gConfig.apps[k]; }); saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }
-function resetAppIcons() { if(!confirm('确定恢复所有应用默认图标吗？')) return; gConfig.apps = { g1:'', g2:'', g3:'', twitter:'', d1:'', d2:'', d3:'', checkphone:'' }; saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }
+function openAppIconEditor() { ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos'].forEach(k => { const dataEl = document.getElementById(`ic-${k}-data`); const prevEl = document.getElementById(`ic-${k}-prev`); if(dataEl) dataEl.value = gConfig.apps[k] || ''; if(prevEl) prevEl.innerHTML = renderIconHTML(gConfig.apps[k], '选择'); }); document.getElementById('app-icons-modal').classList.add('active'); }
+function saveAppIcons() { ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos'].forEach(k => { const dataEl = document.getElementById(`ic-${k}-data`); if(dataEl) gConfig.apps[k] = dataEl.value || gConfig.apps[k]; }); saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }
+function resetAppIcons() { if(!confirm('确定恢复所有应用默认图标吗？')) return; gConfig.apps = { g1:'', g2:'', g3:'', twitter:'', d1:'', d2:'', d3:'', checkphone:'', gallery:'', chronos:'' }; saveData(); renderDesktopApps(); document.getElementById('app-icons-modal').classList.remove('active'); }

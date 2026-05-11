@@ -238,32 +238,47 @@ async function clearAllSystemData() {
          }
          
          function toggleFullscreen() { const isChecked = document.getElementById('setting-fullscreen').checked; localStorage.setItem('g_fullscreen', isChecked); if(isChecked) document.getElementById('main-frame').classList.add('fullscreen-mode'); else document.getElementById('main-frame').classList.remove('fullscreen-mode'); }
+
+         function toggleLockScreenSetting() {
+             const enabled = document.getElementById('setting-lockscreen').checked;
+             gConfig.enableLockScreen = enabled;
+             // 同步密码输入框显隐
+             document.getElementById('lock-code-row').style.display = enabled ? 'block' : 'none';
+             // 直接写入 LocalDB，不依赖 saveGlobal 读取其他表单元素
+             LocalDB.setItem('soap_global_v28', JSON.stringify(gConfig));
+             const ls = document.getElementById('lock-screen');
+             if (!enabled && ls) {
+                 ls.style.transition = 'opacity 0.4s ease';
+                 ls.style.opacity = '0';
+                 setTimeout(() => { ls.remove(); }, 400);
+             }
+         }
          
          function initLockScreen() {
              const lockScreen = document.getElementById('lock-screen');
              if (!lockScreen) return;
          
-             // 🌟 动态生成呼吸星尘
-             const layer = document.getElementById('ls-stardust-layer');
-             if (layer) {
-                 for(let i = 0; i < 35; i++) {
-                     let dot = document.createElement('div');
-                     dot.className = 'ls-dust-dot';
-                     let size = Math.random() * 1.5 + 0.5;
-                     dot.style.width = size + 'px'; dot.style.height = size + 'px';
-                     dot.style.left = Math.random() * 100 + '%'; dot.style.top = Math.random() * 100 + '%';
-                     dot.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite alternate ${Math.random() * 2}s`;
-                     layer.appendChild(dot);
+             // 🌟 星尘动画延迟生成，不阻塞密码输入激活
+             setTimeout(() => {
+                 const layer = document.getElementById('ls-stardust-layer');
+                 if (layer) {
+                     const frag = document.createDocumentFragment();
+                     for(let i = 0; i < 20; i++) {
+                         let dot = document.createElement('div');
+                         dot.className = 'ls-dust-dot';
+                         let size = Math.random() * 1.5 + 0.5;
+                         dot.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation:twinkle ${Math.random()*3+2}s infinite alternate ${Math.random()*2}s`;
+                         frag.appendChild(dot);
+                     }
+                     for(let i = 0; i < 6; i++) {
+                         let star = document.createElement('div');
+                         star.className = 'ls-dust-star'; star.innerText = '✦';
+                         star.style.cssText = `font-size:${Math.random()*6+4}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation:twinkle ${Math.random()*4+2}s infinite alternate ${Math.random()*2}s`;
+                         frag.appendChild(star);
+                     }
+                     layer.appendChild(frag);
                  }
-                 for(let i = 0; i < 10; i++) {
-                     let star = document.createElement('div');
-                     star.className = 'ls-dust-star'; star.innerText = '✦';
-                     star.style.fontSize = Math.random() * 6 + 4 + 'px';
-                     star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
-                     star.style.animation = `twinkle ${Math.random() * 4 + 2}s infinite alternate ${Math.random() * 2}s`;
-                     layer.appendChild(star);
-                 }
-             }
+             }, 300);
          
              // ================= 核心解锁逻辑 =================
 function triggerUnlock() {

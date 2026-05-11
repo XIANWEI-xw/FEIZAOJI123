@@ -380,12 +380,17 @@
       <div class="app-label" id="label-checkphone">查手机</div>
    </div>
    <div class="draggable-app" id="app-gallery-icon" onclick="openGallery()" style="left:29%;top:5%;">
-      <div class="app-icon" id="icon-gallery" style="background:#F4F3F0; color:#1a1816; border:0.5px solid rgba(30,27,23,0.08); display:flex; justify-content:center; align-items:center;">
+      <div class="app-icon" id="icon-gallery" style="background:#FFFFFF; color:#C3A772; border:0.5px solid rgba(0,0,0,0.05); box-shadow:0 4px 10px rgba(0,0,0,0.03); display:flex; justify-content:center; align-items:center;">
          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       </div>
       <div class="app-label">Gallery</div>
    </div>
-   <div class="draggable-app" style="left:53%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
+   <div class="draggable-app" id="app-chronos-icon" onclick="if(typeof Chronos !== 'undefined') Chronos.open()" style="left:53%;top:5%;">
+      <div class="app-icon" id="icon-chronos" style="background:linear-gradient(135deg, #2C2C2E 0%, #1C1C1E 100%); color:#FFFFFF; border:0.5px solid rgba(255,255,255,0.1); box-shadow:0 8px 15px rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center;">
+         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="app-label" style="color:var(--c-black);">Chronos</div>
+   </div>
    <div class="draggable-app" style="left:77%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
 </div>
                   </div>
@@ -2561,7 +2566,8 @@
                <div class="settings-group">
                   <div class="settings-item switch-container"><label style="margin:0;">全局满屏显示</label><input type="checkbox" id="setting-fullscreen" class="btn-switch" onchange="toggleFullscreen()"></div>
 <div class="settings-item switch-container"><label style="margin:0;">流式传输（打字机效果）</label><input type="checkbox" id="setting-stream" class="btn-switch" onchange="saveGlobal()"></div>
-                  <div class="settings-item switch-container"><label style="margin:0;">启用开屏密码锁</label><input type="checkbox" id="setting-lockscreen" class="btn-switch" onchange="saveGlobal()"></div>
+                  <div class="settings-item switch-container"><label style="margin:0;">启用开屏密码锁</label><input type="checkbox" id="setting-lockscreen" class="btn-switch" onchange="toggleLockScreenSetting()">
+</div>
                   <!-- 新增：自定义密码设置 -->
                   <div class="settings-item" id="lock-code-row" style="border-top: 1px dashed rgba(0,0,0,0.05); margin-top: 5px; padding-top: 20px;">
                      <label style="display: flex; justify-content: space-between;">
@@ -3901,6 +3907,16 @@
       <div class="ic-label">查手机</div>
       <input type="file" id="ic-checkphone-file" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-checkphone-prev', 'ic-checkphone-data')"><input type="hidden" id="ic-checkphone-data">
    </div>
+   <div class="ic-box" onclick="document.getElementById('ic-gallery-file').click()">
+      <div class="ic-prev" id="ic-gallery-prev"></div>
+      <div class="ic-label">Gallery</div>
+      <input type="file" id="ic-gallery-file" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-gallery-prev', 'ic-gallery-data')"><input type="hidden" id="ic-gallery-data">
+   </div>
+   <div class="ic-box" onclick="document.getElementById('ic-chronos-file').click()">
+      <div class="ic-prev" id="ic-chronos-prev"></div>
+      <div class="ic-label">Chronos</div>
+      <input type="file" id="ic-chronos-file" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-chronos-prev', 'ic-chronos-data')"><input type="hidden" id="ic-chronos-data">
+   </div>
 </div>
                <div class="icon-upload-grid">
                   <div class="ic-box" onclick="document.getElementById('ic-d1-file').click()">
@@ -5146,6 +5162,7 @@
          <script src="js/22-memory-vault.js"></script>
          <script src="js/23-music-import.js"></script>
          <script src="js/24-coread.js"></script>
+         <script src="js/25-chronos.js"></script>
          <script src="js/04-app-init.js"></script>
    <!-- 🚀 终极修复：将动态样式表移至文档最末尾，确保 100% 覆盖系统样式 -->
    <style id="dynamic-user-style"></style>

@@ -250,6 +250,7 @@ const NotifManager = {
                      LocalDB.setItem('soap_widget_v28', JSON.stringify(wgData)),
                      LocalDB.setItem('soap_art_widget_v1', JSON.stringify(artWidgetData)),
                      LocalDB.setItem('soap_worldbooks_v28', JSON.stringify(worldbooks)),
+                     LocalDB.setItem('soap_wb_categories_v1', JSON.stringify(wbCategories)),
                      LocalDB.setItem('soap_phonelogs_v28', JSON.stringify(phoneLogs))
                  ];
                  await Promise.all(tasks);

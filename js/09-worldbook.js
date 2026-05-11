@@ -1,5 +1,5 @@
 // ================= 世界书逻辑 (增强分类版) =================
-let wbCategories = JSON.parse(localStorage.getItem('wbCategories') || '["默认", "设定", "人物", "物品"]');
+let wbCategories = ["默认", "设定", "人物", "物品"];
 let currentWbFilter = '全部';
 
 function renderWbList() {
@@ -99,7 +99,7 @@ function addWbCategory() {
     const val = input.value.trim();
     if (val && !wbCategories.includes(val)) {
         wbCategories.push(val);
-        localStorage.setItem('wbCategories', JSON.stringify(wbCategories));
+        saveData();
         input.value = '';
         renderWbCatManageList();
         updateWbCategorySelect();
@@ -110,7 +110,7 @@ function deleteWbCategory(index) {
     if (wbCategories.length <= 1) return alert('请至少保留一个分组');
     if (confirm(`确定要删除分组 "${wbCategories[index]}" 吗？`)) {
         wbCategories.splice(index, 1);
-        localStorage.setItem('wbCategories', JSON.stringify(wbCategories));
+        saveData();
         currentWbFilter = '全部';
         renderWbCatManageList();
         updateWbCategorySelect();
