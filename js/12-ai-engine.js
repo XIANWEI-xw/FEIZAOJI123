@@ -1513,8 +1513,7 @@ let pushContent = `${timePrefix}[消息ID: ${m._oid}] ${m.role === 'user' ? (isL
                      let apiRole = m.role;
                      if (apiRole === 'assistant_action') {
                          apiRole = 'assistant';
-                         // 并在内容前加上标注，让 AI 知道这是它自己之前发出的动作描写
-                         pushContent = `[你的动作描写]: ${pushContent}`;
+                         // 不加任何前缀，直接作为普通 assistant 消息发给 API，防止 AI 学着复读 [你的动作描写] 这个格式
                      }
 
                      if (imageUrl && (imageUrl.startsWith('data:image') || imageUrl.startsWith('http'))) {

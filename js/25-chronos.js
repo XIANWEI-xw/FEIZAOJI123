@@ -158,11 +158,11 @@ window.Chronos = {
                         <div class="chr-sec-desc">决定大模型在推演角色作息时，侧重于事业独立性还是情感陪伴感。</div>
                         <div class="chr-seg">
                             <div class="chr-seg-btn active" id="chr-seg-me" onclick="Chronos.switchFocus('me')">围绕我</div>
-                            <div class="chr-seg-btn" id="chr-seg-work" onclick="Chronos.switchFocus('work')">围绕工作</div>
+                            <div class="chr-seg-btn" id="chr-seg-work" onclick="Chronos.switchFocus('work')">人设驱动</div>
                         </div>
                         <div id="chr-focus-desc" style="font-size:10px; color:#9A9A9A; margin-top:12px; line-height:1.5; font-family:'Courier New',monospace;">
                             <span style="color:#1C1C1E; font-weight:700;">[ USER CENTRIC ]</span><br>
-                            作息将大量预留与你互动的“空闲/陪伴”时间，减少深度工作的 DND 勿扰块。更适合处于热恋期或需要高频聊天的体验。
+                            在严格贴合人设的基础上，让角色在力所能及时优先顾及与你的互动。ta 不会因为"在忙"就完全消失，而是会在间隙抽空回一句。适合喜欢被惦记感的体验。
                         </div>
                     </div>
                     <div class="chr-set-close" onclick="Chronos.closeSettings()">DONE / 完成</div>
@@ -322,26 +322,42 @@ window.Chronos = {
             ? `【焦点偏好：围绕用户(恋爱/陪伴导向)】。请大量预留出可以与 "${uName}" 互动、空闲聊天的 "FREE" 和 "PRIVATE" 碎片时间，减少深度的 "DND" 工作块。展现出一个无论多忙都把你放在心上、随时准备回消息的状态。`
             : `【焦点偏好：围绕工作(事业/独立导向)】。请严格符合其社会身份，排满真实、硬核的工作/学习安排。必须包含大段的 "DND" (勿扰模式) 专注时间。展现出一个有独立生活、回复频率较低的写实状态。`;
 
-        const sysPrompt = `你是一个精准的日程引擎。你需要基于下面提供的角色人设，推理出该角色完美符合其性格与身份的【全天作息时间表 (00:00 - 23:59)】。
+        const sysPrompt = `你是一个精准的角色日程引擎。你的核心任务是：严格基于下方提供的【角色人设档案】，深度挖掘该角色的职业、性格、生活习惯、作息偏好等一切细节，推理出一份高度贴合其身份与性格的【全天作息时间表 (00:00 - 23:59)】。
+
+【第一步：深度解析角色人设】
+在生成日程之前，你必须先在内心完成以下分析（不要输出这部分分析）：
+1. 该角色的职业/身份是什么？对应的上班/上课/工作时间是几点到几点？
+2. 该角色的性格特征是什么？（例如：内向/外向、早起/熬夜、自律/随性）
+3. 该角色有哪些明确提及的日常习惯、爱好或特殊癖好？
+4. 该角色的生活节奏快慢？是高压打工人、悠闲学生、还是自由职业者？
+5. 结合以上，推断该角色最可能的起床时间、睡觉时间、吃饭时间。
+
+【第二步：严格按人设生成日程】
+生成的每一个时间段都必须能在人设档案中找到对应依据，严禁使用与角色身份明显矛盾的安排。
 
 【严格输出格式】：
 你必须输出一个纯净的 JSON 数组，包含若干个对象。不要输出任何解释文字或 Markdown 代码块标记（如 \`\`\`json ）。
-必须涵盖 24 小时，时间段必须首尾相连。
+必须涵盖完整的 24 小时，时间段必须首尾相连，不能有空白或重叠。
 
 每个对象的字段要求：
 - "start": "HH:MM" (例如 "08:00")
 - "end": "HH:MM" (例如 "09:30")
 - "tag": 必须且只能从以下 4 个标签中选 1 个：
-    1. "ROUTINE" (日常洗漱/通勤/吃饭)
+    1. "ROUTINE" (日常洗漱/通勤/吃饭等固定流程)
     2. "DND" (Do Not Disturb, 专注工作/学习/会议，回复极慢)
     3. "FREE" (空闲摸鱼，可随时聊天，秒回)
     4. "PRIVATE" (夜间独处/休息/深夜emo，防备心低，适合情感交流)
-- "title": 事项简短标题 (【语言必须大白话，严禁文艺】，例如 "起床洗漱" 或 "开早会")
-- "desc": 详细描述此时的状态，以及如果 ${uName} 发消息过来，ta 的回复意愿如何。(【语言必须极其口语化、接地气，禁止写诗或矫情】，例如 "刚睡醒有起床气，看到消息会回，但基本只会回嗯或哦。" 或 "正在疯狂赶进度，烦得很，回消息很慢甚至直接已读不回。")
+- "title": 事项简短标题，必须高度贴合角色身份（【语言必须大白话，严禁文艺】，例如：程序员角色写"撸代码/改bug"，学生角色写"上高数课"，厨师角色写"备菜开工"）
+- "desc": 以第一人称视角，详细描述该角色此时的真实状态和心理，以及如果 ${uName} 发消息过来，ta 会怎么反应。必须体现角色的性格口吻。描写工作/学习状态时，严禁使用"正在疯狂赶进度""烦得很""已读不回"等套话，必须结合角色的具体职业场景写出细节（例如：设计师可能在反复调色值调到头秃、程序员可能在对着报错发呆、销售可能在陪客户喝酒说违心话）。不同性格的角色面对消息的反应也应有差异（例如：温柔型会抱歉地回一句"在忙哦稍等"、傲娇型可能根本不回但其实有看、话多型可能忍不住还是发了条语音）。(【语言必须极其口语化、接地气，要有角色自己的说话风格，禁止写诗或矫情，禁止套话】)
 
 ${focusPrompt}
 
-【角色人设档案】：
+【⚠️ 关键警告】：
+- 严禁生成与角色职业/身份相矛盾的日程（例如：夜班护士不能早上九点上班，高中生不能下午两点还在睡觉）
+- 严禁使用套话和通用模板，每一条 desc 都必须有角色自己的个性
+- title 和 desc 必须让人一眼就能感受到这是"这个角色"而不是"任意一个人"
+
+【角色人设档案】（请将此档案视为最高优先级的事实依据）：
 ${persona}`;
 
         try {
@@ -418,10 +434,10 @@ ${persona}`;
         
         if (type === 'me') {
             document.getElementById('chr-seg-me').classList.add('active');
-            descBox.innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ USER CENTRIC ]</span><br>作息将大量预留与你互动的“空闲/陪伴”时间，减少深度工作的 DND 勿扰块。更适合处于热恋期或需要高频聊天的体验。`;
+            descBox.innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ USER CENTRIC ]</span><br>在严格贴合人设的基础上，让角色在力所能及时优先顾及与你的互动。ta 不会因为"在忙"就完全消失，而是会在间隙抽空回一句。适合喜欢被惦记感的体验。`;
         } else {
             document.getElementById('chr-seg-work').classList.add('active');
-            descBox.innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ CAREER CENTRIC ]</span><br>作息将严格符合其社会身份，包含大量的“会议/专注/出差”等 DND 勿扰块，回复频率会降低。更写实，充满独立感。`;
+            descBox.innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ PERSONA DRIVEN ]</span><br>完全由人设驱动，角色会做人设里该做的事，该忙的时候真的顾不上消息，该摸鱼的时候才有空搭理你。回复节奏完全取决于 ta 现在在干什么。`;
         }
 
         const c = contacts.find(x => x.id === this.currentId);
@@ -435,11 +451,11 @@ ${persona}`;
         if (this.focusMode === 'me') {
             document.getElementById('chr-seg-me').classList.add('active');
             document.getElementById('chr-seg-work').classList.remove('active');
-            document.getElementById('chr-focus-desc').innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ USER CENTRIC ]</span><br>作息将大量预留与你互动的“空闲/陪伴”时间，减少深度工作的 DND 勿扰块。更适合处于热恋期或需要高频聊天的体验。`;
+            document.getElementById('chr-focus-desc').innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ USER CENTRIC ]</span><br>在严格贴合人设的基础上，让角色在力所能及时优先顾及与你的互动。ta 不会因为"在忙"就完全消失，而是会在间隙抽空回一句。适合喜欢被惦记感的体验。`;
         } else {
             document.getElementById('chr-seg-work').classList.add('active');
             document.getElementById('chr-seg-me').classList.remove('active');
-            document.getElementById('chr-focus-desc').innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ CAREER CENTRIC ]</span><br>作息将严格符合其社会身份，包含大量的“会议/专注/出差”等 DND 勿扰块，回复频率会降低。更写实，充满独立感。`;
+            document.getElementById('chr-focus-desc').innerHTML = `<span style="color:#1C1C1E; font-weight:700;">[ PERSONA DRIVEN ]</span><br>完全由人设驱动，角色会做人设里该做的事，该忙的时候真的顾不上消息，该摸鱼的时候才有空搭理你。回复节奏完全取决于 ta 现在在干什么。`;
         }
     },
 

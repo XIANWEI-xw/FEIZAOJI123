@@ -45,6 +45,7 @@
     <link rel="stylesheet" href="css/22-memory-vault.css">
     <link rel="stylesheet" href="css/23-music-import.css">
     <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="css/26-receipt.css">
     
 </head>
 <body>
@@ -391,7 +392,12 @@
       </div>
       <div class="app-label" style="color:var(--c-black);">Chronos</div>
    </div>
-   <div class="draggable-app" style="left:77%;top:5%;visibility:hidden;pointer-events:none;"><div class="app-icon"></div><div class="app-label">-</div></div>
+   <div class="draggable-app" id="app-receipt-icon" onclick="openApp('receipt'); if(typeof rcInit === 'function') rcInit();" style="left: 77%; top: 5%;">
+      <div class="app-icon" id="icon-receipt" style="background:#F2F2F7; color:#1C1C1E; border:0.5px solid rgba(0,0,0,0.1); box-shadow:0 8px 15px rgba(0,0,0,0.08); display:flex; justify-content:center; align-items:center;">
+         <i class="fa-solid fa-receipt" style="font-size:24px;"></i>
+      </div>
+      <div class="app-label" style="color:var(--c-black);">心事账单</div>
+   </div>
 </div>
                   </div>
                </div>
@@ -1913,6 +1919,128 @@
                 <div id="wb-category-filter" style="padding: 0 20px 12px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; z-index: 10; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.05);"></div>
                 <!-- 列表区 -->
                 <div id="wb-list" style="flex: 1; overflow-y: auto; padding: 10px 20px 100px;"></div>
+            </div>
+         </div>
+         <!-- ================= App: 心事小票 Receipt ================= -->
+         <div class="app-window" id="app-receipt" style="background: #F2F2F7; padding: 0;">
+            <div id="rc-app-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; position: relative;">
+                <header class="rc-topbar">
+                    <div class="rc-icon-btn" onclick="rcOpenContactView()"><i class="fa-solid fa-users"></i></div>
+                    <div class="rc-topbar-title" style="text-align:center;">
+                        <div class="rc-t1 rc-mono">SOUL RECEIPT</div>
+                        <div class="rc-t2 rc-mono">心事账单 // TERMINAL</div>
+                    </div>
+                    <button class="rc-pill-btn rc-mono" onclick="rcFetchAI()">
+                        <i class="fa-solid fa-satellite-dish"></i> 调取
+                    </button>
+                </header>
+                <div class="rc-role-tabbar" id="rc-role-tabbar"></div>
+                <main class="rc-main-scroll" id="rc-main-list"></main>
+                <div class="rc-fab-wrap">
+                    <div class="rc-fab" onclick="rcOpenCompose()"><i class="fa-solid fa-pen-nib"></i></div>
+                </div>
+                
+                <!-- 详情页 -->
+                <div class="rc-detail-view" id="rc-detail-view">
+                    <div class="rc-dv-topbar">
+                        <div class="rc-icon-btn" onclick="rcCloseDetail()"><i class="fa-solid fa-arrow-left"></i></div>
+                        <div class="rc-dv-title rc-mono">RECEIPT DETAIL</div>
+                        <div class="rc-icon-btn" onclick="rcOpenShareSheet()"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+                    </div>
+                    <div class="rc-dv-scroll">
+                        <div class="rc-dv-author-chip">
+                            <img id="rc-dv-author-ava" src="">
+                            <div>
+                                <div class="rc-ac-name rc-mono" id="rc-dv-author-name"></div>
+                                <div class="rc-ac-role rc-mono" id="rc-dv-author-role"></div>
+                            </div>
+                        </div>
+                        <div class="rc-long-receipt">
+                            <div class="rc-wm rc-serif">PRIVATE</div>
+                            <div class="rc-lr-logo rc-mono">SOAP. TERMINAL</div>
+                            <div class="rc-lr-sub rc-mono">EMOTIONAL EXPORT SYSTEM v2.0</div>
+                            <table class="rc-meta-tbl rc-mono">
+                                <tr><td>DATE</td><td id="rc-dv-date"></td></tr>
+                                <tr><td>AUTHOR</td><td id="rc-dv-author-meta"></td></tr>
+                                <tr><td>TXN ID</td><td id="rc-dv-id"></td></tr>
+                                <tr><td>MOOD INDEX</td><td>MELANCHOLY / RAIN</td></tr>
+                            </table>
+                            <div class="rc-dash"></div>
+                            <div class="rc-novel-h rc-serif" id="rc-dv-title"></div>
+                            <div class="rc-novel-p rc-serif" id="rc-dv-body"></div>
+                            <div class="rc-dash"></div>
+                            <table class="rc-meta-tbl rc-mono" style="margin-bottom:24px;">
+                                <tr><td>WORD COUNT</td><td id="rc-dv-words"></td></tr>
+                                <tr style="font-size:13px;font-weight:900;color:var(--rc-ink);">
+                                    <td style="padding-top:8px;border-top:1px solid rgba(0,0,0,.15);">TOTAL PAID</td>
+                                    <td style="padding-top:8px;border-top:1px solid rgba(0,0,0,.15);">1 PIECE OF SOUL</td>
+                                </tr>
+                            </table>
+                            <div class="rc-lr-barcode"></div>
+                            <div class="rc-lr-slogan rc-mono">THANK YOU FOR YOUR THOUGHTS</div>
+                        </div>
+                        <div class="rc-dv-comments-wrap" id="rc-dv-comments-wrap" style="display:none;">
+                            <div class="rc-dv-comments-hd rc-mono">COMMENTS</div>
+                            <div class="rc-comments-area" id="rc-dv-comments-area"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 撰写页 -->
+                <div class="rc-compose-view" id="rc-compose-view">
+                    <div class="rc-cv-hd">
+                        <span class="rc-txt-btn" style="color:var(--rc-sub);" onclick="rcCloseCompose()">取消</span>
+                        <span class="rc-cv-label rc-mono">NEW RECEIPT</span>
+                        <span class="rc-txt-btn" style="background:var(--rc-bg);padding:6px 14px;border-radius:100px;" onclick="rcSubmitReceipt()">打印</span>
+                    </div>
+                    <div class="rc-cv-author-pick">
+                        <div class="rc-cv-author-pick-label rc-mono">FROM:</div>
+                        <div id="rc-author-chips"></div>
+                    </div>
+                    <input type="text" class="rc-cv-title-input rc-serif" id="rc-cv-t" placeholder="章节标题…">
+                    <textarea class="rc-cv-body-input rc-serif" id="rc-cv-b" placeholder="在此倾泻你的思绪…" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
+                </div>
+
+                <!-- 联系人视图 -->
+                <div class="rc-contact-view" id="rc-contact-view">
+                    <div class="rc-cv2-topbar">
+                        <div class="rc-icon-btn" onclick="rcCloseContactView()"><i class="fa-solid fa-arrow-left"></i></div>
+                        <div>
+                            <div class="rc-mono" style="font-size:14px;font-weight:900;">CONTACTS</div>
+                            <div class="rc-mono" style="font-size:9px;color:var(--rc-sub);font-weight:700;margin-top:2px;letter-spacing:.5px;">点击「让TA评论」调取 AI 评论</div>
+                        </div>
+                    </div>
+                    <div class="rc-cv2-scroll" id="rc-contact-big-list"></div>
+                </div>
+
+                <!-- 分享抽屉 -->
+                <div class="rc-sheet-overlay" id="rc-share-sheet" onclick="if(event.target===this)rcCloseShareSheet()">
+                    <div class="rc-sheet">
+                        <div class="rc-sheet-handle"></div>
+                        <div class="rc-sheet-ttl rc-mono">SHARE RECEIPT</div>
+                        <div class="rc-prev-card">
+                            <div class="rc-pc-hd rc-mono">SOUL RECEIPT // EXTRACT</div>
+                            <div class="rc-pc-ttl rc-serif" id="rc-pc-t"></div>
+                            <div class="rc-pc-desc rc-serif" id="rc-pc-b"></div>
+                            <div class="rc-pc-foot">
+                                <div class="rc-pc-bar"></div>
+                                <div class="rc-pc-auth rc-mono"><div id="rc-pc-d"></div><div id="rc-pc-n"></div></div>
+                            </div>
+                        </div>
+                        <div class="rc-sheet-ttl rc-mono" style="margin-bottom:12px;">SEND TO:</div>
+                        <div class="rc-contact-row" id="rc-sheet-contacts"></div>
+                        <div class="rc-sheet-btns">
+                            <div class="rc-btn-cancel" onclick="rcCloseShareSheet()">取消</div>
+                            <div class="rc-btn-send rc-mono" onclick="rcDoSend()">发送 <i class="fa-solid fa-paper-plane" style="margin-left:4px;"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rc-toast rc-mono" id="rc-toast"></div>
+                
+                <div class="home-indicator-area" onclick="closeCurrentApps()">
+                    <div class="home-indicator"></div>
+                </div>
             </div>
          </div>
          <!-- ================= 高定商店 STORE APP ================= -->
@@ -5163,6 +5291,7 @@
          <script src="js/23-music-import.js"></script>
          <script src="js/24-coread.js"></script>
          <script src="js/25-chronos.js"></script>
+         <script src="js/26-receipt.js"></script>
          <script src="js/04-app-init.js"></script>
    <!-- 🚀 终极修复：将动态样式表移至文档最末尾，确保 100% 覆盖系统样式 -->
    <style id="dynamic-user-style"></style>
