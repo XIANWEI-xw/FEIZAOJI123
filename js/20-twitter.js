@@ -4,7 +4,7 @@
          // =====================================================================
          // 动态生成推文 HTML 引擎 (保留了所有精美样式和交互)
          function generateTwPostHtml(post) {
-let avatarSrc = post.avatar || 'https://api.dicebear.com/7.x/notionists/svg?seed=Bot';
+let avatarSrc = post.avatar || 'https://nos.netease.com/youdata-netease/public-utilUpload-ikeCodhsoguHaZwot9fGZF.jpg';
 let displayName = post.name;
 let displayHandle = post.handle || ('@' + (post.name.toLowerCase().replace(/[^a-z0-9_]/g, '') || 'user_' + (post.contactId ? post.contactId.replace(/[^a-z0-9]/gi, '').substring(0,5) : '12345')));
 
@@ -13,11 +13,11 @@ if (post.contactId === 'me') {
         // 🚀 面具帖子：严格使用帖子对象上保存的面具资料
         displayName = post.name;
         displayHandle = post.handle;
-        avatarSrc = post.avatar || 'https://api.dicebear.com/7.x/notionists/svg?seed=Mask';
+        avatarSrc = post.avatar || 'https://nos.netease.com/youdata-netease/public-utilUpload-ikeCodhsoguHaZwot9fGZF.jpg';
     } else {
         displayName = twData.meName || '我';
         displayHandle = twData.meHandle || '@soap_user';
-        avatarSrc = twData.meAvatar || 'https://api.dicebear.com/7.x/notionists/svg?seed=Zero';
+        avatarSrc = twData.meAvatar || 'https://nos.netease.com/youdata-netease/public-utilUpload-ikeCodhsoguHaZwot9fGZF.jpg';
     }
 } else if (post.contactId && post.contactId.startsWith('c_')) {
     let c = contacts.find(x => x.id === post.contactId);
@@ -278,7 +278,7 @@ function deleteDetailComment(cId) {
          function getTwAvatarSrc(c) {
          let av = c.chatAvatar || c.avatar;
          if(av && (av.startsWith('data:image') || av.startsWith('http'))) return av;
-         return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="1.5"%3E%3Crect x="3" y="11" width="18" height="10" rx="2"/%3E%3Ccircle cx="12" cy="5" r="2"/%3E%3Cpath d="M12 7v4M8 16h8"/%3E%3C/svg%3E';
+         return 'https://nos.netease.com/youdata-netease/public-utilUpload-ikeCodhsoguHaZwot9fGZF.jpg';
          }
          
          function renderTwitterContacts() {
@@ -2647,7 +2647,7 @@ if (profilePosts) {
          
          function getProfileAvatarHtml(c, isUser) {
 // 🚀 核心修复：推特主页的大头像，强行从推特专属数据库 twData 里拿，彻底与主系统断绝关系！
-let av = isUser ? (twData.meAvatar || 'https://api.dicebear.com/7.x/notionists/svg?seed=Zero') : (c.chatAvatar || c.avatar);
+let av = isUser ? (twData.meAvatar || 'https://nos.netease.com/youdata-netease/public-utilUpload-ikeCodhsoguHaZwot9fGZF.jpg') : (c.chatAvatar || c.avatar);
 let dataAttr = isUser ? `data-avatar="user"` : `data-avatar="${c.id}"`;
          
          if(av && (av.startsWith('data:image') || av.startsWith('http'))) {
@@ -3055,6 +3055,88 @@ saveData();
          let twStartY = 0;
          let currentTwContactId = null;
          
+         // ===== 推特私信：多选删除状态 =====
+         let twMultiSelectMode = false;
+         let twSelectedMsgIds = new Set();
+
+         function twEnterMultiSelect() {
+             twMultiSelectMode = true;
+             twSelectedMsgIds.clear();
+             document.getElementById('tw-multi-bar').style.display = 'flex';
+             document.getElementById('tw-multi-count').textContent = '已选 0 条';
+             document.querySelectorAll('.tw-msg-row').forEach(row => {
+                 if (row.classList.contains('system')) return;
+                 row.style.paddingLeft = '36px';
+                 row.style.position = 'relative';
+                 let cb = document.createElement('div');
+                 cb.className = 'tw-msg-cb';
+                 cb.style.cssText = 'position:absolute;left:4px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(0,0,0,0.15);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:0.2s;z-index:10;';
+                 cb.onclick = (e) => { e.stopPropagation(); twToggleMsgSelect(row, cb); };
+                 row.prepend(cb);
+             });
+         }
+
+         function twExitMultiSelect() {
+             twMultiSelectMode = false;
+             twSelectedMsgIds.clear();
+             document.getElementById('tw-multi-bar').style.display = 'none';
+             document.querySelectorAll('.tw-msg-row').forEach(row => {
+                 row.style.paddingLeft = '';
+                 let cb = row.querySelector('.tw-msg-cb');
+                 if (cb) cb.remove();
+             });
+         }
+
+         function twToggleMsgSelect(row, cb) {
+             let id = row.id;
+             if (twSelectedMsgIds.has(id)) {
+                 twSelectedMsgIds.delete(id);
+                 cb.style.background = '#fff';
+                 cb.style.borderColor = 'rgba(0,0,0,0.15)';
+                 cb.innerHTML = '';
+             } else {
+                 twSelectedMsgIds.add(id);
+                 cb.style.background = '#1C1C1E';
+                 cb.style.borderColor = '#1C1C1E';
+                 cb.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+             }
+             let countEl = document.getElementById('tw-multi-count');
+             if (countEl) countEl.textContent = '已选 ' + twSelectedMsgIds.size + ' 条';
+         }
+
+         function twSelectAllMsgs() {
+             document.querySelectorAll('.tw-msg-row').forEach(row => {
+                 if (row.classList.contains('system')) return;
+                 let cb = row.querySelector('.tw-msg-cb');
+                 if (!cb) return;
+                 if (!twSelectedMsgIds.has(row.id)) {
+                     twSelectedMsgIds.add(row.id);
+                     cb.style.background = '#1C1C1E';
+                     cb.style.borderColor = '#1C1C1E';
+                     cb.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+                 }
+             });
+             let countEl = document.getElementById('tw-multi-count');
+             if (countEl) countEl.textContent = '已选 ' + twSelectedMsgIds.size + ' 条';
+         }
+
+         function twDeleteSelectedMsgs() {
+             if (twSelectedMsgIds.size === 0) return;
+             if (!confirm('确定删除选中的 ' + twSelectedMsgIds.size + ' 条消息吗？')) return;
+             const c = contacts.find(x => x.id === currentTwContactId);
+             twSelectedMsgIds.forEach(id => {
+                 let row = document.getElementById(id);
+                 if (row) row.remove();
+                 if (c && c.twHistory) {
+                     let idx = c.twHistory.findIndex(m => m._twId === id);
+                     if (idx !== -1) c.twHistory.splice(idx, 1);
+                 }
+             });
+             if (typeof saveData === 'function') saveData();
+             if (typeof syncTwUpdateToMainChat === 'function') syncTwUpdateToMainChat(currentTwContactId);
+             twExitMultiSelect();
+         }
+
          function twOpenChat(contactId) {
          currentTwContactId = contactId;
          const c = contacts.find(x => x.id === contactId);
@@ -3472,7 +3554,7 @@ row.className = `tw-msg-row ${role} fade-in`;
 
 let avatarHtml = '';
 if (role === 'bot') {
-         let src = 'https://api.dicebear.com/7.x/notionists/svg?seed=Bot';
+         let src = 'https://nos.netease.com/youdata-netease/public-utilUpload-ikeCodhsoguHaZwot9fGZF.jpg';
          let clickId = currentTwContactId;
          if (contactObj) {
              src = getTwAvatarSrc(contactObj);

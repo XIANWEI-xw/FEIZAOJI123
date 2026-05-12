@@ -60,7 +60,9 @@ function isUserInChatRoom(targetContactId) {
          }
          
          function openChat(id) { 
-    if(isEditingList) return; 
+    if(isEditingList) return;
+    // 匿名消息在进入聊天室时统一写入
+    if (typeof anonFlushPendingToChat === 'function') anonFlushPendingToChat(id);
     currentContactId = id; 
     const c = contacts.find(x => x.id === id); 
     

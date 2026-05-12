@@ -172,9 +172,9 @@
          #sticker-panel.show { padding-top: 10px !important; padding-left: 0 !important; padding-right: 0 !important; overflow-x: hidden !important; overflow-y: auto !important; }
          #sticker-panel #chat-st-tabs { flex-shrink: 0; overflow-x: auto; overflow-y: hidden; display: flex; gap: 5px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px 5px 10px; }
          #sticker-panel #chat-st-tabs::-webkit-scrollbar { display: none; }
-         #sticker-panel #chat-st-grid { flex: 1; overflow-y: auto; overflow-x: hidden; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-content: start; width: 100%; max-width: 100%; box-sizing: border-box; padding: 0 10px; }
-         #sticker-panel #chat-st-grid > * { display: flex; justify-content: center; align-items: center; width: 100%; box-sizing: border-box; }
-         #sticker-panel #chat-st-grid img { width: 100% !important; max-width: 70px !important; height: auto !important; max-height: 70px !important; object-fit: contain !important; aspect-ratio: 1/1 !important; display: block; margin: 0 auto; }
+         #sticker-panel #chat-st-grid { flex: 1; overflow-y: auto; overflow-x: hidden; display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 100px; gap: 10px; align-content: start; width: 100%; max-width: 100%; box-sizing: border-box; padding: 8px 10px; }
+         #sticker-panel #chat-st-grid > * { display: flex; justify-content: center; align-items: center; width: 100%; height: 100px; overflow: hidden; box-sizing: border-box; border-radius: 12px; background: rgba(0,0,0,0.02); flex-shrink: 0; }
+         #sticker-panel #chat-st-grid img { width: 96px !important; height: 96px !important; max-width: 96px !important; max-height: 96px !important; object-fit: contain !important; display: block !important; margin: 0 auto !important; flex-shrink: 0 !important; }
          #attachment-panel.show { padding-top: 20px !important; }
          /* 全新输入底栏包裹 */
          .chat-input-wrap { background: rgba(250,250,252,0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 0.5px solid rgba(0,0,0,0.05); z-index: 10; display:flex; flex-direction:column; width: 100%;}
