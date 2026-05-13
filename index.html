@@ -1540,15 +1540,19 @@
                             </div>
                         </div>
                         <div class="p-3 border-t border-mono-200 dark:border-mono-700 glass-panel pb-safe">
+                           <div id="tw-chat-image-preview" class="hidden"></div>
                            <div class="bg-mono-100 dark:bg-mono-800 rounded-full flex items-center px-4 py-2">
                               <div class="flex text-mono-600 dark:text-mono-950 space-x-2 mr-2 text-[18px]">
-                                 <div class="hover:bg-mono-200 dark:hover:bg-mono-700 rounded-full p-2 cursor-pointer transition"><i class="fa-regular fa-image"></i></div>
+                                 <div class="tw-chat-img-btn" onclick="twChatPickImage()"><i class="fa-regular fa-image"></i></div>
                                  <div class="hover:bg-mono-200 dark:hover:bg-mono-700 rounded-full p-2 cursor-pointer transition" onclick="openGiftModal()"><i class="fa-solid fa-gift"></i></div>
                               </div>
-                              <input type="text" id="tw-chat-input" placeholder="开始发消息" class="bg-transparent border-none outline-none flex-1 placeholder-mono-500 text-[15px] ml-1" onkeydown="if(event.key==='Enter') sendTwMessage()">
+                              <input type="file" id="tw-chat-image-input" accept="image/*" class="hidden" onchange="twChatHandleImage(event)">
+                              <input type="text" id="tw-chat-input" placeholder="开始发消息" class="bg-transparent border-none outline-none flex-1 placeholder-mono-500 text-[15px] ml-1">
                               <div class="flex text-mono-600 dark:text-mono-950 space-x-1 ml-2 text-[18px]">
                                  <div class="hover:bg-mono-200 dark:hover:bg-mono-700 rounded-full p-2 cursor-pointer transition"><i class="fa-regular fa-face-smile"></i></div>
-                                 <div class="hover:bg-mono-200 dark:hover:bg-mono-700 rounded-full p-2 cursor-pointer transition text-mono-600 dark:text-mono-950" onclick="sendTwMessage()"><i class="fa-regular fa-paper-plane"></i></div>
+                                 <div id="tw-send-btn" class="w-8 h-8 rounded-full bg-mono-200 dark:bg-mono-700 flex items-center justify-center cursor-pointer shrink-0 transition" onmousedown="twSendBtnDown(event)" onmouseup="twSendBtnUp(event)" ontouchstart="twSendBtnDown(event)" ontouchend="twSendBtnUp(event)" title="发送">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                 </div>
                               </div>
                            </div>
                         </div>

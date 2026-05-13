@@ -3222,14 +3222,116 @@ if(historyValid.length === 0) {
     });
 }
 
+// 重置发送键状态和图片
+twSendBtnState = 'idle';
+twUpdateSendBtnState();
+twChatRemoveImage();
+
 switchView('chat-view');
 setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+
+// 绑定键盘回车发送
+const chatInput = document.getElementById('tw-chat-input');
+if (chatInput) {
+    chatInput.onkeydown = function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const hasText = this.value.trim() || twChatImageUrl;
+            if (hasText) {
+                // 有内容就发送，无论当前状态
+                sendTwMessage();
+            } else if (twSendBtnState === 'sent') {
+                // 输入框为空且刚发完 = 调取AI
+                fetchTwAIReply();
+                twSendBtnState = 'idle';
+                twUpdateSendBtnState();
+            }
+        }
+    };
+}
+}
+
+// ================= 推特私信发送键状态引擎 =================
+let twSendBtnState = 'idle'; // idle | sent | holding
+let twSendHoldTimer = null;
+let twChatImageUrl = null; // 私信附带图片
+
+function twUpdateSendBtnState() {
+    const btn = document.getElementById('tw-send-btn');
+    if (!btn) return;
+    if (twSendBtnState === 'sent') {
+        btn.classList.add('tw-send-active');
+        btn.title = '长按调取 AI 回复';
+    } else {
+        btn.classList.remove('tw-send-active');
+        btn.title = '发送';
+    }
+}
+
+function twSendBtnDown(e) {
+    if (e) e.preventDefault();
+    const input = document.getElementById('tw-chat-input');
+    const hasText = (input && input.value.trim()) || twChatImageUrl;
+    
+    // 只有输入框为空且处于已发送状态时，长按才触发调取
+    if (!hasText && twSendBtnState === 'sent') {
+        twSendHoldTimer = setTimeout(() => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            fetchTwAIReply();
+            twSendBtnState = 'idle';
+            twUpdateSendBtnState();
+        }, 400);
+    }
+}
+
+function twSendBtnUp(e) {
+    if (e) e.preventDefault();
+    clearTimeout(twSendHoldTimer);
+    const input = document.getElementById('tw-chat-input');
+    const hasText = (input && input.value.trim()) || twChatImageUrl;
+    
+    // 有内容时，无论什么状态都执行发送
+    if (hasText) {
+        sendTwMessage();
+    }
+    // 没内容且是sent状态：短按不做事（长按已在down里处理）
+}
+
+function twChatPickImage() {
+    const input = document.getElementById('tw-chat-image-input');
+    if (input) input.click();
+}
+
+function twChatHandleImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        twChatImageUrl = e.target.result;
+        const preview = document.getElementById('tw-chat-image-preview');
+        if (preview) {
+            preview.innerHTML = `<div class="relative inline-block"><img src="${twChatImageUrl}" class="w-16 h-16 rounded-xl object-cover border border-mono-200 dark:border-mono-700"><div class="absolute -top-1 -right-1 w-5 h-5 bg-mono-600 dark:bg-mono-300 rounded-full flex items-center justify-center cursor-pointer" onclick="twChatRemoveImage()"><i class="fa-solid fa-xmark text-white dark:text-black text-[10px]"></i></div></div>`;
+            preview.classList.remove('hidden');
+        }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
+function twChatRemoveImage() {
+    twChatImageUrl = null;
+    const preview = document.getElementById('tw-chat-image-preview');
+    if (preview) {
+        preview.innerHTML = '';
+        preview.classList.add('hidden');
+    }
 }
 
 function sendTwMessage() {
     const input = document.getElementById('tw-chat-input');
     const text = input.value.trim();
-    if (!text || !currentTwContactId) return;
+    if (!text && !twChatImageUrl) return;
+    if (!currentTwContactId) return;
     input.value = '';
     
     const c = contacts.find(x => x.id === currentTwContactId);
@@ -3244,16 +3346,30 @@ function sendTwMessage() {
             }
         }
         
+        // 拼接消息内容（文字 + 图片）
+        let finalContent = text;
+        if (twChatImageUrl) {
+            let imgHtml = `<div class="mt-2 rounded-2xl overflow-hidden border border-mono-200 dark:border-mono-700 max-w-[200px]"><img src="${twChatImageUrl}" class="w-full max-h-[200px] object-cover" style="border-radius:12px !important;"></div>`;
+            finalContent = text ? text + imgHtml : imgHtml;
+        }
+        
         if (!c.twHistory) c.twHistory = [];
         let wid = gConfig.currentWorldviewId || 'default';
         const twId = 'tw_' + Date.now() + Math.random();
-        c.twHistory.push({ role: 'user', content: text, isRevoked: false, timestamp: Date.now(), wid: wid, _twId: twId, maskId: twActiveMaskId || null });
+        c.twHistory.push({ role: 'user', content: finalContent, isRevoked: false, timestamp: Date.now(), wid: wid, _twId: twId, maskId: twActiveMaskId || null });
         
         if (typeof window.twSessionUnsynced === 'undefined') window.twSessionUnsynced = [];
         window.twSessionUnsynced.push(twId);
         saveData();
         
-        appendTwMessage('user', text, c, twId);
+        appendTwMessage('user', finalContent, c, twId);
+        
+        // 清除图片预览
+        twChatRemoveImage();
+        
+        // 发送后变黑，进入"长按调取"状态
+        twSendBtnState = 'sent';
+        twUpdateSendBtnState();
     }
 }
 
@@ -3467,8 +3583,20 @@ let wid = gConfig.currentWorldviewId || 'default';
 let currentWorldHistory = c.twHistory.filter(m => m.wid === wid || (!m.wid && wid === 'default'));
 currentWorldHistory.slice(-limit).forEach(m => {
     if(m.role !== 'system' && m.role !== 'system_sum' && !m.isRevoked) {
+        let role = m.role === 'assistant' ? 'assistant' : 'user';
+        // 检测是否包含图片
+        let imgMatch = m.content.match(/src="(data:image[^"]+)"/);
         let cleanContent = m.content.replace(/<[^>]+>/g, '').trim();
-        if(cleanContent) historyToSend.push({ role: m.role === 'assistant' ? 'assistant' : 'user', content: cleanContent });
+        
+        if (imgMatch && role === 'user') {
+            // 带图片的消息使用多模态格式
+            let parts = [];
+            if (cleanContent) parts.push({ type: "text", text: cleanContent });
+            parts.push({ type: "image_url", image_url: { url: imgMatch[1], detail: "auto" } });
+            historyToSend.push({ role: role, content: parts });
+        } else if(cleanContent) {
+            historyToSend.push({ role: role, content: cleanContent });
+        }
     }
 });
          
