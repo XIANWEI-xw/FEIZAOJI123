@@ -1,0 +1,446 @@
+/* ===== Couple Space 情侣空间 ===== */
+
+/* 主容器 */
+#app-couple-space {
+    background: #FFFFFF;
+    padding: 0 !important;
+    z-index: 500;
+}
+#app-couple-space .cs-app-wrap {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    background: #FFFFFF;
+    position: relative; overflow: hidden;
+}
+
+/* 背景底纹 */
+.cs-bg-grid {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+}
+.cs-bg-grid::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(0,0,0,0.012) 80px, rgba(0,0,0,0.012) 81px);
+}
+.cs-bg-grid::after {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(0,0,0,0.012) 80px, rgba(0,0,0,0.012) 81px);
+}
+.cs-bg-wm {
+    position: absolute; top: 15%; left: -8%;
+    font-family: 'Playfair Display', serif; font-size: 140px; font-weight: 900; font-style: italic;
+    color: rgba(0,0,0,0.015); pointer-events: none; letter-spacing: -4px; z-index: 0;
+}
+
+/* ===== 选择页 ===== */
+.cs-sel {
+    position: absolute; inset: 0; z-index: 100; background: #FFFFFF;
+    display: flex; flex-direction: column;
+    transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+}
+.cs-sel.hide { transform: translateX(-100%); pointer-events: none; }
+
+.cs-sel-bg-wm {
+    position: absolute; bottom: 8%; right: -5%;
+    font-family: 'Playfair Display', serif; font-size: 100px; font-weight: 900; font-style: italic;
+    color: rgba(0,0,0,0.02); pointer-events: none; letter-spacing: -3px;
+}
+.cs-sel-stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+.cs-sel-stars svg { position: absolute; fill: none; stroke: var(--c-black, #1C1C1E); stroke-width: 0.6; opacity: 0.06; }
+
+.cs-sel-hd {
+    position: relative; z-index: 2;
+    padding: calc(var(--safe-top, 0px) + 50px) 28px 0;
+    margin-bottom: 40px;
+}
+.cs-sel-ey {
+    font-size: 9px; font-weight: 800; letter-spacing: 4px;
+    color: #4A4A4A; font-family: 'Courier New', monospace; margin-bottom: 8px;
+}
+.cs-sel-tt { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; line-height: 1.25; }
+.cs-sel-sub { font-size: 12px; color: #8E8E93; font-weight: 500; margin-top: 12px; line-height: 1.5; }
+
+.cs-sel-ls {
+    position: relative; z-index: 2; flex: 1; overflow-y: auto;
+    padding: 0 20px calc(var(--safe-bottom, 0px) + 20px);
+    scrollbar-width: none;
+}
+.cs-sel-ls::-webkit-scrollbar { display: none; }
+
+.cs-sel-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 18px; background: #FFFFFF; border-radius: 18px; margin-bottom: 10px;
+    cursor: pointer; border: 0.5px solid rgba(0,0,0,0.04);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.03); transition: all 0.2s; position: relative; overflow: hidden;
+}
+.cs-sel-item::before {
+    content: ''; position: absolute; top: 0; right: 0; width: 50px; height: 50px;
+    background: radial-gradient(circle, rgba(0,0,0,0.02), transparent 70%); pointer-events: none;
+}
+.cs-sel-item:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+
+.cs-sel-av {
+    width: 48px; height: 48px; border-radius: 50%; background: #F5F5F5;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.04); overflow: hidden;
+}
+.cs-sel-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.cs-sel-av svg { width: 20px; height: 20px; stroke: #AEAEB2; fill: none; stroke-width: 1.4; }
+.cs-sel-inf { flex: 1; }
+.cs-sel-nm { font-size: 15px; font-weight: 700; }
+.cs-sel-ht { font-size: 11px; color: #8E8E93; font-weight: 500; margin-top: 2px; }
+.cs-sel-ar svg { width: 16px; height: 16px; stroke: #AEAEB2; fill: none; stroke-width: 2; }
+
+.cs-sel-close {
+    position: absolute; top: calc(var(--safe-top, 0px) + 16px); right: 20px;
+    width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.04);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;
+}
+.cs-sel-close:active { transform: scale(0.9); }
+.cs-sel-close svg { width: 14px; height: 14px; stroke: #1C1C1E; fill: none; stroke-width: 2.2; }
+
+/* ===== 主空间 ===== */
+.cs-space { display: none; flex: 1; flex-direction: column; position: relative; overflow: hidden; }
+
+.cs-topbar {
+    position: relative; z-index: 50;
+    padding: calc(var(--safe-top, 0px) + 12px) 20px 10px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.cs-tp-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; background: rgba(0,0,0,0.03);
+}
+.cs-tp-btn:active { transform: scale(0.9); }
+.cs-tp-btn svg { width: 18px; height: 18px; stroke: #1C1C1E; fill: none; stroke-width: 2.5; }
+.cs-tp-mid {
+    font-size: 10px; font-weight: 800; letter-spacing: 3px;
+    color: #8E8E93; font-family: 'Courier New', monospace;
+}
+
+.cs-main-scroll {
+    position: relative; z-index: 1; flex: 1;
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    padding-bottom: 88px;
+}
+.cs-main-scroll::-webkit-scrollbar { display: none; }
+
+/* 卡片 */
+.cs-card {
+    background: #FFFFFF; border-radius: 22px; margin: 0 16px 14px;
+    position: relative; overflow: hidden;
+    border: 0.5px solid rgba(0,0,0,0.04); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+/* 大头像区 */
+.cs-pf-wrap {
+    padding: 40px 20px 24px; position: relative;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F5F3F0 100%);
+}
+.cs-pf-deco {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    width: 180px; height: 180px; border-radius: 50%;
+    border: 0.5px solid rgba(0,0,0,0.03); pointer-events: none;
+}
+.cs-pf-deco::after {
+    content: ''; position: absolute; inset: 12px; border-radius: 50%;
+    border: 0.5px dashed rgba(0,0,0,0.04);
+}
+.cs-pf-row {
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px; position: relative; z-index: 2;
+}
+.cs-pf-av {
+    width: 96px; height: 96px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F0EDE8 100%);
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05);
+    display: flex; align-items: center; justify-content: center;
+}
+.cs-pf-av img { width: 100%; height: 100%; object-fit: cover; }
+.cs-pf-av svg { width: 36px; height: 36px; stroke: #AEAEB2; fill: none; stroke-width: 1.1; }
+
+.cs-pf-heart {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    margin: 0 -14px; z-index: 3; background: #1C1C1E;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.cs-pf-heart svg { width: 15px; height: 15px; stroke: #fff; fill: none; stroke-width: 1.8; }
+
+.cs-pf-names {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px; padding: 0 12px; position: relative; z-index: 2;
+}
+.cs-pf-nc { text-align: center; flex: 1; }
+.cs-pf-nm { font-size: 17px; font-weight: 800; }
+.cs-pf-sub {
+    font-size: 8px; color: #8E8E93; font-weight: 800;
+    letter-spacing: 2.5px; font-family: 'Courier New', monospace; margin-top: 4px;
+}
+.cs-pf-and { font-size: 14px; color: #AEAEB2; font-weight: 900; font-family: serif; font-style: italic; }
+
+.cs-pf-days-bar {
+    background: #F5F5F5; border-radius: 16px; padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative; z-index: 2;
+}
+.cs-pf-dl {
+    font-size: 8px; color: #8E8E93; font-weight: 800;
+    letter-spacing: 2px; font-family: 'Courier New', monospace;
+}
+.cs-pf-dv { display: flex; align-items: baseline; gap: 4px; }
+.cs-pf-dn { font-size: 30px; font-weight: 900; font-family: 'Courier New', monospace; letter-spacing: -2px; }
+.cs-pf-du { font-size: 9px; color: #4A4A4A; font-weight: 800; }
+
+/* ===== 面板 ===== */
+.cs-pnl { display: none; padding: 0 0 20px; }
+.cs-pnl.active { display: block; animation: csFadeUp 0.3s ease-out; }
+@keyframes csFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.cs-sh {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 22px 14px;
+}
+.cs-sl { display: flex; align-items: center; gap: 7px; }
+.cs-stag {
+    font-size: 7px; font-weight: 800; letter-spacing: 2.5px;
+    color: #4A4A4A; font-family: 'Courier New', monospace;
+    background: rgba(74,74,74,0.06); padding: 3px 8px; border-radius: 6px;
+}
+.cs-stt { font-size: 15px; font-weight: 800; }
+
+.cs-fb {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #1C1C1E; color: #fff; border: none; border-radius: 100px;
+    padding: 6px 14px; font-size: 9px; font-weight: 800; cursor: pointer;
+    font-family: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.cs-fb:active { transform: scale(0.95); opacity: 0.85; }
+.cs-fb svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 2.5; }
+.cs-fb-send { background: #4A4A4A; box-shadow: 0 4px 12px rgba(74,74,74,0.15); }
+
+/* 手风琴 */
+.cs-ac {
+    border-radius: 14px; overflow: hidden;
+    border: 0.5px solid rgba(0,0,0,0.04);
+    margin: 0 22px 7px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.015);
+}
+.cs-ac-h {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 14px; background: #F5F5F5; cursor: pointer;
+}
+.cs-ac-h:active { opacity: 0.7; }
+.cs-ac-t {
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
+}
+.cs-ac-t svg { width: 14px; height: 14px; stroke: #1C1C1E; fill: none; stroke-width: 1.5; flex-shrink: 0; }
+.cs-ac-arrow {
+    width: 12px; height: 12px; stroke: #AEAEB2; fill: none; stroke-width: 2;
+    transition: transform 0.3s;
+}
+.cs-ac.open .cs-ac-arrow { transform: rotate(180deg); }
+.cs-ac-b {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.cs-ac.open .cs-ac-b { max-height: 600px; }
+.cs-ac-inner {
+    padding: 12px 14px; font-size: 11px; color: #555;
+    line-height: 1.7; background: #FFFFFF; white-space: pre-line;
+}
+
+/* 引述块 */
+.cs-db {
+    background: #F5F5F5; border-radius: 14px; padding: 16px;
+    margin: 0 22px 10px; position: relative;
+}
+.cs-db::before {
+    content: '✦'; position: absolute; top: 12px; right: 14px;
+    font-size: 10px; color: rgba(0,0,0,0.06);
+}
+.cs-db-tt { font-size: 14px; font-weight: 600; line-height: 1.7; }
+.cs-db-meta { font-size: 9px; color: #8E8E93; margin-top: 8px; font-weight: 600; font-style: italic; }
+
+/* 加载状态 */
+.cs-loading {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: #8E8E93; font-weight: 700;
+}
+.cs-loading-dot {
+    display: flex; gap: 3px;
+}
+.cs-loading-dot span {
+    width: 4px; height: 4px; border-radius: 50%; background: #AEAEB2;
+    animation: csDotBounce 1.2s infinite;
+}
+.cs-loading-dot span:nth-child(2) { animation-delay: 0.2s; }
+.cs-loading-dot span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes csDotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ===== 情绪胶囊 ===== */
+.cs-mood-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+    padding: 0 22px; margin-bottom: 10px;
+}
+.cs-mood-btn {
+    aspect-ratio: 1; border-radius: 14px; background: #FFFFFF;
+    border: 0.5px solid rgba(0,0,0,0.04); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.cs-mood-btn:active { transform: scale(0.92); }
+.cs-mood-btn.selected { background: rgba(74,74,74,0.06); border-color: #4A4A4A; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.cs-mood-btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+.cs-mood-btn span { font-size: 7.5px; color: #8E8E93; font-weight: 700; }
+
+/* ===== 许愿池 ===== */
+.cs-wish-input-row { display: flex; gap: 8px; padding: 0 22px; margin-bottom: 10px; }
+.cs-wish-inp {
+    flex: 1; background: #FFFFFF; border: 0.5px solid rgba(0,0,0,0.06);
+    border-radius: 100px; padding: 10px 16px; font-size: 12px; font-weight: 600;
+    color: #1C1C1E; outline: none; font-family: inherit;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+.cs-wish-inp::placeholder { color: #AEAEB2; }
+.cs-wish-add-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: #1C1C1E;
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.cs-wish-add-btn:active { transform: scale(0.9); }
+.cs-wish-add-btn svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.5; }
+
+.cs-wish-list { display: flex; flex-direction: column; gap: 5px; padding: 0 22px; }
+.cs-wish-item {
+    background: #FFFFFF; border-radius: 12px; padding: 10px 13px;
+    display: flex; align-items: center; gap: 10px;
+    border: 0.5px solid rgba(0,0,0,0.03); box-shadow: 0 2px 6px rgba(0,0,0,0.015);
+}
+.cs-wish-item.done { opacity: 0.3; }
+.cs-wish-item.done .cs-wish-text { text-decoration: line-through; }
+.cs-wish-ck {
+    width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #EBEBEB;
+    flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+}
+.cs-wish-ck.on { background: #1C1C1E; border-color: #1C1C1E; }
+.cs-wish-ck.on::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 900; }
+.cs-wish-text { flex: 1; font-size: 12px; font-weight: 600; }
+.cs-wish-who { font-size: 8px; color: #4A4A4A; font-weight: 800; font-family: 'Courier New', monospace; }
+
+/* ===== 情书匣子 ===== */
+.cs-letter-list { display: flex; flex-direction: column; gap: 6px; padding: 0 22px; margin-bottom: 10px; }
+.cs-letter-item {
+    background: #FFFFFF; border-radius: 14px; padding: 12px 14px;
+    cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+    border: 0.5px solid rgba(0,0,0,0.03); box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    position: relative; overflow: hidden;
+}
+.cs-letter-item::after {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%; background: #EBEBEB;
+}
+.cs-letter-item:active { opacity: 0.7; }
+.cs-letter-hd { display: flex; justify-content: space-between; align-items: center; }
+.cs-letter-from { font-size: 9px; color: #4A4A4A; font-weight: 800; font-family: 'Courier New', monospace; }
+.cs-letter-date { font-size: 9px; color: #AEAEB2; font-weight: 600; }
+.cs-letter-pv {
+    font-size: 11.5px; font-weight: 500; line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; padding-left: 2px;
+}
+
+/* ===== 誓言墙 ===== */
+.cs-vow-text {
+    font-size: 15px; font-weight: 500; line-height: 1.9; font-style: italic;
+    text-align: center; padding: 10px 28px; margin-bottom: 10px; font-family: serif;
+}
+.cs-vow-sig {
+    text-align: center; font-size: 9px; color: #4A4A4A; font-weight: 700;
+    font-family: 'Courier New', monospace; letter-spacing: 2px; padding-bottom: 16px;
+}
+
+/* ===== 底栏 ===== */
+.cs-dock {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 80;
+    padding: 0 14px calc(var(--safe-bottom, 0px) + 10px);
+    display: flex; justify-content: center;
+}
+.cs-dock-inner {
+    display: flex; align-items: center;
+    background: #1C1C1E; border-radius: 20px; padding: 5px 6px; gap: 2px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.22), 0 0 0 0.5px rgba(255,255,255,0.05) inset;
+    width: 100%; max-width: 360px; justify-content: space-between;
+}
+.cs-dk-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 7px 0; width: 50px; cursor: pointer; border-radius: 12px; transition: all 0.2s;
+}
+.cs-dk-item:active { transform: scale(0.9); }
+.cs-dk-item.active { background: rgba(255,255,255,0.1); }
+.cs-dk-ico { width: 18px; height: 18px; margin-bottom: 2px; }
+.cs-dk-ico svg { width: 18px; height: 18px; stroke: rgba(255,255,255,0.4); fill: none; stroke-width: 1.5; transition: all 0.2s; }
+.cs-dk-item.active .cs-dk-ico svg { stroke: #fff; }
+.cs-dk-lb { font-size: 7px; font-weight: 700; color: rgba(255,255,255,0.3); transition: color 0.2s; letter-spacing: 0.3px; }
+.cs-dk-item.active .cs-dk-lb { color: rgba(255,255,255,0.9); }
+
+.cs-dk-center {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(255,255,255,0.1);
+    margin: 0 3px; transition: transform 0.2s;
+}
+.cs-dk-center:active { transform: scale(0.88); }
+.cs-dk-center svg { width: 16px; height: 16px; stroke: #1C1C1E; fill: none; stroke-width: 2; }
+
+/* ===== HUD 弹出菜单 ===== */
+.cs-hud {
+    position: absolute; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0); backdrop-filter: blur(0);
+    transition: all 0.3s; pointer-events: none;
+    display: flex; align-items: flex-end;
+}
+.cs-hud.active { background: rgba(0,0,0,0.3); backdrop-filter: blur(14px); pointer-events: auto; }
+.cs-hud-sheet {
+    width: 100%; background: #FFFFFF; border-radius: 24px 24px 0 0;
+    padding: 0 0 calc(var(--safe-bottom, 0px) + 16px);
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    border-top: 0.5px solid rgba(0,0,0,0.05); box-shadow: 0 -8px 30px rgba(0,0,0,0.06);
+}
+.cs-hud.active .cs-hud-sheet { transform: translateY(0); }
+.cs-hud-handle { width: 36px; height: 4px; background: #EBEBEB; border-radius: 2px; margin: 12px auto 16px; }
+.cs-hud-title {
+    font-size: 7px; font-weight: 800; letter-spacing: 3px;
+    color: #4A4A4A; font-family: 'Courier New', monospace; padding: 0 22px; margin-bottom: 10px;
+}
+.cs-hud-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px;
+    padding: 0 16px; margin-bottom: 16px;
+}
+.cs-hud-item {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    cursor: pointer; padding: 10px 4px; border-radius: 14px;
+    background: #F5F5F5; border: 0.5px solid rgba(0,0,0,0.03); transition: all 0.12s;
+}
+.cs-hud-item:active { transform: scale(0.93); background: rgba(74,74,74,0.06); }
+.cs-hud-item svg { width: 18px; height: 18px; stroke: #1C1C1E; fill: none; stroke-width: 1.5; }
+.cs-hud-item span { font-size: 9px; font-weight: 700; color: #8E8E93; }
+
+/* Toast */
+.cs-toast {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0.9);
+    background: #1C1C1E; color: #fff; padding: 16px 28px; border-radius: 16px;
+    font-size: 13px; font-weight: 700; z-index: 9999; pointer-events: none;
+    opacity: 0; transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3); text-align: center; line-height: 1.6;
+}
+.cs-toast.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }

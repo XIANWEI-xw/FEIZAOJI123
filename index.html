@@ -46,6 +46,7 @@
     <link rel="stylesheet" href="css/23-music-import.css">
     <link rel="stylesheet" href="css/gallery.css">
     <link rel="stylesheet" href="css/26-receipt.css">
+    <link rel="stylesheet" href="css/28-couple-space.css">
     
 </head>
 <body>
@@ -397,6 +398,12 @@
          <i class="fa-solid fa-receipt" style="font-size:24px;"></i>
       </div>
       <div class="app-label" style="color:var(--c-black);">心事账单</div>
+   </div>
+   <div class="draggable-app" id="app-couple-icon" onclick="CoupleSpace.open()" style="left: 5%; top: 30%;">
+      <div class="app-icon" id="icon-couple" style="background:#1C1C1E; color:#FFFFFF; border:0.5px solid rgba(255,255,255,0.1); box-shadow:0 8px 15px rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center;">
+         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="app-label" style="color:var(--c-black);">Couple</div>
    </div>
 </div>
                   </div>
@@ -2058,6 +2065,166 @@
                 <div class="home-indicator-area" onclick="closeCurrentApps()">
                     <div class="home-indicator"></div>
                 </div>
+            </div>
+         </div>
+         <!-- ================= App: Couple Space 情侣空间 ================= -->
+         <div class="app-window" id="app-couple-space" style="background: #FFFFFF; padding: 0;">
+            <div class="cs-app-wrap">
+               <div class="cs-bg-grid"></div>
+               <div class="cs-bg-wm">Us.</div>
+
+               <!-- 选择页 -->
+               <div class="cs-sel" id="cs-sel-page">
+                  <div class="cs-bg-grid"></div>
+                  <div class="cs-sel-bg-wm">Link</div>
+                  <div class="cs-sel-stars">
+                     <svg width="14" height="14" viewBox="0 0 24 24" style="top:18%;left:12%;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                     <svg width="10" height="10" viewBox="0 0 24 24" style="top:25%;left:80%;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                     <svg width="8" height="8" viewBox="0 0 24 24" style="top:55%;left:90%;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                     <svg width="12" height="12" viewBox="0 0 24 24" style="top:70%;left:8%;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </div>
+                  <div class="cs-sel-close" onclick="document.getElementById('app-couple-space').classList.remove('active')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+                  <div class="cs-sel-hd">
+                     <div class="cs-sel-ey">NEURAL LINK</div>
+                     <div class="cs-sel-tt">开启专属<br>双人频道</div>
+                     <div class="cs-sel-sub">选择一位联系人，进入你们的私密空间。<br>空间内所有数据仅对双方可见。</div>
+                  </div>
+                  <div class="cs-sel-ls" id="cs-sel-list">
+                     <!-- JS 动态渲染 -->
+                  </div>
+               </div>
+
+               <!-- 主空间 -->
+               <div class="cs-space" id="cs-space-page">
+                  <div class="cs-topbar">
+                     <div class="cs-tp-btn" onclick="CoupleSpace.backToSel()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+                     <div class="cs-tp-mid" id="cs-tp-name">LINKED</div>
+                     <div class="cs-tp-btn" onclick="CoupleSpace.openHUD()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2;"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></div>
+                  </div>
+                  <div class="cs-main-scroll">
+                     <!-- 大头像卡片 -->
+                     <div class="cs-card">
+                        <div class="cs-pf-wrap">
+                           <div class="cs-pf-deco"></div>
+                           <div class="cs-pf-row">
+                              <div class="cs-pf-av" id="cs-pf-me-av"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></div>
+                              <div class="cs-pf-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                              <div class="cs-pf-av" id="cs-pf-ta-av"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></div>
+                           </div>
+                           <div class="cs-pf-names">
+                              <div class="cs-pf-nc"><div class="cs-pf-nm" id="cs-pf-me-name">我</div><div class="cs-pf-sub">ADMIN</div></div>
+                              <div class="cs-pf-and">&</div>
+                              <div class="cs-pf-nc"><div class="cs-pf-nm" id="cs-pf-ta-name">TA</div><div class="cs-pf-sub">PARTNER</div></div>
+                           </div>
+                           <div class="cs-pf-days-bar">
+                              <div class="cs-pf-dl">TOGETHER</div>
+                              <div class="cs-pf-dv"><div class="cs-pf-dn" id="cs-pf-days-num">1</div><div class="cs-pf-du">DAYS</div></div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- p0 今日频率 -->
+                     <div class="cs-pnl active" id="cs-pnl-0">
+                        <div class="cs-sh">
+                           <div class="cs-sl"><div class="cs-stag">DAILY</div><div class="cs-stt">今日频率</div></div>
+                           <div style="display:flex;gap:6px;">
+                              <button class="cs-fb" onclick="CoupleSpace.fetchAllDaily()"><svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>调取</button>
+                              <button class="cs-fb cs-fb-send" onclick="CoupleSpace.packAndSend()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>打包发送</button>
+                           </div>
+                        </div>
+                        <div class="cs-db"><div class="cs-db-tt" id="cs-daily-quote">点击「调取」让 AI 生成专属内容</div><div class="cs-db-meta">— AI · Resonance</div></div>
+                        <div class="cs-ac" onclick="this.classList.toggle('open')"><div class="cs-ac-h"><div class="cs-ac-t"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>今日运势</div><svg class="cs-ac-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div><div class="cs-ac-b"><div class="cs-ac-inner" id="cs-daily-fortune">等待 AI 生成...</div></div></div>
+                        <div class="cs-ac" onclick="this.classList.toggle('open')"><div class="cs-ac-h"><div class="cs-ac-t"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>约会企划</div><svg class="cs-ac-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div><div class="cs-ac-b"><div class="cs-ac-inner" id="cs-daily-date-plan">等待 AI 生成...</div></div></div>
+                        <div class="cs-ac" onclick="this.classList.toggle('open')"><div class="cs-ac-h"><div class="cs-ac-t"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>情话弹药库</div><svg class="cs-ac-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div><div class="cs-ac-b"><div class="cs-ac-inner" id="cs-daily-flirt">等待 AI 生成...</div></div></div>
+                        <div class="cs-ac" onclick="this.classList.toggle('open')"><div class="cs-ac-h"><div class="cs-ac-t"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>关系小建议</div><svg class="cs-ac-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div><div class="cs-ac-b"><div class="cs-ac-inner" id="cs-daily-advice">等待 AI 生成...</div></div></div>
+                        <div class="cs-ac" onclick="this.classList.toggle('open')"><div class="cs-ac-h"><div class="cs-ac-t"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>默契指数</div><svg class="cs-ac-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div><div class="cs-ac-b"><div class="cs-ac-inner" id="cs-daily-sync">等待 AI 生成...</div></div></div>
+                     </div>
+
+                     <!-- p1 情绪胶囊 -->
+                     <div class="cs-pnl" id="cs-pnl-1">
+                        <div class="cs-sh">
+                           <div class="cs-sl"><div class="cs-stag">MOOD</div><div class="cs-stt">情绪胶囊</div></div>
+                           <button class="cs-fb" onclick="CoupleSpace.fetchMoodAnalysis()"><svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>AI分析</button>
+                        </div>
+                        <div class="cs-mood-grid">
+                           <div class="cs-mood-btn" data-mood="心动" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="#C06070" stroke-width="1.3" stroke-linejoin="round"/></svg><span>心动</span></div>
+                           <div class="cs-mood-btn" data-mood="甜蜜" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" stroke="#B08090" stroke-width="1.1"/><path d="M8.5 14c1 1.8 2.5 2.5 3.5 2.5s2.5-.7 3.5-2.5" stroke="#B08090" stroke-width="1.1" stroke-linecap="round"/><path d="M8.5 9.5v1M15.5 9.5v1" stroke="#B08090" stroke-width="1.4" stroke-linecap="round"/></svg><span>甜蜜</span></div>
+                           <div class="cs-mood-btn" data-mood="开心" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" stroke="#909060" stroke-width="1.1"/><path d="M8 14c1.2 2 2.8 2.8 4 2.8s2.8-.8 4-2.8" stroke="#909060" stroke-width="1.1" stroke-linecap="round"/><circle cx="9" cy="9.5" r="0.6" fill="#909060"/><circle cx="15" cy="9.5" r="0.6" fill="#909060"/></svg><span>开心</span></div>
+                           <div class="cs-mood-btn" data-mood="想你" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" stroke="#6A8A9A" stroke-width="1.1"/><circle cx="9" cy="10" r="0.5" fill="#6A8A9A"/><circle cx="15" cy="10" r="0.5" fill="#6A8A9A"/><path d="M9 15h6" stroke="#6A8A9A" stroke-width="1.1" stroke-linecap="round"/></svg><span>想你</span></div>
+                           <div class="cs-mood-btn" data-mood="难过" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" stroke="#556A7A" stroke-width="1.1"/><path d="M8.5 15.5c1-1.5 2.2-2 3.5-2s2.5.5 3.5 2" stroke="#556A7A" stroke-width="1.1" stroke-linecap="round"/><circle cx="9" cy="9.5" r="0.5" fill="#556A7A"/><circle cx="15" cy="9.5" r="0.5" fill="#556A7A"/></svg><span>难过</span></div>
+                           <div class="cs-mood-btn" data-mood="吃醋" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" stroke="#5A8A5A" stroke-width="1.1"/><path d="M8.5 14h7" stroke="#5A8A5A" stroke-width="1.1" stroke-linecap="round"/><path d="M9.5 8l1.5 1.5M14.5 8l-1.5 1.5" stroke="#5A8A5A" stroke-width="1.1" stroke-linecap="round"/></svg><span>吃醋</span></div>
+                           <div class="cs-mood-btn" data-mood="困了" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" stroke="#8A8A8A" stroke-width="1.1"/><path d="M8.5 14h7" stroke="#8A8A8A" stroke-width="1.1" stroke-linecap="round"/><path d="M8 9.5h2.5M13.5 9.5H16" stroke="#8A8A8A" stroke-width="1.1" stroke-linecap="round"/></svg><span>困了</span></div>
+                           <div class="cs-mood-btn" data-mood="激动" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2c-2 3-5 5.5-5 9.5a5 5 0 0 0 10 0c0-4-3-6.5-5-9.5z" stroke="#9A6040" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>激动</span></div>
+                           <div class="cs-mood-btn" data-mood="抱抱" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8M18 8a2 2 0 0 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" stroke="#6A6A6A" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>抱抱</span></div>
+                           <div class="cs-mood-btn" data-mood="社死" onclick="CoupleSpace.pickMood(this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="10" r="7.5" stroke="#666" stroke-width="1.1"/><circle cx="9.5" cy="9" r="1" stroke="#666" stroke-width="0.8"/><circle cx="14.5" cy="9" r="1" stroke="#666" stroke-width="0.8"/><path d="M10 13h4M9 18.5v1.5M15 18.5v1.5" stroke="#666" stroke-width="1.1" stroke-linecap="round"/></svg><span>社死</span></div>
+                        </div>
+                        <div class="cs-ac" onclick="this.classList.toggle('open')">
+                           <div class="cs-ac-h"><div class="cs-ac-t"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>AI 情绪洞察报告</div><svg class="cs-ac-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+                           <div class="cs-ac-b"><div class="cs-ac-inner" id="cs-mood-report">点击上方「AI分析」按钮生成洞察报告</div></div>
+                        </div>
+                     </div>
+
+                     <!-- p2 许愿池 -->
+                     <div class="cs-pnl" id="cs-pnl-2">
+                        <div class="cs-sh">
+                           <div class="cs-sl"><div class="cs-stag">WISH</div><div class="cs-stt">许愿池</div></div>
+                           <button class="cs-fb" onclick="CoupleSpace.fetchWishAI()"><svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>AI推荐</button>
+                        </div>
+                        <div class="cs-wish-input-row">
+                           <input class="cs-wish-inp" id="cs-wish-input" placeholder="写下想一起做的事...">
+                           <button class="cs-wish-add-btn" onclick="CoupleSpace.addWish()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                        </div>
+                        <div class="cs-wish-list" id="cs-wish-list"></div>
+                     </div>
+
+                     <!-- p3 情书匣子 -->
+                     <div class="cs-pnl" id="cs-pnl-3">
+                        <div class="cs-sh">
+                           <div class="cs-sl"><div class="cs-stag">LETTER</div><div class="cs-stt">情书匣子</div></div>
+                           <button class="cs-fb" onclick="CoupleSpace.fetchLetterAI()"><svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>AI代笔</button>
+                        </div>
+                        <div class="cs-letter-list" id="cs-letter-list"></div>
+                     </div>
+
+                     <!-- p4 誓言墙 -->
+                     <div class="cs-pnl" id="cs-pnl-4">
+                        <div class="cs-sh">
+                           <div class="cs-sl"><div class="cs-stag">VOW</div><div class="cs-stt">誓言墙</div></div>
+                           <button class="cs-fb" onclick="CoupleSpace.fetchVowAI()"><svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>AI誓词</button>
+                        </div>
+                        <div class="cs-vow-text" id="cs-vow-text">尚未刻录誓言</div>
+                        <div class="cs-vow-sig" id="cs-vow-sig"></div>
+                     </div>
+                  </div>
+
+                  <!-- 底栏 -->
+                  <div class="cs-dock"><div class="cs-dock-inner">
+                     <div class="cs-dk-item active" onclick="CoupleSpace.switchPanel(0,this)"><div class="cs-dk-ico"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="cs-dk-lb">心语</div></div>
+                     <div class="cs-dk-item" onclick="CoupleSpace.switchPanel(1,this)"><div class="cs-dk-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div class="cs-dk-lb">情绪</div></div>
+                     <div class="cs-dk-center" onclick="CoupleSpace.openHUD()"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                     <div class="cs-dk-item" onclick="CoupleSpace.switchPanel(2,this)"><div class="cs-dk-ico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="cs-dk-lb">许愿</div></div>
+                     <div class="cs-dk-item" onclick="CoupleSpace.switchPanel(3,this)"><div class="cs-dk-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div class="cs-dk-lb">情书</div></div>
+                     <div class="cs-dk-item" onclick="CoupleSpace.switchPanel(4,this)"><div class="cs-dk-ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="cs-dk-lb">誓言</div></div>
+                  </div></div>
+
+                  <!-- HUD -->
+                  <div class="cs-hud" id="cs-hud-panel" onclick="if(event.target===this)CoupleSpace.closeHUD()">
+                     <div class="cs-hud-sheet">
+                        <div class="cs-hud-handle"></div>
+                        <div class="cs-hud-title">ALL MODULES</div>
+                        <div class="cs-hud-grid">
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD();CoupleSpace.switchPanel(0)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>心语</span></div>
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD();CoupleSpace.switchPanel(1)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg><span>情绪</span></div>
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD();CoupleSpace.switchPanel(2)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>许愿</span></div>
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD();CoupleSpace.switchPanel(3)"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>情书</span></div>
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD();CoupleSpace.switchPanel(4)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>誓言</span></div>
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD();CoupleSpace.fetchAllDaily()"><svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg><span>全调取</span></div>
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD()"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg><span>纪念日</span></div>
+                           <div class="cs-hud-item" onclick="CoupleSpace.closeHUD()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>设置</span></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
             </div>
          </div>
          <!-- ================= 高定商店 STORE APP ================= -->
@@ -5311,6 +5478,7 @@
          <script src="js/24-coread.js"></script>
          <script src="js/25-chronos.js"></script>
          <script src="js/26-receipt.js"></script>
+         <script src="js/28-couple-space.js"></script>
          <script src="js/04-app-init.js"></script>
          <script src="js/27-anon-chat.js"></script>
    <!-- 🚀 终极修复：将动态样式表移至文档最末尾，确保 100% 覆盖系统样式 -->
@@ -5621,6 +5789,27 @@
    }
    .gal-couple-chat-card {
        margin: 8px auto !important;
+   }
+   /* 修复情侣空间卡片：去除气泡背景让卡片裸露居中 */
+   .bubble-sys:has(.cs-pack),
+   .bubble-sys:has(.cs-pack-body),
+   .bubble-bot:has(.cs-pack),
+   .bubble-user:has(.cs-pack) {
+       background: transparent !important;
+       border: none !important;
+       box-shadow: none !important;
+       padding: 0 !important;
+       max-width: 100% !important;
+       border-radius: 0 !important;
+   }
+   .msg-row:has(.cs-pack) {
+       justify-content: center !important;
+   }
+   .msg-row:has(.cs-pack) .msg-avatar-wrap {
+       display: none !important;
+   }
+   .msg-row.sys-row:has(.cs-pack) .bubble-sys {
+       max-width: 100% !important;
    }
    </style>
    <!-- ================= 弹性艺术更新公告 (支持往期切换) ================= -->
