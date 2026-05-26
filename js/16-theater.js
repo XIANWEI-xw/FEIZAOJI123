@@ -335,6 +335,20 @@ actionColorPicker.oninput = function() {
     saveData();
 };
 
+// 线下自定义范围总结按钮 - 动态注入
+if (!document.getElementById('btnCustomSync')) {
+    var syncBtn = document.getElementById('btnSyncMemory');
+    if (syncBtn) {
+        var customBtn = document.createElement('div');
+        customBtn.className = 'btn-memory-sync';
+        customBtn.id = 'btnCustomSync';
+        customBtn.style.cssText = 'margin-top:10px;border-color:var(--border-color);cursor:pointer;';
+        customBtn.onclick = function() { openTheaterCustomSync(); };
+        customBtn.innerHTML = '<div class="main-text">Custom Range Sync</div><div class="sub-text">自定义范围总结 · 分段刻录记忆</div>';
+        syncBtn.after(customBtn);
+    }
+}
+
 // 线下自动总结设置 - 动态注入 UI
 if (!document.getElementById('th-auto-sum-setting')) {
     const refSlider = document.getElementById('th-length-slider');
@@ -1402,4 +1416,128 @@ function syncTheaterToMemory() {
         if (subText) subText.innerText = '总结失败，请重试';
         if (btn) { btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }
     });
+}
+
+// ================= 线下自定义范围总结引擎 =================
+
+function openTheaterCustomSync() {
+    if (!currentContactId) return;
+    const c = contacts.find(x => x.id === currentContactId);
+    if (!c) return;
+
+    var modal = document.getElementById('th-custom-sync-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'th-custom-sync-modal';
+        modal.style.cssText = 'display:none;position:absolute;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;justify-content:center;align-items:center;padding:20px;';
+        modal.innerHTML = '<div style="background:#FFFFFF;border:1px solid rgba(0,0,0,0.08);border-radius:24px;padding:28px 24px;width:100%;max-width:340px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);"><div style="font-family:var(--th-font-serif);font-size:16px;font-weight:900;color:#1C1C1E;letter-spacing:2px;text-align:center;margin-bottom:20px;">CUSTOM ARCHIVE</div><div style="background:#F4F3F0;border-radius:14px;padding:14px 16px;margin-bottom:20px;border:0.5px solid rgba(0,0,0,0.04);"><div style="font-size:9px;font-weight:800;color:#A8A196;letter-spacing:1.5px;margin-bottom:6px;">LAST ARCHIVED AT</div><div id="th-cs-last-idx" style="font-family:\'Space Mono\',monospace;font-size:15px;font-weight:900;color:#1C1C1E;">第 0 轮</div><div id="th-cs-last-info" style="font-size:11px;color:#8E8E93;margin-top:4px;">尚未进行过总结</div></div><div style="margin-bottom:18px;"><label style="font-size:11px;font-weight:800;color:#1C1C1E;letter-spacing:0.5px;display:block;margin-bottom:8px;">FROM (起始轮数)</label><input type="number" id="th-cs-from" placeholder="0" style="width:100%;height:44px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.1);background:#FAFAFA;color:#1C1C1E;padding:0 14px;font-family:\'Space Mono\',monospace;font-size:15px;font-weight:700;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor=\'#C3A772\'" onblur="this.style.borderColor=\'rgba(0,0,0,0.1)\'"></div><div style="margin-bottom:18px;"><label style="font-size:11px;font-weight:800;color:#1C1C1E;letter-spacing:0.5px;display:block;margin-bottom:8px;">TO (结束轮数)</label><input type="number" id="th-cs-to" placeholder="全部" style="width:100%;height:44px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.1);background:#FAFAFA;color:#1C1C1E;padding:0 14px;font-family:\'Space Mono\',monospace;font-size:15px;font-weight:700;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor=\'#C3A772\'" onblur="this.style.borderColor=\'rgba(0,0,0,0.1)\'"></div><div id="th-cs-preview" style="font-size:11px;color:#8E8E93;text-align:center;margin-bottom:18px;font-weight:600;"></div><div style="display:flex;gap:10px;"><button onclick="closeTheaterCustomSync()" style="flex:1;height:42px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.1);background:#FAFAFA;color:#1C1C1E;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:0.2s;">CANCEL</button><button id="th-cs-btn-go" onclick="executeTheaterCustomSync()" style="flex:1;height:42px;border-radius:10px;border:none;background:#1C1C1E;color:#FFFFFF;font-size:12px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.15);">ARCHIVE</button></div></div>';
+        document.getElementById('th-settings-overlay').appendChild(modal);
+    }
+
+    modal.style.display = 'flex';
+
+    var thMsgs = c.history.filter(function(m) { return m.isTheater && (m.role === 'user' || m.role === 'assistant'); });
+    var totalRounds = Math.floor(thMsgs.length / 2);
+    var lastIdx = c.theaterLastAutoSumIndex || 0;
+    var lastRound = 0;
+    var countForRound = 0;
+    for (var i = 0; i < c.history.length && i < lastIdx; i++) {
+        if (c.history[i].isTheater && (c.history[i].role === 'user' || c.history[i].role === 'assistant')) countForRound++;
+    }
+    lastRound = Math.floor(countForRound / 2);
+
+    document.getElementById('th-cs-last-idx').textContent = '第 ' + lastRound + ' 轮 (共 ' + totalRounds + ' 轮)';
+    document.getElementById('th-cs-last-info').textContent = lastRound === 0 ? '尚未进行过总结' : '上次总结覆盖了前 ' + lastRound + ' 轮对话';
+    document.getElementById('th-cs-from').value = lastRound;
+    document.getElementById('th-cs-to').value = totalRounds;
+
+    updateCustomSyncPreview();
+    document.getElementById('th-cs-from').oninput = updateCustomSyncPreview;
+    document.getElementById('th-cs-to').oninput = updateCustomSyncPreview;
+}
+
+function updateCustomSyncPreview() {
+    if (!currentContactId) return;
+    var c = contacts.find(function(x) { return x.id === currentContactId; });
+    if (!c) return;
+
+    var thMsgs = c.history.filter(function(m) { return m.isTheater && (m.role === 'user' || m.role === 'assistant'); });
+    var totalRounds = Math.floor(thMsgs.length / 2);
+
+    var from = parseInt(document.getElementById('th-cs-from').value) || 0;
+    var to = parseInt(document.getElementById('th-cs-to').value) || totalRounds;
+    from = Math.max(0, Math.min(from, totalRounds));
+    to = Math.max(from, Math.min(to, totalRounds));
+
+    var msgCount = (to - from) * 2;
+    var preview = document.getElementById('th-cs-preview');
+    preview.textContent = '将总结第 ' + from + '~' + to + ' 轮，约 ' + msgCount + ' 条消息';
+
+    var btn = document.getElementById('th-cs-btn-go');
+    if (msgCount < 4) {
+        btn.style.opacity = '0.4';
+        btn.style.pointerEvents = 'none';
+        preview.textContent += ' (太少，至少需要4条)';
+    } else {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+    }
+}
+
+function closeTheaterCustomSync() {
+    var modal = document.getElementById('th-custom-sync-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function executeTheaterCustomSync() {
+    if (!currentContactId) return;
+    var c = contacts.find(function(x) { return x.id === currentContactId; });
+    if (!c) return;
+
+    var thMsgs = c.history.filter(function(m) { return m.isTheater && (m.role === 'user' || m.role === 'assistant'); });
+    var totalRounds = Math.floor(thMsgs.length / 2);
+
+    var from = parseInt(document.getElementById('th-cs-from').value) || 0;
+    var to = parseInt(document.getElementById('th-cs-to').value) || totalRounds;
+    from = Math.max(0, Math.min(from, totalRounds));
+    to = Math.max(from, Math.min(to, totalRounds));
+
+    var startMsgIdx = from * 2;
+    var endMsgIdx = to * 2;
+    var targetMsgs = thMsgs.slice(startMsgIdx, endMsgIdx);
+
+    if (targetMsgs.length < 4) {
+        alert('选定范围内的消息太少，无法总结。');
+        return;
+    }
+
+    var btn = document.getElementById('th-cs-btn-go');
+    btn.textContent = 'ARCHIVING...';
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
+
+    var realStartIdx = 0;
+    var count = 0;
+    for (var i = 0; i < c.history.length; i++) {
+        if (c.history[i].isTheater && (c.history[i].role === 'user' || c.history[i].role === 'assistant')) {
+            if (count === startMsgIdx) { realStartIdx = i; break; }
+            count++;
+        }
+    }
+
+    try {
+        await executeTheaterAutoSum(c, realStartIdx);
+        c.theaterLastAutoSumIndex = realStartIdx + targetMsgs.length;
+        saveData();
+
+        closeTheaterCustomSync();
+        if (typeof mvUpdateSettingsPreview === 'function') mvUpdateSettingsPreview(c);
+        alert('✦ 成功！第 ' + from + '~' + to + ' 轮的记忆已刻录至记忆库。');
+    } catch (e) {
+        alert('总结失败：' + e.message);
+    } finally {
+        btn.textContent = 'ARCHIVE';
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+    }
 }
