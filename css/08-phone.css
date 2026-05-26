@@ -272,3 +272,18 @@
       transition: transform 0.2s, background 0.2s; 
       }
       .c-btn-hangup:active { transform: scale(0.9); background: rgba(255,255,255,0.15); }
+      /* 修复：电话通话输入框在不同机型上被键盘顶飞 */
+.call-bottom-ctrl {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 10px 20px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 60%, transparent 100%) !important;
+    z-index: 50 !important;
+}
+
+/* 确保幽灵字幕区不被输入栏遮挡 */
+.ghost-transcript {
+    padding-bottom: 160px !important;
+}

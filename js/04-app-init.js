@@ -278,14 +278,6 @@ if (sFu) followedUsers = new Set(JSON.parse(sFu));
                  }
              });
          }
-// 全局性能休眠引擎：页面不可见时冻结所有动画和定时器
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        document.body.classList.add('perf-sleep');
-    } else {
-        document.body.classList.remove('perf-sleep');
-    }
-});
 // ================= 全局性能休眠引擎 =================
 document.addEventListener('visibilitychange', function() {
     if (document.hidden) {
@@ -303,6 +295,10 @@ document.addEventListener('visibilitychange', function() {
         if (audio && window._savedTimeUpdate) {
             audio.ontimeupdate = window._savedTimeUpdate;
             window._savedTimeUpdate = null;
+        }
+        // 恢复雪花动画（如果之前被暂停了）
+        if (window._snowStopped && typeof drawSnow === 'function') {
+            drawSnow();
         }
     }
 });

@@ -91,3 +91,39 @@
     /* 滑块 */
     .cs-range { -webkit-appearance: none; width: 100%; height: 4px; background: #E5E5EA; border-radius: 2px; outline: none; }
     .cs-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #1C1C1E; border-radius: 50%; cursor: pointer; border: 3px solid #FFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    /* 修复：聊天室设置页底部保存按钮在不同机型上飘移 */
+#chat-settings-modal footer,
+#wb-modal footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* 修复：心事小票撰写页的按钮区域 */
+.rc-compose-view .rc-cv-hd {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+}
+
+/* 修复：线下剧场输入框在小屏幕上被挤出视口 */
+#theater-modal .input-wrapper {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    z-index: 100 !important;
+}
+
+/* 修复：底栏 Dock 在安卓/小屏上偏移 */
+.bottom-tabs-dark {
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+/* 修复：聊天输入栏在不同机型上的底部安全距离 */
+#chat-input-wrap {
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}

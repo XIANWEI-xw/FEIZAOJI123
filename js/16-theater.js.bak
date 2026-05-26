@@ -145,24 +145,24 @@ function saveThStyle() {
 }
 
 function deleteThPreset(index, event) {
-    if(event) { event.stopPropagation(); event.preventDefault(); }
+    event.stopPropagation();
     if (!confirm("确定要永久删除这条文风吗？")) return;
     
-    const presets = gConfig.thPresets;
-    if (!presets || index < 0 || index >= presets.length) return;
-    
-    const deletedId = presets[index].id;
+    const presets = getThPresets();
+    const deletedPreset = presets[index];
+    const deletedId = deletedPreset.id;
     presets.splice(index, 1);
     
     const c = contacts.find(x => x.id === currentContactId);
     if (c) {
+        // 从多选数组中移除被删除的文风 ID
         if (c.theaterStyleIds) {
             c.theaterStyleIds = c.theaterStyleIds.filter(id => id !== deletedId);
         }
+        // 重建合并文本
         const remaining = presets.filter(p => c.theaterStyleIds && c.theaterStyleIds.includes(p.id));
         c.theaterStylePrompt = remaining.map(p => `【${p.title}】：${p.content}`).join('\n\n');
-        const promptInput = document.getElementById('th-stylePromptInput');
-        if(promptInput) promptInput.value = c.theaterStylePrompt;
+        document.getElementById('th-stylePromptInput').value = c.theaterStylePrompt;
     }
     
     saveData(); 
