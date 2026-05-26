@@ -248,7 +248,11 @@ function toggleThTheater(btn) {
     const c = contacts.find(x => x.id === currentContactId);
     
     closeChatMenu(); 
-    document.getElementById('theater-modal').classList.add('active');
+    const theaterEl = document.getElementById('theater-modal');
+    theaterEl.classList.add('active');
+    theaterEl.style.pointerEvents = 'auto';
+    document.getElementById('th-scroll-wrap').style.overflow = 'auto';
+    document.getElementById('th-settings-overlay').classList.remove('active');
     document.getElementById('th-header-title').innerText = c.name.toUpperCase();
 
     // 🚀 核心修复：恢复上次设置的文字颜色
@@ -331,6 +335,35 @@ actionColorPicker.oninput = function() {
     saveData();
 };
 
+// 线下自动总结设置 - 动态注入 UI
+if (!document.getElementById('th-auto-sum-setting')) {
+    const refSlider = document.getElementById('th-length-slider');
+    if (refSlider) {
+        const parentItem = refSlider.closest('.setting-item');
+        if (parentItem) {
+            const el = document.createElement('div');
+            el.className = 'setting-item';
+            el.id = 'th-auto-sum-setting';
+            el.style.cssText = 'flex-direction:column;align-items:flex-start;gap:12px;margin-top:10px;';
+            el.innerHTML = '<div style="width:100%;display:flex;justify-content:space-between;align-items:center;"><div class="setting-label">Auto Archive <span class="setting-label-sub">每 N 轮对话自动总结到记忆库 (0=关闭)</span></div><div style="font-family:var(--th-font-serif);font-size:13px;color:var(--th-gold-text);font-weight:600;" id="th-auto-sum-val">0</div></div><input type="range" id="th-auto-sum-slider" min="0" max="50" step="5" value="0" style="width:100%;accent-color:#C3A772;cursor:pointer;">';
+            parentItem.after(el);
+        }
+    }
+}
+const thAutoSumSlider = document.getElementById('th-auto-sum-slider');
+const thAutoSumVal = document.getElementById('th-auto-sum-val');
+const savedAutoSum = c.theaterAutoSumFreq || 0;
+if (thAutoSumSlider) {
+    thAutoSumSlider.value = savedAutoSum;
+    if (thAutoSumVal) thAutoSumVal.innerText = savedAutoSum === 0 ? '关闭' : savedAutoSum + '轮';
+    thAutoSumSlider.oninput = function() {
+        const v = parseInt(this.value);
+        if (thAutoSumVal) thAutoSumVal.innerText = v === 0 ? '关闭' : v + '轮';
+        c.theaterAutoSumFreq = v;
+        saveData();
+    };
+}
+
 if (!c.theaterHistory) c.theaterHistory = [];
 
     const box = document.getElementById('th-dialogue-box');
@@ -346,7 +379,15 @@ if (!c.theaterHistory) c.theaterHistory = [];
 }
          
          function closeTheaterMode() {
-             document.getElementById('theater-modal').classList.remove('active');
+             const theaterEl = document.getElementById('theater-modal');
+             theaterEl.classList.remove('active');
+             theaterEl.style.pointerEvents = 'auto';
+             document.getElementById('th-scroll-wrap').style.overflow = 'auto';
+             document.getElementById('th-settings-overlay').classList.remove('active');
+             var palette = document.getElementById('th-palette-modal');
+             if(palette) palette.classList.remove('active');
+             var mind = document.getElementById('thMindModal');
+             if(mind) mind.classList.remove('active');
          }
          
           function clearTheater() {
@@ -413,6 +454,7 @@ function openThColorPalette() {
 
 function closeThColorPalette() {
     document.getElementById('th-palette-modal').classList.remove('active');
+    document.getElementById('theater-modal').style.pointerEvents = 'auto';
 }
 
 function selectThColor(color, name) {
@@ -1011,6 +1053,8 @@ ${wbTop}
                  c.history.push(aiMsg);
                  saveData(); 
 
+                 checkTheaterAutoSum(c);
+
                  if (isUserInTheater) {
                      appendTheaterMsg(aiMsg);
                      thScrollToBottom();
@@ -1218,3 +1262,144 @@ setTimeout(() => {
         }, { passive: true });
     }
 }, 500);
+
+// ================= 线下记忆自动总结引擎 =================
+
+async function checkTheaterAutoSum(c) {
+    if (!c || !c.theaterAutoSumFreq || c.theaterAutoSumFreq <= 0) return;
+    const lastIdx = c.theaterLastAutoSumIndex || 0;
+    let count = 0;
+    for (let i = lastIdx; i < c.history.length; i++) {
+        if (c.history[i].isTheater && (c.history[i].role === 'user' || c.history[i].role === 'assistant')) count++;
+    }
+    if (Math.floor(count / 2) < c.theaterAutoSumFreq) return;
+    await executeTheaterAutoSum(c, lastIdx);
+}
+
+async function executeTheaterAutoSum(c, fromIdx) {
+    if (!gConfig.apiUrl || !gConfig.apiKey) return;
+    const name = c.chatRemark || c.name;
+    const uName = gConfig.meName || '用户';
+    const startIdx = typeof fromIdx === 'number' ? fromIdx : (c.theaterLastAutoSumIndex || 0);
+
+    let lines = [];
+    for (let i = startIdx; i < c.history.length; i++) {
+        const m = c.history[i];
+        if (!m.isTheater || (m.role !== 'user' && m.role !== 'assistant')) continue;
+        const clean = (m.content || '').replace(/<[^>]+>/g, '').trim();
+        if (clean) lines.push((m.role === 'user' ? uName : name) + ': ' + clean.substring(0, 400));
+    }
+    if (lines.length < 4) return;
+
+    const prompt = `你是一个专业的剧本记忆分析师。请仔细阅读「${name}」与「${uName}」的线下面对面互动记录，提取所有值得长期记忆的关键信息。
+
+【提取要求】：
+1. 提取 3-6 条独立的记忆条目
+2. 每条必须包含具体细节：时间节点、地点氛围、关键动作、表情变化、情绪波动、说过的原话、身体接触、承诺或秘密
+3. 用★标记重要度：★=日常细节 ★★=重要事件 ★★★=关键转折/情感突破
+4. 以第三人称客观视角记录
+5. 每条 40-100 字，信息密度极高
+
+【严格格式】每条用 |||SEP||| 分隔：
+★重要度|标题(8字以内)|详细内容
+
+【范例】：
+★★★|深夜便利店牵手|凌晨2点便利店门口，${name}在沉默中主动握住${uName}的手指，指尖冰凉却微微颤抖。${uName}没有抽开，两人沉默站了近一分钟。${name}先松手假装看手机，耳尖泛红。
+|||SEP|||
+★★|关于童年的裂缝|${name}在窗边提到"小时候家里总是很安静"，语气极度克制。${uName}追问时${name}笑着转移话题，但手指在无意识地抠沙发扶手。
+|||SEP|||
+★|咖啡偏好暴露|${name}点了一杯超甜的焦糖拿铁又假装不喜欢甜食，被${uName}当场拆穿后耳朵红了整整三分钟。
+
+以下是待总结的线下互动记录（${lines.length}条）：
+${lines.join('\n')}
+
+直接输出记忆条目：`;
+
+    try {
+        const url = (gConfig.apiUrl || '').replace(/\/+$/, '');
+        const base = url.endsWith('/v1') ? url : url + '/v1';
+        const res = await fetch(base + '/chat/completions', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + gConfig.apiKey, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: gConfig.model, messages: [{ role: 'user', content: prompt }], temperature: 0.6, max_tokens: 2500 })
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const raw = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
+        if (!raw) return;
+
+        if (!c.memoryEntries) c.memoryEntries = [];
+        const entries = raw.split('|||SEP|||').map(s => s.trim()).filter(s => s.length > 5);
+        let added = 0;
+
+        entries.forEach(entry => {
+            const parts = entry.split('|').map(s => s.trim());
+            if (parts.length < 3) return;
+            const starsRaw = parts[0];
+            const title = parts[1].replace(/^[#\-\*\s]+/, '');
+            const content = parts.slice(2).join('|').replace(/^[：:\s]+/, '');
+            let stars = (starsRaw.match(/★/g) || []).length;
+            stars = Math.max(1, Math.min(3, stars));
+
+            const isDup = c.memoryEntries.some(e => e.title === title || (e.content && content && e.content.substring(0, 25) === content.substring(0, 25)));
+            if (isDup) return;
+
+            c.memoryEntries.push({
+                id: 'thsum_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                title: title,
+                content: content,
+                category: '线下记忆',
+                keywords: '',
+                stars: stars,
+                source: 'theater_auto',
+                createdAt: Date.now()
+            });
+            added++;
+        });
+
+        c.theaterLastAutoSumIndex = c.history.length;
+        saveData();
+
+        if (added > 0) {
+            const box = document.getElementById('th-dialogue-box');
+            if (box && document.getElementById('theater-modal').classList.contains('active')) {
+                const hint = document.createElement('div');
+                hint.style.cssText = 'text-align:center;font-size:9px;color:var(--th-gold-text);letter-spacing:2px;margin:15px 0;opacity:0.6;animation:pulseLight 2s infinite alternate;';
+                hint.innerText = '✦ AUTO ARCHIVE: ' + added + ' 条记忆已刻录至记忆库 ✦';
+                box.appendChild(hint);
+                thScrollToBottom();
+            }
+        }
+    } catch(e) {
+        console.error('[Theater AutoSum]', e);
+    }
+}
+
+function syncTheaterToMemory() {
+    if (!currentContactId) return;
+    const c = contacts.find(x => x.id === currentContactId);
+    if (!c) return;
+
+    const btn = document.getElementById('btnSyncMemory');
+    const mainText = document.getElementById('syncMainText');
+    const subText = document.getElementById('syncSubText');
+    if (mainText) mainText.innerText = 'Archiving...';
+    if (subText) subText.innerText = '正在深度分析并提取关键记忆...';
+    if (btn) { btn.style.pointerEvents = 'none'; btn.style.opacity = '0.5'; }
+
+    const old = c.theaterLastAutoSumIndex;
+    c.theaterLastAutoSumIndex = 0;
+
+    executeTheaterAutoSum(c, 0).then(() => {
+        if (mainText) mainText.innerText = 'Summarize & Save Memory';
+        if (subText) subText.innerText = '总结当前对话，并将其刻录至核心记忆';
+        if (btn) { btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }
+        if (typeof mvUpdateSettingsPreview === 'function') mvUpdateSettingsPreview(c);
+        alert('✦ 线下记忆已刻录至记忆库！\n可在聊天室设置 → 记忆库中查看。');
+    }).catch(() => {
+        c.theaterLastAutoSumIndex = old;
+        if (mainText) mainText.innerText = 'Summarize & Save Memory';
+        if (subText) subText.innerText = '总结失败，请重试';
+        if (btn) { btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }
+    });
+}

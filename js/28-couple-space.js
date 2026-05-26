@@ -533,6 +533,7 @@ ${ctx}
         c.coupleSpace.letters.forEach((l, i) => {
             const item = document.createElement('div');
             item.className = 'cs-letter-item';
+            const isLong = l.text.length > 60;
             item.innerHTML = `
                 <div class="cs-letter-hd">
                     <div class="cs-letter-from">FROM: ${l.from}</div>
@@ -541,9 +542,11 @@ ${ctx}
                         <div class="cs-del-btn" style="display:none;width:20px;height:20px;border-radius:50%;background:rgba(255,59,48,0.1);color:#FF3B30;font-size:10px;font-weight:900;cursor:pointer;align-items:center;justify-content:center;" onclick="event.stopPropagation();CoupleSpace.deleteLetter(${i})">✕</div>
                     </div>
                 </div>
-                <div class="cs-letter-pv">${l.text}</div>
+                <div class="cs-letter-pv" style="${isLong ? 'display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-height:4.5em;transition:max-height 0.3s ease;' : ''}">${l.text}</div>
+                ${isLong ? '<div class="cs-letter-expand" style="font-family:monospace;font-size:9px;font-weight:800;color:rgba(0,0,0,0.25);letter-spacing:1px;margin-top:6px;cursor:pointer;text-align:right;padding:2px 0;-webkit-tap-highlight-color:transparent;" onclick="event.stopPropagation();var pv=this.previousElementSibling;var isOpen=pv.style.maxHeight===\'none\';pv.style.webkitLineClamp=isOpen?\'3\':\'unset\';pv.style.maxHeight=isOpen?\'4.5em\':\'none\';pv.style.overflow=isOpen?\'hidden\':\'visible\';pv.style.display=isOpen?\'-webkit-box\':\'block\';this.textContent=isOpen?\'展开全文 ▾\':\'收起 ▴\';">展开全文 ▾</div>' : ''}
             `;
-            item.onclick = () => {
+            item.onclick = (e) => {
+                if(e.target.classList.contains('cs-letter-expand')) return;
                 const del = item.querySelector('.cs-del-btn');
                 const isShown = del.style.display === 'flex';
                 list.querySelectorAll('.cs-del-btn').forEach(d => d.style.display = 'none');
@@ -605,31 +608,11 @@ ${ctx}
 
         if(typeof saveData === 'function') saveData();
         currentTarget = c;
-        // 强制直接操作DOM，不依赖 renderLetters 的 currentTarget 检查
+        // 强制直接操作DOM
         const list = document.getElementById('cs-letter-list');
         if(list){
-            list.innerHTML = '';
-            c.coupleSpace.letters.forEach((l, i) => {
-                const item = document.createElement('div');
-                item.className = 'cs-letter-item';
-                item.innerHTML = `
-                    <div class="cs-letter-hd">
-                        <div class="cs-letter-from">FROM: ${l.from}</div>
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <div class="cs-letter-date">${l.date}</div>
-                            <div class="cs-del-btn" style="display:none;width:20px;height:20px;border-radius:50%;background:rgba(255,59,48,0.1);color:#FF3B30;font-size:10px;font-weight:900;cursor:pointer;align-items:center;justify-content:center;" onclick="event.stopPropagation();CoupleSpace.deleteLetter(${i})">✕</div>
-                        </div>
-                    </div>
-                    <div class="cs-letter-pv">${l.text}</div>
-                `;
-                item.onclick = () => {
-                    const del = item.querySelector('.cs-del-btn');
-                    const isShown = del.style.display === 'flex';
-                    list.querySelectorAll('.cs-del-btn').forEach(d => d.style.display = 'none');
-                    del.style.display = isShown ? 'none' : 'flex';
-                };
-                list.appendChild(item);
-            });
+            currentTarget = c;
+            renderLetters();
         }
         csToast('✓ ' + name + ' 写了 ' + addedCount + ' 封情书');
     }

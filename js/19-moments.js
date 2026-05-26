@@ -2183,11 +2183,18 @@ ${linkedInfoStr}
                      alpha: Math.random() * 0.5 + 0.3 
                  });
              }
+             window._snowStopped = false;
              drawSnow();
          }
          
          function drawSnow() {
              if(!snowCtx) return;
+             var momentsEl = document.getElementById('view-main-moments');
+             if(!momentsEl || momentsEl.style.display === 'none' || document.hidden) {
+                 window._snowStopped = true;
+                 return;
+             }
+             window._snowStopped = false;
              snowCtx.clearRect(0, 0, snowWidth, snowHeight);
              for (let i = 0; i < flakes.length; i++) {
                  let f = flakes[i];
@@ -2195,11 +2202,8 @@ ${linkedInfoStr}
                  let currentAlpha = f.alpha * fadeRatio;
                  snowCtx.beginPath();
                  snowCtx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
-                 snowCtx.shadowBlur = 5;
-                 snowCtx.shadowColor = `rgba(0, 0, 0, ${currentAlpha * 0.2})`; 
                  snowCtx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
                  snowCtx.fill();
-                 snowCtx.shadowBlur = 0;
              }
              for (let i = 0; i < flakes.length; i++) {
                  let f = flakes[i];
@@ -2210,9 +2214,7 @@ ${linkedInfoStr}
                      else { f.x = Math.random() * snowWidth; f.y = -5; }
                  }
              }
-             if(document.getElementById('view-main-moments').style.display !== 'none') {
-                 requestAnimationFrame(drawSnow);
-             }
+             requestAnimationFrame(drawSnow);
          }
          
          window.addEventListener('resize', () => {

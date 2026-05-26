@@ -128,3 +128,14 @@ input, textarea, select {
     -webkit-user-select: auto !important;
     user-select: auto !important;
 }
+/* 全局休眠：页面不可见时冻结所有动画释放GPU */
+.perf-sleep *,
+.perf-sleep *::before,
+.perf-sleep *::after {
+    animation-play-state: paused !important;
+    transition: none !important;
+}
+.perf-sleep canvas { visibility: hidden !important; }
+.perf-sleep .soap-float-player { animation: none !important; }
+.perf-sleep #star-bg * { animation: none !important; }
+#star-bg.frozen * { animation-play-state: paused !important; }

@@ -3862,12 +3862,24 @@
             </div>
          </div>
          <div class="action-sheet-overlay" id="select-chat-sheet" onclick="closeSelectChat()">
-            <div class="action-sheet" onclick="event.stopPropagation()">
-               <div class="as-group">
-                  <div style="padding:24px; font-weight:800; text-align:center; border-bottom:0.5px solid rgba(0,0,0,0.05); font-size:17px; letter-spacing:0.5px;">选择聊天角色</div>
-                  <div id="select-chat-list" style="max-height:50vh; overflow-y:auto; padding:10px 0;"></div>
+            <div class="action-sheet" onclick="event.stopPropagation()" style="max-width:380px;">
+               <div class="as-group" style="background:rgba(255,255,255,0.95); backdrop-filter:blur(30px); border-radius:20px; overflow:hidden;">
+                  <div style="padding:20px 20px 0; display:flex; align-items:center; justify-content:space-between;">
+                     <div style="font-size:18px; font-weight:900; letter-spacing:-0.5px;">新对话</div>
+                     <div style="font-family:'Courier New',monospace; font-size:8px; font-weight:800; color:#A8A196; letter-spacing:2px;">SELECT PERSONA</div>
+                  </div>
+                  <div id="select-chat-mode-tabs" style="display:flex; padding:12px 20px 0; gap:6px;">
+                     <div id="sct-single" onclick="switchSelectChatMode('single')" style="flex:1; text-align:center; padding:10px 0; border-radius:100px; font-size:12px; font-weight:800; cursor:pointer; background:var(--c-black); color:#fff; transition:0.3s; letter-spacing:1px;">单聊</div>
+                     <div id="sct-group" onclick="switchSelectChatMode('group')" style="flex:1; text-align:center; padding:10px 0; border-radius:100px; font-size:12px; font-weight:800; cursor:pointer; background:rgba(0,0,0,0.04); color:var(--c-black); transition:0.3s; letter-spacing:1px;">群聊</div>
+                  </div>
+                  <div id="select-chat-list" style="max-height:45vh; overflow-y:auto; padding:8px 12px 12px; scrollbar-width:none;"></div>
+                  <div id="select-chat-group-actions" style="display:none; padding:0 20px 16px;">
+                     <div style="font-size:9px; font-weight:800; color:#A8A196; letter-spacing:1.5px; margin-bottom:8px; text-transform:uppercase;">Group Name</div>
+                     <input type="text" id="group-chat-name-input" placeholder="群聊名称 (可选)" style="width:100%; padding:12px 16px; border-radius:14px; border:1px solid rgba(0,0,0,0.06); font-size:14px; font-weight:600; margin-bottom:10px; outline:none; background:rgba(0,0,0,0.02); box-sizing:border-box;">
+                     <button onclick="createGroupChat()" style="width:100%; padding:14px; border-radius:100px; background:var(--c-black); color:#fff; border:none; font-size:13px; font-weight:800; cursor:pointer; letter-spacing:2px; box-shadow:0 8px 20px rgba(0,0,0,0.15); transition:0.2s;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">CREATE GROUP</button>
+                  </div>
                </div>
-               <button class="as-btn as-cancel" style="margin-bottom:10px;" onclick="closeSelectChat()">取消</button>
+               <button class="as-btn as-cancel" style="margin-bottom:10px; border-radius:16px; font-weight:800; letter-spacing:1px;" onclick="closeSelectChat()">取消</button>
             </div>
          </div>
          <!-- 撤回消息查阅弹窗 -->
@@ -4292,13 +4304,23 @@
                     <section style="margin-bottom: 40px;">
                         <div class="cs-section-head">01. Identity & Persona</div>
                         
-                        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                            <div style="flex: 1; background: #F9F9F7; border-radius: 20px; padding: 20px; text-align: center;">
+                        <!-- 群聊专属：群头像设置 -->
+                        <div class="cs-group-only" style="display:none; background:#F9F9F7; border-radius:20px; padding:20px; text-align:center; margin-bottom:15px;">
+                            <div class="cs-avatar-box" id="cs-group-avatar-preview" onclick="document.getElementById('cs-group-avatar-file').click()" style="width:72px; height:72px; margin:0 auto 12px; border:2px solid #FFF; box-shadow:0 8px 20px rgba(0,0,0,0.05); border-radius:18px; overflow:hidden; cursor:pointer; background:var(--c-gray-light); display:flex; align-items:center; justify-content:center;">
+                                <div id="cs-group-avatar-inner" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#A8A196;font-weight:700;">点击上传</div>
+                            </div>
+                            <div style="font-size:8px; font-weight:800; color:#A8A196; letter-spacing:1px;">GROUP AVATAR</div>
+                            <input type="file" id="cs-group-avatar-file" hidden accept="image/*" onchange="handleImageUpload(event, 'cs-group-avatar-inner', 'cs-group-avatar-data', null, true)">
+                            <input type="hidden" id="cs-group-avatar-data" value="">
+                        </div>
+                        <!-- 单聊：双头像（横向排列） -->
+                        <div id="cs-solo-headers" style="display: flex; flex-direction: row; gap: 15px; margin-bottom: 25px; width: 100%; align-items: stretch;">
+                            <div style="flex: 11 50%; min-width: 0; background: #F9F9F7; border-radius: 20px; padding: 20px; text-align: center;">
                                 <div class="cs-avatar-box" id="cs-avatar-preview" onclick="document.getElementById('cs-avatar-file').click()" style="width: 64px; height: 64px; margin: 0 auto 12px; border: 2px solid #FFF; box-shadow: 0 8px 20px rgba(0,0,0,0.05);"></div>
                                 <div style="font-size: 8px; font-weight: 800; color: #A8A196; letter-spacing: 1px;">THEIR AVATAR</div>
                                 <input type="file" id="cs-avatar-file" hidden accept="image/*" onchange="handleImageUpload(event, 'cs-avatar-preview', 'cs-avatar-data')">
                             </div>
-                            <div style="flex: 1; background: #F9F9F7; border-radius: 20px; padding: 20px; text-align: center;">
+                            <div style="flex: 1 1 50%; min-width: 0; background: #F9F9F7; border-radius: 20px; padding: 20px; text-align: center;">
                                 <div class="cs-avatar-box" id="cs-me-avatar-preview" onclick="document.getElementById('cs-me-avatar-file').click()" style="width: 64px; height: 64px; margin: 0 auto 12px; border: 2px solid #FFF; box-shadow: 0 8px 20px rgba(0,0,0,0.05);"></div>
                                 <div style="font-size: 8px; font-weight: 800; color: #A8A196; letter-spacing: 1px;">YOUR AVATAR</div>
                                 <input type="file" id="cs-me-avatar-file" hidden accept="image/*" onchange="handleImageUpload(event, 'cs-me-avatar-preview', 'cs-me-avatar-data')">
@@ -4306,10 +4328,10 @@
                         </div>
 
                         <div class="cs-row-item">
-                            <label>专属昵称备注</label>
+                            <label><span class="cs-label-solo">专属昵称备注</span><span class="cs-label-group" style="display:none;">群昵称</span></label>
                             <input type="text" id="cs-remark" placeholder="Set Remark..." class="cs-input-minimal">
                         </div>
-                        <div class="cs-row-item">
+                        <div class="cs-row-item cs-solo-only">
                             <label>当前佩戴面具</label>
                             <select id="cs-mask-select" class="cs-select-minimal"></select>
                         </div>
@@ -4323,17 +4345,17 @@
                             <label>感知现实时间 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">Time Awareness</small></label>
                             <div class="cs-toggle"><input type="checkbox" id="cs-aware-time" class="cs-toggle-input"><label for="cs-aware-time"></label></div>
                         </div>
-                        <div class="cs-row-item">
+                        <div class="cs-row-item cs-solo-only">
                             <label>主动使用贴纸 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">AI Stickers</small></label>
                             <div class="cs-toggle"><input type="checkbox" id="cs-allow-ai-sticker" class="cs-toggle-input"><label for="cs-allow-ai-sticker"></label></div>
                         </div>
-                        <div class="cs-row-item">
+                        <div class="cs-row-item cs-solo-only">
                             <label>动作神态描写 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">Action & Expression</small></label>
                             <div class="cs-toggle"><input type="checkbox" id="cs-allow-action" class="cs-toggle-input"><label for="cs-allow-action"></label></div>
                         </div>
 
                         <!-- 新增：主动消息配置 -->
-                        <div style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <div class="cs-solo-only" style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <label style="font-size: 13px; font-weight: 800;">允许 AI 主动找我</label>
                                 <div class="cs-toggle"><input type="checkbox" id="cs-allow-proactive" class="cs-toggle-input"><label for="cs-allow-proactive"></label></div>
@@ -4346,7 +4368,7 @@
                         </div>
 
                         <!-- 新增：双语模式配置 -->
-                        <div style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <div class="cs-solo-only" style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <label style="font-size: 13px; font-weight: 800;">双语翻译</label>
                                 <div class="cs-toggle"><input type="checkbox" id="cs-allow-bilingual" class="cs-toggle-input"><label for="cs-allow-bilingual"></label></div>
@@ -4368,7 +4390,7 @@
                         </div>
                         
                         <!-- 强制线下高级组 -->
-                        <div style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px;">
+                        <div class="cs-solo-only" style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <label style="font-size: 13px; font-weight: 800;">允许发起强制线下</label>
                                 <div class="cs-toggle"><input type="checkbox" id="cs-allow-override" class="cs-toggle-input"><label for="cs-allow-override"></label></div>
@@ -4395,7 +4417,7 @@
                     </section>
 
                     <!-- 板块：Couple Avatar -->
-                    <section style="margin-bottom: 40px;">
+                    <section class="cs-solo-only" style="margin-bottom: 40px;">
                         <div class="cs-section-head">03. Couple Avatar</div>
                         <div class="cs-row-item" style="border:none;">
                             <label>情侣头像配对 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">AI 从图库中挑选情侣头像发入聊天</small></label>
@@ -4404,7 +4426,7 @@
                     </section>
 
                     <!-- 板块 4：Visuals (视觉微调) -->
-                    <section style="margin-bottom: 40px;">
+                    <section class="cs-solo-only" style="margin-bottom: 40px;">
                         <div class="cs-section-head">04. Visual Aesthetics</div>
                         
                         <div class="cs-row-item">
@@ -4459,10 +4481,14 @@
                     <section style="margin-bottom: 40px;">
                         <div class="cs-section-head">04. Soul & Memory</div>
                         
-                        <div class="cs-row-item" style="border:none; padding-bottom:10px;">
+                        <div class="cs-row-item cs-solo-only" style="border:none; padding-bottom:10px;">
                             <label>系统指令 (System Prompt)</label>
                         </div>
-                        <textarea id="cs-prompt" class="cs-textarea-minimal" style="height: 100px;"></textarea>
+                        <textarea id="cs-prompt" class="cs-textarea-minimal cs-solo-only" style="height: 100px;"></textarea>
+                        <div class="cs-group-only" style="display:none; background:#F9F9F7; border-radius:14px; padding:14px 16px; margin-bottom:16px; border:0.5px solid rgba(0,0,0,0.03);">
+                            <div style="font-size:10px; font-weight:800; color:#A8A196; letter-spacing:1px; margin-bottom:6px;">SYSTEM PROMPT</div>
+                            <div style="font-size:12px; color:var(--c-gray-dark); font-weight:600; line-height:1.5;">群聊人设自动读取各成员的独立人设，无需手动编辑。</div>
+                        </div>
 
                         <div class="cs-row-item" style="margin-top:20px;">
                             <label>核心记忆库 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">点击进入管理所有记忆条目</small></label>
@@ -5857,5 +5883,6 @@
                 <button onclick="closeWbCatManager()" style="width: 100%; margin-top: 20px; padding: 14px; border-radius: 16px; border: 0.5px solid rgba(0,0,0,0.1); background: #fff; font-size: 12px; font-weight: 900; letter-spacing: 1px;">完成</button>
             </div>
          </div>
+         <script src="js/29-push-notify.js"></script>
    </body>
 </html>

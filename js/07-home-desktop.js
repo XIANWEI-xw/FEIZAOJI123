@@ -136,6 +136,8 @@ const myAvatarSrc = twData.meAvatar || 'https://api.dicebear.com/7.x/notionists/
 document.querySelectorAll('#app-twitter img[data-avatar="user"]').forEach(img => {
     img.src = myAvatarSrc;
 });
+    var starBg = document.getElementById('star-bg');
+    if(starBg) starBg.classList.remove('frozen');
 }
          if (appId === 'music') { 
              initMusicApp(); 
@@ -158,6 +160,8 @@ if(twitterApp) {
     if (typeof flushTwSyncToMainChat === 'function') flushTwSyncToMainChat();
     twitterApp.classList.remove('active');
 }
+    var starBg = document.getElementById('star-bg');
+    if(starBg) starBg.classList.add('frozen');
 setTimeout(()=>goBackToMain(false),300); 
              
              // 核心修复：只有在有记录、且用户【没有手动关掉悬浮窗】的情况下，才允许它回到桌面时呼出！

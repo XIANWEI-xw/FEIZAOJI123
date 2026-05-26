@@ -26,36 +26,78 @@ function isUserInChatRoom(targetContactId) {
              
              const topBotAv = document.getElementById('chat-top-bot-avatar');
              const topMeAv = document.getElementById('chat-top-me-avatar');
-             topBotAv.innerHTML = renderAvatarHTML(c.chatAvatar || c.avatar, 'bot');
-             topMeAv.innerHTML = renderAvatarHTML(uAvatar, 'user');
-             
-             const setupDoubleTapNudge = (el, isMe) => {
-                 el.onclick = () => {
-                     let now = Date.now();
-                     let lastTap = parseInt(el.dataset.lastTap) || 0;
-                     if (now - lastTap < 300) {
-                         triggerNudge(isMe, el);
-                         el.dataset.lastTap = 0;
-                     } else {
-                         el.dataset.lastTap = now;
-                     }
+
+             // 群聊模式：顶栏显示群头像 + 成员头像列表
+             if (c.isGroup === true && c.groupMembers && c.groupMembers.length > 0) {
+                 // 群头像：优先使用自定义群头像，否则用九宫格
+                 if (c.groupAvatar) {
+                     topBotAv.innerHTML = `<img src="${c.groupAvatar}" style="width:38px;height:38px;border-radius:12px;object-fit:cover;">`;
+                 } else {
+                     let groupAvatarHtml = '<div class="group-avatar-grid" style="width:38px;height:38px;">';
+                     const displayMembers = c.groupMembers.slice(0, 4);
+                     displayMembers.forEach(mid => {
+                         const member = contacts.find(x => x.id === mid);
+                         if (member) {
+                             groupAvatarHtml += `<div class="group-avatar-cell">${renderAvatarHTML(member.chatAvatar || member.avatar, 'bot')}</div>`;
+                         }
+                     });
+                     groupAvatarHtml += '</div>';
+                     topBotAv.innerHTML = groupAvatarHtml;
+                 }
+                 topMeAv.style.display = 'none';
+
+                 // 强制把群头像挤到正中央：让 me 头像和ecg 占位但隐形，群头像绝对居中
+                 const connRow = topBotAv.parentElement;
+                 if (connRow) {
+                     connRow.style.position = 'relative';
+                     connRow.style.justifyContent = 'center';
+                 }
+                 topBotAv.style.position = 'absolute';
+                 topBotAv.style.left = '50%';
+                 topBotAv.style.top = '50%';
+                 topBotAv.style.transform = 'translate(-50%, -50%)';
+                
+                 // 群聊不绑定拍一拍
+                 topBotAv.onclick = null;
+                 topMeAv.onclick = null;
+             } else {
+                 topBotAv.innerHTML = renderAvatarHTML(c.chatAvatar || c.avatar, 'bot');
+                 topMeAv.style.display = '';
+                 topMeAv.innerHTML = renderAvatarHTML(uAvatar, 'user');
+                
+                 const setupDoubleTapNudge = (el, isMe) => {
+                     el.onclick = () => {
+                         let now = Date.now();
+                         let lastTap = parseInt(el.dataset.lastTap) || 0;
+                         if (now - lastTap < 300) {
+                             triggerNudge(isMe, el);
+                             el.dataset.lastTap = 0;
+                         } else {
+                             el.dataset.lastTap = now;
+                         }
+                     };
                  };
-             };
-             setupDoubleTapNudge(topBotAv, false);
-             setupDoubleTapNudge(topMeAv, true);
+                 setupDoubleTapNudge(topBotAv, false);
+                 setupDoubleTapNudge(topMeAv, true);
+             }
              
              const ecgWrap = document.getElementById('top-bar-ecg-wrap');
              if(ecgWrap) {
                  // 2. 应用独立的光标/图标颜色
                  ecgWrap.style.color = c.chatTopIconColor || '#1C1C1E'; 
                  
-                 let latestMood = 60;
-                 for(let i = c.history.length - 1; i >= 0; i--) {
-                     if(c.history[i].role === 'assistant' && c.history[i].mood !== undefined) {
-                         latestMood = c.history[i].mood; break;
+                 if (c.isGroup === true) {
+                     // 群聊模式：中间不显示心电图，留空
+                     ecgWrap.innerHTML = '';
+                 } else {
+                     let latestMood = 60;
+                     for(let i = c.history.length - 1; i >= 0; i--) {
+                         if(c.history[i].role === 'assistant' && c.history[i].mood !== undefined) {
+                             latestMood = c.history[i].mood; break;
+                         }
                      }
+                     ecgWrap.innerHTML = getCursorHTML(c.cursorDefault || 'ecg', latestMood);
                  }
-                 ecgWrap.innerHTML = getCursorHTML(c.cursorDefault || 'ecg', latestMood);
              }
          }
          
@@ -173,6 +215,15 @@ function isUserInChatRoom(targetContactId) {
              const c = contacts.find(x => x.id === currentContactId); 
              if(!c) return;
 
+             // 群聊模式下隐藏不适用的设置板块
+             const isGroup = c.isGroup === true;
+             document.querySelectorAll('.cs-solo-only').forEach(el => el.style.display = isGroup ? 'none' : '');
+             document.querySelectorAll('.cs-group-only').forEach(el => el.style.display = isGroup ? '' : 'none');
+             document.querySelectorAll('.cs-label-solo').forEach(el => el.style.display = isGroup ? 'none' : '');
+             document.querySelectorAll('.cs-label-group').forEach(el => el.style.display = isGroup ? '' : 'none');
+             const soloHeaders = document.getElementById('cs-solo-headers');
+             if (soloHeaders) soloHeaders.style.display = isGroup ? 'none' : 'flex';
+
              // 1. 基础信息与面具
              const sel = document.getElementById('cs-mask-select'); 
              sel.innerHTML = '<option value="">不佩戴 (全局默认)</option>';
@@ -225,6 +276,26 @@ if (presetLangs.includes(targetLang)) {
              // 6. 资源预览 (头像与壁纸)
              document.getElementById('cs-avatar-data').value = c.chatAvatar || ''; 
              document.getElementById('cs-avatar-preview').innerHTML = renderAvatarHTML(c.chatAvatar || c.avatar, 'bot');
+             
+             // 群头像加载
+             var groupAvData = document.getElementById('cs-group-avatar-data');
+             var groupAvInner = document.getElementById('cs-group-avatar-inner');
+             if (groupAvData && groupAvInner) {
+                 groupAvData.value = c.groupAvatar || '';
+                 if (c.groupAvatar) {
+                     groupAvInner.innerHTML = '<img src="' + c.groupAvatar + '" style="width:100%;height:100%;object-fit:cover;">';
+                 } else if (c.isGroup && c.groupMembers) {
+                     var miniHtml = '<div class="group-avatar-grid" style="width:100%;height:100%;">';
+                     c.groupMembers.slice(0, 4).forEach(function(mid) {
+                         var member = contacts.find(function(x) { return x.id === mid; });
+                         if (member) miniHtml += '<div class="group-avatar-cell">' + renderAvatarHTML(member.chatAvatar || member.avatar, 'bot') + '</div>';
+                     });
+                     miniHtml += '</div>';
+                     groupAvInner.innerHTML = miniHtml;
+                 } else {
+                     groupAvInner.innerHTML = '点击上传';
+                 }
+             }
              
              document.getElementById('cs-me-avatar-data').value = c.chatMeAvatar || ''; 
              document.getElementById('cs-me-avatar-preview').innerHTML = renderAvatarHTML(c.chatMeAvatar || gConfig.meAvatar, 'user');
@@ -377,6 +448,8 @@ if (presetLangs.includes(targetLang)) {
              c.chatRemark = document.getElementById('cs-remark').value.trim(); 
              c.chatAvatar = document.getElementById('cs-avatar-data').value;
              c.chatMeAvatar = document.getElementById('cs-me-avatar-data').value;
+             var groupAvDataEl = document.getElementById('cs-group-avatar-data');
+             if (groupAvDataEl && groupAvDataEl.value) c.groupAvatar = groupAvDataEl.value;
 
              // 2. 行为逻辑
              c.awareTime = document.getElementById('cs-aware-time').checked === true;
@@ -1166,6 +1239,195 @@ c.history[0].content = newPrompt;
              }
          }
 // ================= 全新：共读系统卡片全局渲染引擎 =================
+//================= 群聊 AI 引擎 =================// ================= 群聊 AI 引擎 =================
+async function fetchGroupAIReply(targetContactId) {
+    if (!targetContactId) return;
+    const c = contacts.find(x => x.id === targetContactId);
+    if (!c || !c.isGroup) return;
+    if (!gConfig.apiUrl || !gConfig.apiKey) return alert('需配置API！');
+
+    const isCurrentlyInRoom = (currentContactId === targetContactId && document.getElementById('view-chat').classList.contains('slide-in'));
+    let tempId = null;
+    if (isCurrentlyInRoom) {
+        document.getElementById('btn-call-ai').disabled = true;
+        document.getElementById('btn-send').disabled = true;
+        const ca = document.getElementById('chat-area');tempId = 'load-' + Date.now();
+        const row = document.createElement('div');
+        row.id = tempId;
+        row.className = 'msg-row bot';
+        row.innerHTML = `<div class="msg-avatar-wrap"><div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:100%;height:100%;padding:6px;"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></div></div><div class="bubble-body"><div class="bubble bubble-bot"><div class="soap-loader"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div></div></div>`;
+        ca.appendChild(row);
+        scrollToBottom();}
+
+    let uName = gConfig.meName || '我';
+    if (c.maskId) { const m = masks.find(x => x.id === c.maskId); if (m) uName = m.name; }
+
+    const memberInfo = c.groupMembers.map(mid => {
+        const m = contacts.find(x => x.id === mid);
+        return m ? { id: mid, name: m.chatRemark || m.name, avatar: m.chatAvatar || m.avatar, prompt: (m.history && m.history[0]) ? m.history[0].content : '' } : null;
+    }).filter(Boolean);
+
+    let sysPrompt = `你正在同时扮演一个群聊中的多个角色。每个角色必须严格按照各自的人设说话。
+
+【群聊成员】：${memberInfo.map(m => m.name).join('、')}
+【用户】：${uName}
+
+【各角色人设】：
+${memberInfo.map(m => `\n【${m.name}】：${m.prompt}\n`).join('')}
+
+【规则】：
+1. 每次回复选择 1-3 个角色发言，每个角色严格按照自己的人设性格说话。
+2. 如果用户明确在跟某人说话，被点名的角色必须回应。
+3. 每条消息格式：<msg name="角色名">内容</msg>
+
+【禁止事项】：
+- 禁止输出 <msg> 标签之外的任何文字
+- name 必须与上方角色名完全一致
+- 每条 <msg> 控制在 40 字以内
+- 禁止替用户说话
+- 禁止输出空内容
+- 语言：简体中文`;
+
+    const apiMessages = [{ role: 'system', content: sysPrompt }];
+
+    let limit = parseInt(gConfig.contextSize) || 20;
+    let recentHistory = [];
+    let collected = 0;
+    for (let i = c.history.length - 1; i >= 0 && collected < limit; i--) {
+        const m = c.history[i];
+        if (m.role === 'system') continue;
+        recentHistory.unshift(m);
+        if (m.role !== 'system_sum') collected++;
+    }
+
+    recentHistory.forEach(m => {
+        let cleanText = (m.content || '').replace(/<[^>]+>/g, '').trim();
+        if (!cleanText) return;
+        if (m.role === 'user') {
+            apiMessages.push({ role: 'user', content: `${uName}: ${cleanText}` });
+        } else if (m.role === 'assistant' && m.speakerName) {
+            apiMessages.push({ role: 'assistant', content: `<msg name="${m.speakerName}">${cleanText}</msg>` });
+        }
+    });
+
+    apiMessages.push({ role: 'user', content: `[请按<msg name="角色名">内容</msg> 格式回应上面的对话，选择最合适的 1-3 个角色发言]` });
+
+    try {
+        const response = await fetch(`${gConfig.apiUrl}/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${gConfig.apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: gConfig.model, messages: apiMessages, temperature: Number(gConfig.temperature || 0.8), stream: false })
+        });
+        if (!response.ok) throw new Error('网络错误');
+        const data = await response.json();
+        let raw = ((data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '').trim();
+
+        if (tempId && document.getElementById(tempId)) document.getElementById(tempId).remove();
+
+        const msgRegex = /<msg\s+name=["']?([^"'>]+)["']?>([\s\S]*?)<\/msg>/gi;
+        let match;
+        let messages = [];
+        while ((match = msgRegex.exec(raw)) !== null) {
+            const speakerName = match[1].trim();
+            const content = match[2].trim();
+            if (!content) continue;
+            const speaker = memberInfo.find(m => m.name === speakerName) || memberInfo[0];
+            messages.push({ name: speaker.name, avatar: speaker.avatar, content: content });
+        }
+
+        if (messages.length === 0 && raw) {
+            messages.push({ name: memberInfo[0].name, avatar: memberInfo[0].avatar, content: raw.replace(/<[^>]+>/g, '').trim() });
+        }
+
+        let baseTs = Date.now();
+        for (let i = 0; i < messages.length; i++) {
+            const msg = messages[i];
+            const newMsg = {
+                role: 'assistant',
+                content: msg.content,
+                isRevoked: false,
+                timestamp: baseTs + i,
+                speakerName: msg.name,
+                speakerAvatar: msg.avatar,
+                wid: gConfig.currentWorldviewId ||'default'
+            };
+            c.history.push(newMsg);
+            saveData();
+
+            if (isCurrentlyInRoom) {
+                appendBubbleRow(newMsg, c.history.length - 1);
+                scrollToBottom();
+                if (i< messages.length - 1) await new Promise(r => setTimeout(r, 700));
+            }
+        }
+
+        if (!isCurrentlyInRoom && messages.length > 0) {
+            const last = messages[messages.length - 1];
+            showToast(`${c.chatRemark || c.name} · ${last.name}`, last.content, last.avatar, targetContactId, 4000);
+            if (document.getElementById('view-main-list').classList.contains('active')) renderContacts();
+        }
+    } catch (e) {
+        if (tempId && document.getElementById(tempId)) document.getElementById(tempId).remove();
+        if (isCurrentlyInRoom) {
+            const ca = document.getElementById('chat-area');
+            const row = document.createElement('div');
+            row.className = 'msg-row sys-row';
+            row.innerHTML = `<div class="bubble-sys" style="color:#D32F2F;">[ 群聊 AI 错误: ${e.message} ]</div>`;
+            ca.appendChild(row);
+            scrollToBottom();
+        }
+    } finally {
+        document.getElementById('btn-call-ai').disabled = false;
+        document.getElementById('btn-send').disabled = false;
+    }
+}
+
+// 劫持原fetchAIReply：群聊走专用引擎
+const _origFetchAIReply = window.fetchAIReply;
+window.fetchAIReply = function(targetContactId, isProactive) {
+    const tid = targetContactId || currentContactId;
+    if (!tid) return;
+    const c = contacts.find(x => x.id === tid);
+    if (c && c.isGroup) return fetchGroupAIReply(tid);
+    return _origFetchAIReply.apply(this, arguments);
+};
+
+// 劫持appendBubbleRow：群聊气泡显示发言者头像和名字
+const _origAppendBubbleRow = window.appendBubbleRow;
+window.appendBubbleRow = function(msg, index, isHistory) {
+    const c = contacts.find(x => x.id === currentContactId);
+    if (!c || !c.isGroup || !msg.speakerName || msg.role !== 'assistant') {
+        return _origAppendBubbleRow.apply(this, arguments);
+    }
+    const origAvatar = c.chatAvatar;
+    const origName = c.chatRemark || c.name;
+    c.chatAvatar = msg.speakerAvatar;
+    c.chatRemark = msg.speakerName;
+    const result = _origAppendBubbleRow.apply(this, arguments);
+    c.chatAvatar = origAvatar;
+    c.chatRemark = origName;
+    setTimeout(() => {
+        const row = document.getElementById('msg-item-' + index);
+        if (row) {
+            const nameDiv = row.querySelector('.bubble-name');
+            if (nameDiv) {
+                nameDiv.innerText = msg.speakerName;
+                nameDiv.classList.add('group-speaker');
+                nameDiv.style.display = 'block';
+            } else {
+                const bodyDiv = row.querySelector('.bubble-body');
+                if (bodyDiv) {
+                    const newName = document.createElement('div');
+                    newName.className = 'bubble-name group-speaker';
+                    newName.innerText = msg.speakerName;
+                    bodyDiv.insertBefore(newName, bodyDiv.firstChild);
+                }
+            }
+        }
+    }, 10);
+    return result;
+};
+
 window.pushCoReadCard = function(contactId, bookName, bookCover, isStart) {
     if (!contactId || typeof contacts === 'undefined') return;
     const c = contacts.find(x => x.id === contactId);
@@ -1266,3 +1528,204 @@ window.pushCoReadCard = function(contactId, bookName, bookCover, isStart) {
         }
     }
 };
+
+// ================= 群聊系统 =================
+async function fetchGroupAIReply(targetContactId) {
+    if (!targetContactId) return;
+    const c = contacts.find(x => x.id === targetContactId);
+    if (!c || !c.isGroup) return;
+    if (!gConfig.apiUrl || !gConfig.apiKey) {
+        alert('需配置API！');
+        return;
+    }
+
+    const isCurrentlyInRoom = (currentContactId === targetContactId && document.getElementById('view-chat').classList.contains('slide-in'));
+    let tempId = null;
+    if (isCurrentlyInRoom) {
+        const btnAi = document.getElementById('btn-call-ai');
+        const btnSend = document.getElementById('btn-send');
+        if (btnAi) btnAi.disabled = true;
+        if (btnSend) btnSend.disabled = true;
+        const ca = document.getElementById('chat-area');
+        tempId = 'load-' + Date.now();
+        const row = document.createElement('div');
+        row.id = tempId;
+        row.className = 'msg-row bot';
+        row.innerHTML = '<div class="msg-avatar-wrap"><div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:100%;height:100%;padding:6px;"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></div></div><div class="bubble-body"><div class="bubble bubble-bot"><div class="soap-loader"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div></div></div>';
+        ca.appendChild(row);
+        scrollToBottom();
+    }
+
+    let uName = gConfig.meName || '我';
+    if (c.maskId) {
+        const m = masks.find(x => x.id === c.maskId);
+        if (m) uName = m.name;
+    }
+
+    const memberInfo = c.groupMembers.map(function(mid) {
+        const m = contacts.find(x => x.id === mid);
+        if (!m) return null;
+        return {
+            id: mid,
+            name: m.chatRemark || m.name,
+            avatar: m.chatAvatar || m.avatar,
+            prompt: (m.history && m.history[0]) ? m.history[0].content : ''
+        };
+    }).filter(Boolean);
+
+    let sysPrompt = '你正在主持一个群聊场景，需要扮演多个不同的角色。\n群聊成员：' + memberInfo.map(m => m.name).join('、') + '\n用户身份：' + uName + '\n\n【角色人设】：\n';
+    memberInfo.forEach(function(m) {
+        sysPrompt += '\n━━━' + m.name + ' ━━━\n' + m.prompt + '\n';
+    });
+    sysPrompt += '\n【输出格式铁律】：\n你必须从上述角色中选择 1-3 个最适合回应当前话题的角色发言。\n每条发言必须严格使用：<msg name="角色名">该角色说的话</msg>\n\n【示例】：\n<msg name="张三">哈哈哈这个好玩</msg>\n<msg name="李四">你们又在搞什么</msg>\n\n【绝对禁令】：\n1. 禁止输出 <msg> 标签外的任何文字\n2. name 必须严格匹配上述角色名\n3. 每条 <msg> 内容控制在 30 字以内\n4. 禁止让用户（' + uName + '）说话';
+
+    const apiMessages = [{ role: 'system', content: sysPrompt }];
+
+    let limit = parseInt(gConfig.contextSize) || 20;
+    let recentHistory = [];
+    let collected = 0;
+    for (let i = c.history.length - 1; i >= 0 && collected < limit; i--) {
+        const m = c.history[i];
+        if (m.role === 'system') continue;
+        recentHistory.unshift(m);
+        if (m.role !== 'system_sum') collected++;
+    }
+
+    recentHistory.forEach(function(m) {
+        let cleanText = (m.content || '').replace(/<[^>]+>/g, '').trim();
+        if (!cleanText) return;
+        if (m.role === 'user') {
+            apiMessages.push({ role: 'user', content: uName + ': ' + cleanText });
+        } else if (m.role === 'assistant' && m.speakerName) {
+            apiMessages.push({ role: 'assistant', content: '<msg name="' + m.speakerName + '">' + cleanText + '</msg>' });
+        }
+    });
+
+    apiMessages.push({ role: 'user', content: '[请按<msg name="角色名">内容</msg> 格式回应，选择最合适的 1-3 个角色发言]' });
+
+    try {
+        const response = await fetch(gConfig.apiUrl + '/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + gConfig.apiKey, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: gConfig.model, messages: apiMessages, temperature: Number(gConfig.temperature || 0.8), stream: false })
+        });
+        if (!response.ok) throw new Error('网络错误 ' + response.status);
+        const data = await response.json();
+        let raw = '';
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+            raw = (data.choices[0].message.content || '').trim();
+        }
+
+        if (tempId && document.getElementById(tempId)) document.getElementById(tempId).remove();
+
+        const msgRegex = /<msg\s+name=["']?([^"'>]+)["']?>([\s\S]*?)<\/msg>/gi;
+        let match;
+        let messages = [];
+        while ((match = msgRegex.exec(raw)) !== null) {
+            const speakerName = match[1].trim();
+            const content = match[2].trim();
+            if (!content) continue;
+            const speaker = memberInfo.find(m => m.name === speakerName) || memberInfo[0];
+            messages.push({ name: speaker.name, avatar: speaker.avatar, content: content });
+        }
+
+        if (messages.length === 0 && raw) {
+            messages.push({ name: memberInfo[0].name, avatar: memberInfo[0].avatar, content: raw.replace(/<[^>]+>/g, '').trim() });
+        }
+
+        let baseTs = Date.now();
+        for (let i = 0; i < messages.length; i++) {
+            const msg = messages[i];
+            const newMsg = {
+                role: 'assistant',
+                content: msg.content,
+                isRevoked: false,
+                timestamp: baseTs + i,
+                speakerName: msg.name,
+                speakerAvatar: msg.avatar,
+                wid: gConfig.currentWorldviewId ||'default'
+            };
+            c.history.push(newMsg);
+            saveData();
+
+            if (isCurrentlyInRoom) {
+                appendBubbleRow(newMsg, c.history.length - 1);
+                scrollToBottom();
+                if (i < messages.length - 1) await new Promise(r => setTimeout(r, 700));
+            }
+        }
+
+        if (!isCurrentlyInRoom && messages.length > 0) {
+            const last = messages[messages.length - 1];
+            showToast((c.chatRemark || c.name) + ' · ' + last.name, last.content, last.avatar, targetContactId, 4000);
+            if (document.getElementById('view-main-list').classList.contains('active')) renderContacts();
+        }
+    } catch (e) {
+        if (tempId && document.getElementById(tempId)) document.getElementById(tempId).remove();
+        if (isCurrentlyInRoom) {
+            const ca = document.getElementById('chat-area');
+            const row = document.createElement('div');
+            row.className = 'msg-row sys-row';
+            row.innerHTML = '<div class="bubble-sys" style="color:#D32F2F;">[ 群聊 AI 错误: ' + e.message + ' ]</div>';
+            ca.appendChild(row);
+            scrollToBottom();
+        }
+    } finally {
+        const btnAi = document.getElementById('btn-call-ai');
+        const btnSend = document.getElementById('btn-send');
+        if (btnAi) btnAi.disabled = false;
+        if (btnSend) btnSend.disabled = false;
+    }
+}
+
+// 延迟劫持：等所有 JS 文件加载完毕后再执行劫持
+setTimeout(function() {
+    // 劫持 fetchAIReply
+    if (typeof window.fetchAIReply === 'function') {
+        var _origFetch = window.fetchAIReply;
+        window.fetchAIReply = function(targetContactId, isProactive) {
+            var tid = targetContactId || currentContactId;
+            if (!tid) return;
+            var c = contacts.find(function(x) { return x.id === tid; });
+            if (c && c.isGroup) return fetchGroupAIReply(tid);
+            return _origFetch.apply(this, arguments);
+        };
+    }
+
+    // 劫持 appendBubbleRow
+    if (typeof window.appendBubbleRow === 'function') {
+        var _origAppend = window.appendBubbleRow;
+        window.appendBubbleRow = function(msg, index, isHistory) {
+            var c = contacts.find(function(x) { return x.id === currentContactId; });
+            if (!c || !c.isGroup || !msg.speakerName || msg.role !== 'assistant') {
+                return _origAppend.apply(this, arguments);
+            }
+            var origAvatar = c.chatAvatar;
+            var origName = c.chatRemark || c.name;
+            c.chatAvatar = msg.speakerAvatar;
+            c.chatRemark = msg.speakerName;
+            var result = _origAppend.apply(this, arguments);
+            c.chatAvatar = origAvatar;
+            c.chatRemark = origName;
+            setTimeout(function() {
+                var row = document.getElementById('msg-item-' + index);
+                if (!row) return;
+                var nameDiv = row.querySelector('.bubble-name');
+                if (nameDiv) {
+                    nameDiv.innerText = msg.speakerName;
+                    nameDiv.classList.add('group-speaker');
+                    nameDiv.style.display = 'block';
+                } else {
+                    var bodyDiv = row.querySelector('.bubble-body');
+                    if (bodyDiv) {
+                        var newName = document.createElement('div');
+                        newName.className = 'bubble-name group-speaker';
+                        newName.innerText = msg.speakerName;
+                        bodyDiv.insertBefore(newName, bodyDiv.firstChild);
+                    }
+                }
+            }, 10);
+            return result;
+        };
+    }
+}, 100);

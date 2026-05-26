@@ -324,4 +324,92 @@
     color: #A8A196;
     font-weight: 500;
 }
+
+/* 选择聊天弹窗头像锁死 */
+#select-chat-list img,
+#select-chat-list svg {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 38px !important;
+    max-height: 38px !important;
+    object-fit: cover !important;
+}
+
+/* 群聊顶栏：只显示一个群头像 */
+/* 群聊顶栏：群头像容器强制居中 */
+#chat-top-bot-avatar:has(.group-avatar-grid),
+#chat-top-bot-avatar:has(img) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.group-avatar-grid {
+    width: 38px; height: 38px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; border-radius: 12px; overflow: hidden;
+    flex-shrink: 0;
+}
+
+.group-avatar-cell {
+    width: 100%; height: 100%; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--c-gray-light);
+}
+.group-avatar-cell img, .group-avatar-cell svg {
+    width: 100% !important; height: 100% !important; object-fit: cover !important;
+}
+.group-members-row {
+    display: flex; align-items: center; gap: 4px;
+    overflow-x: auto; scrollbar-width: none; padding: 2px 0;
+}
+.group-members-row::-webkit-scrollbar { display: none; }
+.group-member-mini {
+    width: 22px; height: 22px; border-radius: 6px;
+    overflow: hidden; flex-shrink: 0; border: 0.5px solid rgba(0,0,0,0.08);
+}
+.group-member-mini img, .group-member-mini svg {
+    width: 100% !important; height: 100% !important; object-fit: cover !important;
+}
+.msg-row.bot .bubble-name.group-speaker {
+    display: block !important;
+    font-size: 10px; font-weight: 800;
+    color: #C3A772; letter-spacing: 0.5px;
+    margin-bottom: 4px; margin-left: 4px;
+}
+
+/*================= 群聊专属样式 ================= */
+.group-avatar-grid {
+    width: 100%; height: 100%;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; border-radius: 12px; overflow: hidden;
+}
+.group-avatar-cell {
+    width: 100%; height: 100%; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--c-gray-light);
+}
+.group-avatar-cell img, .group-avatar-cell svg {
+    width: 100% !important; height: 100% !important; object-fit: cover !important;
+}
+.group-members-row {
+    display: flex; align-items: center; gap: 4px;
+    overflow-x: auto; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;padding: 2px 0;
+}
+.group-members-row::-webkit-scrollbar { display: none; }
+.group-member-mini {
+    width: 22px; height: 22px; border-radius: 6px;
+    overflow: hidden; flex-shrink: 0;border: 0.5px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.group-member-mini img, .group-member-mini svg {
+    width: 100% !important; height: 100% !important; object-fit: cover !important;
+}
+/* 群聊气泡：显示发言者名字 */
+.msg-row.bot .bubble-name.group-speaker {
+    display: block !important;
+    font-size: 10px; font-weight: 800;
+    color: #C3A772; letter-spacing: 0.5px;
+    margin-bottom: 4px; margin-left: 4px;
+}
          

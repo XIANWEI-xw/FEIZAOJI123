@@ -26,7 +26,13 @@ window.rcInit = function() {
         });
         if (window.rcContacts.length > 0) window.rcSelectedContact = window.rcContacts[0].id;
     }
-    // 尝试加载存储
+    // 异步加载存储（兼容 IndexedDB + localStorage）
+    rcLoadData().then(() => {
+        rcRenderTabs();
+        rcRenderMain();
+    });
+
+    // 同步降级：先尝试 localStorage 快速显示
     try {
         const stored = localStorage.getItem('rcDataDB');
         if (stored) {
@@ -55,8 +61,66 @@ window.rcInit = function() {
     rcRenderMain();
 };
 
+// IndexedDB 存储引擎 - 容量无上限，数据永久保留
+let _rcIDB = null;
+function rcGetIDB() {
+    return new Promise((resolve, reject) => {
+        if(_rcIDB) { resolve(_rcIDB); return; }
+        const req = indexedDB.open('SoapReceiptDB', 1);
+        req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if(!db.objectStoreNames.contains('receipts')) {
+                db.createObjectStore('receipts');
+            }
+        };
+        req.onsuccess = (e) => { _rcIDB = e.target.result; resolve(_rcIDB); };
+        req.onerror = () => reject(req.error);
+    });
+}
+
 function rcSaveData() {
-    localStorage.setItem('rcDataDB', JSON.stringify(window.rcDB));
+    // 优先存 IndexedDB
+    rcGetIDB().then(db => {
+        const tx = db.transaction('receipts', 'readwrite');
+        tx.objectStore('receipts').put(JSON.parse(JSON.stringify(window.rcDB)), 'rcData');
+    }).catch(() => {
+        // IndexedDB 不可用则降级 localStorage
+        try {
+            localStorage.setItem('rcDataDB', JSON.stringify(window.rcDB));
+        } catch(e) {
+            if(e.name === 'QuotaExceededError') {
+                if(typeof window.rcShowToast === 'function') window.rcShowToast('存储空间不足，请前往设置导出备份后清理');
+            }
+        }
+    });
+}
+
+function rcLoadData() {
+    return new Promise(resolve => {
+        rcGetIDB().then(db => {
+            const tx = db.transaction('receipts', 'readonly');
+            const req = tx.objectStore('receipts').get('rcData');
+            req.onsuccess = () => {
+                if(req.result) {
+                    Object.keys(req.result).forEach(k => { window.rcDB[k] = req.result[k]; });
+                    // 迁移成功后清理 localStorage 旧数据释放空间
+                    localStorage.removeItem('rcDataDB');
+                }
+                resolve();
+            };
+            req.onerror = () => resolve();
+        }).catch(() => {
+            // IndexedDB 不可用，走 localStorage
+            try {
+                const stored = localStorage.getItem('rcDataDB');
+                if(stored) {
+                    const parsed = JSON.parse(stored);
+                    Object.keys(parsed).forEach(k => { window.rcDB[k] = parsed[k]; });
+                }
+            } catch(e) {}
+            resolve();
+        });
+    });
 }
 
 function rcGetNow() {
@@ -383,14 +447,39 @@ window.rcCloseDetail = function() {
 window.rcComposeAuthorId = 'self';
 window.rcOpenCompose = function() {
     window.rcComposeAuthorId = window.rcCurrentRole === 'self' ? 'self' : window.rcCurrentRole;
-    document.getElementById('rc-cv-t').value = ''; document.getElementById('rc-cv-b').value = ''; document.getElementById('rc-cv-b').style.height = 'auto';
-    const wrap = document.getElementById('rc-author-chips'); wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;'; wrap.innerHTML = '';
-    window.rcRoles.forEach(r => {
-        const chip = document.createElement('div'); chip.className = 'rc-author-chip' + (r.id === window.rcComposeAuthorId ? ' sel' : '');
-        chip.onclick = () => { window.rcComposeAuthorId = r.id; window.rcOpenCompose(); };
-        chip.innerHTML = `<img src="${r.avatar}"><span class="rc-author-chip-name rc-mono">${r.name}</span>`; wrap.appendChild(chip);
-    });
-    document.getElementById('rc-compose-view').classList.add('on');
+    document.getElementById('rc-cv-t').value = '';
+    document.getElementById('rc-cv-b').value = '';
+    document.getElementById('rc-cv-b').style.height = 'auto';
+
+    const composeView = document.getElementById('rc-compose-view');
+    composeView.classList.add('on');
+
+    const authorPick = composeView.querySelector('.rc-cv-author-pick');
+    if(authorPick) {
+        authorPick.style.cssText = 'display:flex;align-items:center;gap:10px;padding:14px 20px;position:relative;z-index:9999;';
+        authorPick.innerHTML = '';
+
+        const label = document.createElement('div');
+        label.textContent = 'FROM:';
+        label.className = 'rc-cv-author-pick-label rc-mono';
+        label.style.cssText = 'font-family:monospace;font-size:10px;font-weight:800;color:rgba(0,0,0,0.3);letter-spacing:2px;flex-shrink:0;';
+        authorPick.appendChild(label);
+
+        const sel = document.createElement('select');
+        sel.id = 'rc-author-select';
+        sel.style.cssText = 'flex:1;height:44px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.1);background:#fff;padding:0 14px;font-family:monospace;font-size:12px;font-weight:800;color:#1C1C1E;letter-spacing:0.5px;outline:none;appearance:auto;-webkit-appearance:menulist;cursor:pointer;';
+        window.rcRoles.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            opt.textContent = r.name;
+            if(r.id === window.rcComposeAuthorId) opt.selected = true;
+            sel.appendChild(opt);
+        });
+        sel.onchange = function() {
+            window.rcComposeAuthorId = this.value;
+        };
+        authorPick.appendChild(sel);
+    }
 };
 
 window.rcCloseCompose = function() { 

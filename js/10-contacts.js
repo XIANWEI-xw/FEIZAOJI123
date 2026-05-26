@@ -318,3 +318,128 @@
                   });
               }
           }
+
+// ================= 群聊选择系统 =================
+let selectChatMode = 'single';
+let groupSelectedIds = [];
+
+(function() {
+    const _origOpen = window.openSelectChat;
+    window.openSelectChat = function() {
+        selectChatMode = 'single';
+        groupSelectedIds = [];
+        const tabSingle = document.getElementById('sct-single');
+        const tabGroup = document.getElementById('sct-group');
+        if (tabSingle) { tabSingle.style.background = 'var(--c-black)'; tabSingle.style.color = '#fff'; }
+        if (tabGroup) { tabGroup.style.background = 'rgba(0,0,0,0.05)'; tabGroup.style.color = 'var(--c-black)'; }
+        const groupActions = document.getElementById('select-chat-group-actions');
+        if (groupActions) groupActions.style.display = 'none';
+        renderSelectChatList();
+        document.getElementById('select-chat-sheet').classList.add('active');
+    };
+})();
+
+function switchSelectChatMode(mode) {
+    selectChatMode = mode;
+    groupSelectedIds = [];
+    const tabSingle = document.getElementById('sct-single');
+    const tabGroup = document.getElementById('sct-group');
+    tabSingle.style.background = mode === 'single' ? 'var(--c-black)' : 'rgba(0,0,0,0.05)';
+    tabSingle.style.color = mode === 'single' ? '#fff' : 'var(--c-black)';
+    tabGroup.style.background = mode === 'group' ? 'var(--c-black)' : 'rgba(0,0,0,0.05)';
+    tabGroup.style.color = mode === 'group' ? '#fff' : 'var(--c-black)';
+    if (mode === 'group') {
+        document.getElementById('select-chat-list').innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:28px;opacity:0.15;margin-bottom:12px;">✦</div><div style="font-size:14px;font-weight:800;color:var(--c-black);letter-spacing:1px;">COMING SOON</div><div style="font-size:11px;color:var(--c-gray-dark);margin-top:8px;line-height:1.6;">群聊功能正在全力开发中<br>敬请期待下个版本更新 ✧</div></div>';
+        document.getElementById('select-chat-group-actions').style.display = 'none';
+        return;
+    }
+    document.getElementById('select-chat-group-actions').style.display = 'none';
+    renderSelectChatList();
+}
+
+function renderSelectChatList() {
+    const list = document.getElementById('select-chat-list');
+    list.innerHTML = '';
+    const realContacts = contacts.filter(c => !c.isGroup);
+    if (realContacts.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--c-gray-dark); font-size:12px; font-weight:600;">暂无人格，请先到Contacts 创建。</div>';
+        return;
+    }
+    realContacts.forEach(function(c) {
+        const item = document.createElement('div');
+        item.style.cssText = 'display:flex; align-items:center; padding:10px 8px; cursor:pointer; transition:all 0.2s; border-radius:14px; margin-bottom:2px;';
+        if (selectChatMode === 'group') {
+            const isChecked = groupSelectedIds.includes(c.id);
+            item.style.background = isChecked ? 'rgba(0,122,255,0.06)' : 'transparent';
+            item.innerHTML = '<div style="width:20px;height:20px;border-radius:6px;border:2px solid ' + (isChecked ? '#007AFF' : 'rgba(0,0,0,0.15)') + ';margin-right:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:' + (isChecked ? '#007AFF' : 'transparent') + ';transition:0.2s;">' + (isChecked ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '') + '</div><div style="width:38px;height:38px;min-width:38px;min-height:38px;max-width:38px;max-height:38px;border-radius:12px;overflow:hidden;margin-right:12px;flex-shrink:0;background:var(--c-gray-light);display:flex;align-items:center;justify-content:center;border:0.5px solid rgba(0,0,0,0.05);">' + renderAvatarHTML(c.chatAvatar || c.avatar, 'bot') + '</div><div style="flex:1;overflow:hidden;"><div style="font-size:14px;font-weight:700;color:var(--c-black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.chatRemark || c.name) + '</div><div style="font-size:10px;color:#A8A196;font-weight:600;margin-top:2px;letter-spacing:0.5px;">' + (c.group || 'FRIENDS') + '</div></div>';
+            item.onclick = function() {
+                if (groupSelectedIds.includes(c.id)) {
+                    groupSelectedIds = groupSelectedIds.filter(function(id) { return id !== c.id; });
+                } else {
+                    groupSelectedIds.push(c.id);
+                }
+                renderSelectChatList();
+            };
+        } else {
+            item.innerHTML = '<div style="width:38px;height:38px;min-width:38px;min-height:38px;max-width:38px;max-height:38px;border-radius:12px;overflow:hidden;margin-right:12px;flex-shrink:0;background:var(--c-gray-light);display:flex;align-items:center;justify-content:center;border:0.5px solid rgba(0,0,0,0.05);">' + renderAvatarHTML(c.chatAvatar || c.avatar, 'bot') + '</div><div style="flex:1;overflow:hidden;"><div style="font-size:14px;font-weight:700;color:var(--c-black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.chatRemark || c.name) + '</div><div style="font-size:10px;color:#A8A196;font-weight:600;margin-top:2px;letter-spacing:0.5px;">' + (c.group || 'FRIENDS') + '</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="2" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>';
+            item.onmousedown = function() { item.style.background = 'rgba(0,0,0,0.03)'; };
+            item.onmouseup = function() { item.style.background = 'transparent'; };
+            item.onclick = function() {
+                closeSelectChat();
+                openChat(c.id);
+            };
+        }
+        list.appendChild(item);
+    });
+}
+
+function createGroupChat() {
+    if (groupSelectedIds.length < 2) {
+        alert('请至少选择 2 个角色创建群聊');
+        return;
+    }
+    const nameInput = document.getElementById('group-chat-name-input');
+    const memberNames = groupSelectedIds.map(function(id) {
+        const c = contacts.find(x => x.id === id);
+        return c ? (c.chatRemark || c.name) : '';
+    }).filter(Boolean);
+    const groupName = nameInput.value.trim() || (memberNames.slice(0, 3).join('、') + (memberNames.length > 3 ? '...' : ''));
+    let combinedPrompt = '群聊成员：' + memberNames.join('、');
+    const groupContact = {
+        id: 'group_' + Date.now(),
+        name: groupName,
+        chatRemark: groupName,
+        isGroup: true,
+        groupMembers: groupSelectedIds.slice(),
+        avatar: '',
+        chatAvatar: '',
+        group: 'FRIENDS',
+        history: [{ role: 'system', content: combinedPrompt }],
+        memory: '',
+        memoryEntries: [],
+        awareTime: false,
+        chatTopIconColor: '#1C1C1E',
+        chatTopTextColor: '#1C1C1E',
+        chatFontSize: '',
+        bubbleCss: '',
+        chatBg: '',
+        maskId: '',
+        chatMeAvatar: '',
+        autoSumFreq: 0,
+        lastSumIndex: 0,
+        sumPrompt: ''
+    };
+    contacts.push(groupContact);
+    groupContact.history.push({
+        role: 'system_sum',
+        content: '<i>✧ 群聊已创建，开始聊天吧</i>'
+    });
+    saveData();
+    closeSelectChat();
+    renderContacts();
+    openChat(groupContact.id);
+    groupSelectedIds = [];
+    selectChatMode = 'single';
+    nameInput.value = '';
+}
+          
