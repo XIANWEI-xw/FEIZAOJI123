@@ -199,7 +199,7 @@ function renderIconHTML(src, fallback) {
 }
 
 function renderDesktopApps() { 
-    ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos'].forEach(k => { const el = document.getElementById(`icon-${k}`); if(el) { if(gConfig.apps[k] && (gConfig.apps[k].startsWith('data:') || gConfig.apps[k].startsWith('http'))) el.classList.add('has-img'); else el.classList.remove('has-img'); } });
+    ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos','couple','cycle','receipt','couple2'].forEach(k => { const el = document.getElementById(`icon-${k}`); if(el) { if(gConfig.apps[k] && (gConfig.apps[k].startsWith('data:') || gConfig.apps[k].startsWith('http'))) el.classList.add('has-img'); else el.classList.remove('has-img'); } });
     document.getElementById('icon-g1').innerHTML = renderIconHTML(gConfig.apps.g1, SVG_BOOK); 
     document.getElementById('icon-g2').innerHTML = renderIconHTML(gConfig.apps.g2, SVG_PHOTO); 
     document.getElementById('icon-g3').innerHTML = renderIconHTML(gConfig.apps.g3, SVG_SET); if(gConfig.apps.g3) { document.getElementById('icon-g3').classList.remove('dark'); } 
@@ -220,4 +220,61 @@ function renderDesktopApps() {
     if(chrIcon) {
         chrIcon.innerHTML = renderIconHTML(gConfig.apps.chronos, '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/></svg>');
     }
+    const coupleIcon = document.getElementById('icon-couple');
+    if(coupleIcon) {
+        coupleIcon.innerHTML = renderIconHTML(gConfig.apps.couple, '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>');
+    }
+    const cycleIcon = document.getElementById('icon-cycle');
+    if(cycleIcon) {
+        cycleIcon.innerHTML = renderIconHTML(gConfig.apps.cycle, '<svg style="position:absolute;top:3px;right:3px;opacity:0.25;" width="8" height="8" viewBox="0 0 24 24" fill="#C06070"><path d="M12 2 L13.8 9.2 L21 12 L13.8 14.8 L12 22 L10.2 14.8 L3 12 L10.2 9.2 Z"/></svg><svg style="position:absolute;bottom:4px;left:4px;opacity:0.15;" width="6" height="6" viewBox="0 0 24 24" fill="#C3A772"><path d="M12 2 L13.8 9.2 L21 12 L13.8 14.8 L12 22 L10.2 14.8 L3 12 L10.2 9.2 Z"/></svg><svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M20 6 C14 6 10 10 10 16 C10 22 14 26 20 26 C16 24 14 21 14 16 C14 11 16 8 20 6 Z" fill="rgba(181,98,110,0.6)" stroke="rgba(181,98,110,0.9)" stroke-width="0.8"/><path d="M22 10 C22 10 18 16 18 19 C18 21.2 19.8 23 22 23 C24.2 23 26 21.2 26 19 C26 16 22 10 22 10 Z" fill="rgba(192,96,112,0.85)" stroke="#C06070" stroke-width="0.5"/><ellipse cx="21" cy="17" rx="1.2" ry="2" fill="rgba(255,255,255,0.25)" transform="rotate(-15 21 17)"/><path d="M12 8 L12.5 9.5 L14 10 L12.5 10.5 L12 12 L11.5 10.5 L10 10 L11.5 9.5 Z" fill="rgba(195,167,114,0.7)"/></svg>');
+    }
+    const receiptIcon = document.getElementById('icon-receipt');
+    if(receiptIcon) {
+        receiptIcon.innerHTML = renderIconHTML(gConfig.apps.receipt, '<i class="fa-solid fa-receipt" style="font-size:24px;"></i>');
+    }
+    const couple2Icon = document.getElementById('icon-couple2');
+    if(couple2Icon) {
+        couple2Icon.innerHTML = renderIconHTML(gConfig.apps.couple2, '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>');
+    }
 }
+
+// 覆盖设置文件中的图标编辑器逻辑
+window.openAppIconEditor = function() {
+    ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos','couple','cycle','receipt','couple2'].forEach(k => {
+        const dataEl = document.getElementById(`ic-${k}-data`);
+        const prevEl = document.getElementById(`ic-${k}-prev`);
+        if(dataEl && prevEl) {
+            dataEl.value = gConfig.apps[k] || '';
+            prevEl.innerHTML = renderIconHTML(gConfig.apps[k], '');
+            if(gConfig.apps[k]) prevEl.classList.add('has-img');
+            else prevEl.classList.remove('has-img');
+        }
+    });
+    document.getElementById('app-icons-modal').classList.add('active');
+};
+
+window.saveAppIcons = function() {
+    ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos','couple','cycle','receipt','couple2'].forEach(k => {
+        const dataEl = document.getElementById(`ic-${k}-data`);
+        if(dataEl) gConfig.apps[k] = dataEl.value;
+    });
+    saveData();
+    renderDesktopApps();
+    document.getElementById('app-icons-modal').classList.remove('active');
+};
+
+window.resetAppIcons = function() {
+    ['g1','g2','g3','twitter','d1','d2','d3','checkphone','gallery','chronos','couple','cycle','receipt','couple2'].forEach(k => {
+        const dataEl = document.getElementById(`ic-${k}-data`);
+        const prevEl = document.getElementById(`ic-${k}-prev`);
+        if(dataEl && prevEl) {
+            dataEl.value = '';
+            prevEl.innerHTML = '';
+            prevEl.classList.remove('has-img');
+            gConfig.apps[k] = '';
+        }
+    });
+    saveData();
+    renderDesktopApps();
+    document.getElementById('app-icons-modal').classList.remove('active');
+};

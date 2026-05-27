@@ -405,6 +405,25 @@
       </div>
       <div class="app-label" style="color:var(--c-black);">Couple</div>
    </div>
+   <div class="draggable-app" id="app-cycle-icon" onclick="CycleApp.open()" style="left: 29%; top: 30%;">
+      <div class="app-icon" id="icon-cycle" style="background:linear-gradient(135deg,#1C1C1E 0%,#2C1A1E 100%); border:0.5px solid rgba(181,98,110,0.2); box-shadow:0 8px 15px rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center; position:relative; overflow:hidden;">
+         <!-- 背景装饰星 -->
+         <svg style="position:absolute;top:3px;right:3px;opacity:0.25;" width="8" height="8" viewBox="0 0 24 24" fill="#C06070"><path d="M12 2 L13.8 9.2 L21 12 L13.8 14.8 L12 22 L10.2 14.8 L3 12 L10.2 9.2 Z"/></svg>
+         <svg style="position:absolute;bottom:4px;left:4px;opacity:0.15;" width="6" height="6" viewBox="0 0 24 24" fill="#C3A772"><path d="M12 2 L13.8 9.2 L21 12 L13.8 14.8 L12 22 L10.2 14.8 L3 12 L10.2 9.2 Z"/></svg>
+         <!-- 主图标：月相 + 水滴组合 -->
+         <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+            <!-- 月牙 -->
+            <path d="M20 6 C14 6 10 10 10 16 C10 22 14 26 20 26 C16 24 14 21 14 16 C14 11 16 8 20 6 Z" fill="rgba(181,98,110,0.6)" stroke="rgba(181,98,110,0.9)" stroke-width="0.8"/>
+            <!-- 水滴 -->
+            <path d="M22 10 C22 10 18 16 18 19 C18 21.2 19.8 23 22 23 C24.2 23 26 21.2 26 19 C26 16 22 10 22 10 Z" fill="rgba(192,96,112,0.85)" stroke="#C06070" stroke-width="0.5"/>
+            <!-- 高光 -->
+            <ellipse cx="21" cy="17" rx="1.2" ry="2" fill="rgba(255,255,255,0.25)" transform="rotate(-15 21 17)"/>
+            <!-- 小星 -->
+            <path d="M12 8 L12.5 9.5 L14 10 L12.5 10.5 L12 12 L11.5 10.5 L10 10 L11.5 9.5 Z" fill="rgba(195,167,114,0.7)"/>
+         </svg>
+      </div>
+      <div class="app-label" style="color:var(--c-black);">Cycle</div>
+   </div>
 </div>
                   </div>
                </div>
@@ -4243,6 +4262,26 @@
       <div class="ic-label">Chronos</div>
       <input type="file" id="ic-chronos-file" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-chronos-prev', 'ic-chronos-data')"><input type="hidden" id="ic-chronos-data">
    </div>
+   <div class="ic-box" onclick="document.getElementById('ic-couple-file').click()">
+      <div class="ic-prev" id="ic-couple-prev"></div>
+      <div class="ic-label">Couple</div>
+      <input type="file" id="ic-couple-file" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-couple-prev', 'ic-couple-data')"><input type="hidden" id="ic-couple-data">
+   </div>
+   <div class="ic-box" onclick="document.getElementById('ic-cycle-file').click()">
+      <div class="ic-prev" id="ic-cycle-prev"></div>
+      <div class="ic-label">Cycle</div>
+      <input type="file" id="ic-cycle-file" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-cycle-prev', 'ic-cycle-data')"><input type="hidden" id="ic-cycle-data">
+   </div>
+   <div class="ic-box" onclick="document.getElementById('ic-receipt-file2').click()">
+      <div class="ic-prev" id="ic-receipt-prev"></div>
+      <div class="ic-label">心事账单</div>
+      <input type="file" id="ic-receipt-file2" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-receipt-prev', 'ic-receipt-data')"><input type="hidden" id="ic-receipt-data">
+   </div>
+   <div class="ic-box" onclick="document.getElementById('ic-couple2-file').click()">
+      <div class="ic-prev" id="ic-couple2-prev"></div>
+      <div class="ic-label">CoupleSpace</div>
+      <input type="file" id="ic-couple2-file" hidden accept="image/*" onchange="handleImageUpload(event, 'ic-couple2-prev', 'ic-couple2-data')"><input type="hidden" id="ic-couple2-data">
+   </div>
 </div>
                <div class="icon-upload-grid">
                   <div class="ic-box" onclick="document.getElementById('ic-d1-file').click()">
@@ -5515,6 +5554,7 @@
          <script src="js/28-couple-space.js"></script>
          <script src="js/04-app-init.js"></script>
          <script src="js/27-anon-chat.js"></script>
+         <script src="js/30-cycle.js"></script>
    <!-- 🚀 终极修复：将动态样式表移至文档最末尾，确保 100% 覆盖系统样式 -->
    <style id="dynamic-user-style"></style>
    <style id="dynamic-chat-style"></style>
