@@ -191,7 +191,11 @@ function rcRenderMain() {
     let lastDate = '';
     list.forEach(r => {
         if (r.date !== lastDate) {
-            el.innerHTML += `<div class="rc-date-label rc-mono">${r.date.replace(/-/g,' / ')}</div>`;
+            //🔧 用 createElement 代替 innerHTML +=，避免破坏前面卡片的 onclick 绑定
+            const dateLabel = document.createElement('div');
+            dateLabel.className = 'rc-date-label rc-mono';
+            dateLabel.textContent = r.date.replace(/-/g, ' / ');
+            el.appendChild(dateLabel);
             lastDate = r.date;
         }
         const wrap = document.createElement('div');
@@ -381,7 +385,11 @@ ${c.history[0] ? c.history[0].content : c.prompt}`;
             }
         }
 
-        // 流结束，解析并保存数据
+        // 流结束，先移除临时占位卡片，避免遮挡正式卡片导致点击无响应
+        const liveWrap = document.getElementById('live-receipt-wrap');
+        if (liveWrap) liveWrap.remove();
+
+        // 解析并保存数据
         let receiptsTexts = rawReply.split('===RECEIPT===').map(s => s.trim()).filter(s => s.length > 20);
         
         if (!window.rcDB[window.rcCurrentRole]) window.rcDB[window.rcCurrentRole] = [];
@@ -391,15 +399,18 @@ ${c.history[0] ? c.history[0].content : c.prompt}`;
             let parts = rt.split('\n');
             let finalTitle = parts[0].trim() || '无题';
             let finalBody = parts.slice(1).join('\n').trim() || '...';
+            // 用时间戳确保 ID 唯一，避免和已有小票冲突
+            const uniqueId = '#AI-' + Date.now().toString().slice(-6) + '-' + idx;
             
             window.rcDB[window.rcCurrentRole].unshift({
-                id: tempId + '-' + idx, time: tempTime, date: new Date().toISOString().split('T')[0],
+                id: uniqueId, time: tempTime, date: new Date().toISOString().split('T')[0],
                 author: { id: role.id, name: role.name, title: role.title, avatar: role.avatar }, isUserPost: false,
                 title: finalTitle, body: finalBody, comments: []
             });
         });
         
         rcSaveData(); 
+        rcRenderTabs();
         rcRenderMain(); // 重新渲染以绑定完整事件
         window.rcShowToast(`成功调取 ${receiptsTexts.length} 篇心事`);
 
