@@ -350,7 +350,7 @@ const CycleApp = (function () {
 <style>
 #cycle-app-modal{--rose:#B5626E;--rose-l:rgba(181,98,110,0.08);--rose-m:rgba(181,98,110,0.15);--gold:#C3A772;--gold-l:rgba(195,167,114,0.1);--black:#1C1C1E;--gray:#8E8E93;--gray-l:#F2F2F7;--border:rgba(0,0,0,0.05);--card:#fff;--bg:#FAFAFA;}
 #cycle-app-modal *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-.cy2-header{padding:calc(env(safe-area-inset-top,44px) + 10px) 22px 14px;background:rgba(250,250,250,0.96);backdrop-filter:blur(24px);display:flex;justify-content:space-between;align-items:flex-end;border-bottom:0.5px solid var(--border);flex-shrink:0;position:relative;}
+.cy2-header{padding:calc(env(safe-area-inset-top,44px) + 30px) 22px 14px;background:rgba(250,250,250,0.96);backdrop-filter:blur(24px);display:flex;justify-content:space-between;align-items:flex-end;border-bottom:0.5px solid var(--border);flex-shrink:0;position:relative;}
 .cy2-header-deco{position:absolute;right:66px;bottom:12px;opacity:0.06;pointer-events:none;}
 .cy2-title{font-size:27px;font-weight:900;letter-spacing:-1px;color:var(--black);font-style:italic;}
 .cy2-title span{color:var(--rose);}
@@ -405,7 +405,11 @@ const CycleApp = (function () {
 .cy2-day.today::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--rose);}
 .cy2-day.period{background:var(--rose-l);color:var(--rose);font-weight:800;}
 .cy2-day.period-edge{background:var(--rose);color:#fff;font-weight:900;box-shadow:0 3px 10px rgba(181,98,110,0.3);}
+.cy2-day.period-end{background:var(--black);color:var(--rose);font-weight:900;border:2px solid var(--rose);box-shadow:0 4px 12px rgba(181,98,110,0.4);}
 .cy2-day.predicted{color:var(--gold);background:var(--gold-l);}
+.cy2-end-fab{position:fixed;bottom:calc(75px + env(safe-area-inset-bottom,20px));right:20px;width:56px;height:56px;border-radius:50%;background:var(--black);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.25);border:1.5px solid var(--rose);z-index:90;cursor:pointer;animation:cy2Pop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes cy2Pop{from{transform:scale(0) rotate(-90deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.cy2-end-fab-txt{font-size:9px;font-weight:800;letter-spacing:1px;margin-top:2px;color:var(--rose);}
 .cy2-day.has-log::before{content:'✦';position:absolute;top:0;right:1px;font-size:6px;color:var(--rose);line-height:1;}
 /* 记录卡 */
 .cy2-log{background:var(--card);border-radius:20px;padding:14px 16px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:0.5px solid var(--border);display:flex;gap:12px;cursor:pointer;transition:transform 0.15s;position:relative;overflow:hidden;}
@@ -685,6 +689,10 @@ const CycleApp = (function () {
 
 <!-- Toast -->
 <div class="cy2-toast" id="cy2-toast"></div>
+<div class="cy2-end-fab" id="cy2-end-fab" onclick="CycleApp._endPeriod()">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+  <div class="cy2-end-fab-txt">结束</div>
+</div>
         `;
         document.body.appendChild(modal);
     }
@@ -728,7 +736,9 @@ const CycleApp = (function () {
             if (D.periodDays.includes(ds)) {
                 el.classList.add('period');
                 const prev = addDays(ds, -1), next = addDays(ds, 1);
-                if (!D.periodDays.includes(prev) || !D.periodDays.includes(next)) el.classList.add('period-edge');
+                // 结束日：这一天在经期内，但明天不在
+                if (!D.periodDays.includes(next)) el.classList.add('period-end');
+                else if (!D.periodDays.includes(prev)) el.classList.add('period-edge');
             }
             if (predicted.includes(ds)) el.classList.add('predicted');
             if (D.logs[ds]) el.classList.add('has-log');
@@ -961,9 +971,50 @@ const CycleApp = (function () {
     }
 
     function renderAll() {
+        const st = getStatus();
         renderHero();
         renderCal();
         renderRecent();
+        // 控制结束悬浮键
+        const fab = document.getElementById('cy2-end-fab');
+        if (fab) fab.style.display = st.inPeriod ? 'flex' : 'none';
+    }
+
+    function _endPeriod() {
+        if (!D.periodDays.includes(todayStr)) return;
+        if (!confirm('确认经期已于今日结束？系统将自动校准您的经期长度。')) return;
+
+        // 1. 在今日日志中记录已结束
+        if (!D.logs[todayStr]) {
+            D.logs[todayStr] = { isPeriod: true, flow: 0, pain: 0, moods: [], note: '经期于今日手动点击结束', ts: Date.now() };
+        } else {
+            D.logs[todayStr].note = (D.logs[todayStr].note ? D.logs[todayStr].note + '\n' : '') + '经期于今日手动点击结束';
+        }
+
+        // 2. 计算本次经期长度并校准 D.periodLen
+        const starts = findPeriodStarts();
+        const lastStart = starts[starts.length - 1];
+        const actualLen = diffDays(lastStart, todayStr) + 1;
+        D.periodLen = actualLen;
+
+        save();
+        renderAll();
+        cyToast('✦ 经期已结束，已为您更新预测模型');
+        
+        // 3. 通知联系人
+        if (typeof contacts !== 'undefined' && typeof currentContactId !== 'undefined' && currentContactId) {
+            const c = contacts.find(x => x.id === currentContactId);
+            if (c) {
+                const aiText = `[🌙 经期追踪系统 · 状态更新]\n\n用户刚刚手动确认：本次经期已于今日正式结束。本次持续时长为 ${actualLen} 天。\n\n【请以符合你人设的方式表达关心。可以表现出松了一口气，叮嘱她虽然结束了但也不要立刻吃冰或剧烈运动，或者问问她现在身体感觉有没有好一点。语气要自然。】`;
+                c.history.push({
+                    role: 'system_sum',
+                    content: `<i>✧ 经期已结束（共 ${actualLen} 天）</i>\n<span style="display:none;">${aiText}</span>`,
+                    timestamp: Date.now()
+                });
+                if (typeof saveData === 'function') saveData();
+                if (typeof renderChatHistory === 'function' && typeof isUserInChatRoom === 'function' && isUserInChatRoom(c.id)) renderChatHistory();
+            }
+        }
     }
 
     // ─── 记录弹窗 ───
@@ -1244,7 +1295,7 @@ const CycleApp = (function () {
         _startDrag, _onDrag, _stopDrag, _updateSlider,
         _switchTab, _prevMonth, _nextMonth,
         _openReminder, _closeReminder, _saveReminder, _toggleReminder,
-        _immediateNotify,
+        _immediateNotify, _endPeriod,
         _renderMoods,
         _bindSwipe, _cardTap, _closeAllSwipe, _deleteLog
     };
