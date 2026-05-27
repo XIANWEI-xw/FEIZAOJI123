@@ -75,9 +75,6 @@
                  appendBubbleRow(newMsg, c.history.length - 2); 
              }
              closeTransferModal();
-             
-             // 🚀 核心修复：发送卡片后强制触发 AI 回复，并确保它能读取到刚发的卡片
-             setTimeout(() => fetchAIReply(currentContactId), 500);
          }
          
          // 处理 AI 给你发卡后，你点击按钮的特效

@@ -1966,7 +1966,7 @@
                 
                 <!-- 详情页 -->
                 <div class="rc-detail-view" id="rc-detail-view">
-                    <div class="rc-dv-topbar">
+                    <div class="rc-dv-topbar" style="padding-top: calc(var(--safe-top) + 15px);">
                         <div class="rc-icon-btn" onclick="rcCloseDetail()"><i class="fa-solid fa-arrow-left"></i></div>
                         <div class="rc-dv-title rc-mono">RECEIPT DETAIL</div>
                         <div class="rc-icon-btn" onclick="rcOpenShareSheet()"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
@@ -3469,7 +3469,7 @@
                            <div class="cm-text">高定红包</div>
                         </div>
                         <!-- 【新增】：玫瑰星河入口 -->
-                        <div class="cm-item" onclick="openRoseGalaxy()">
+                        <div class="cm-item" id="cm-rose-galaxy" onclick="openRoseGalaxy()">
                            <div class="cm-icon-box" style="background: linear-gradient(135deg, #161214, #a8102a); color: #ffb6c1; box-shadow: 0 8px 20px rgba(168,16,42,0.3);">
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -4353,6 +4353,10 @@
                             <label>动作神态描写 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">Action & Expression</small></label>
                             <div class="cs-toggle"><input type="checkbox" id="cs-allow-action" class="cs-toggle-input"><label for="cs-allow-action"></label></div>
                         </div>
+                        <div class="cs-row-item cs-solo-only">
+                            <label>回复最大条数 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">Max Bubbles (0=不限)</small></label>
+                            <input type="number" id="cs-max-reply-bubbles" placeholder="0" class="cs-num-input" style="width: 80px;">
+                        </div>
 
                         <!-- 新增：主动消息配置 -->
                         <div class="cs-solo-only" style="margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
@@ -4426,7 +4430,7 @@
                     </section>
 
                     <!-- 板块 4：Visuals (视觉微调) -->
-                    <section class="cs-solo-only" style="margin-bottom: 40px;">
+                    <section style="margin-bottom: 40px;">
                         <div class="cs-section-head">04. Visual Aesthetics</div>
                         
                         <div class="cs-row-item">
@@ -4464,11 +4468,11 @@
                         <div class="chat-bg-preview-box" id="cs-bg-preview" onclick="document.getElementById('cs-bg-file').click()" style="height: 70px; width: 100%; border-radius: 12px; display:flex; justify-content:center; align-items:center; background:rgba(0,0,0,0.02); border: 1px dashed rgba(0,0,0,0.1); color:var(--c-gray-dark); font-size:12px; font-weight:700; cursor:pointer; letter-spacing: 1px; margin-bottom: 20px;">TAP TO UPLOAD</div>
                         <input type="file" id="cs-bg-file" hidden accept="image/*" onchange="handleImageUpload(event, 'cs-bg-preview', 'cs-bg-data', null, true)">
 
-                        <div class="cs-row-item" style="border:none;">
+                        <div class="cs-row-item cs-solo-only" style="border:none;">
                             <label>顶部光标装扮</label>
                             <span class="cs-text-btn" onclick="toggleCursorMenu()">选择样式 ›</span>
                         </div>
-                        <div id="cursor-menu-wrap" style="display:none; flex-direction:column; gap:6px; background: rgba(0,0,0,0.02); border-radius: 12px; padding: 10px; margin-bottom: 20px;"></div>
+                        <div id="cursor-menu-wrap" class="cs-solo-only" style="display:none; flex-direction:column; gap:6px; background: rgba(0,0,0,0.02); border-radius: 12px; padding: 10px; margin-bottom: 20px;"></div>
 
                         <div class="cs-row-item" style="border:none;">
                             <label>专属气泡 CSS</label>
@@ -4490,11 +4494,15 @@
                             <div style="font-size:12px; color:var(--c-gray-dark); font-weight:600; line-height:1.5;">群聊人设自动读取各成员的独立人设，无需手动编辑。</div>
                         </div>
 
-                        <div class="cs-row-item" style="margin-top:20px;">
+                        <div class="cs-row-item cs-group-only" style="display:none;">
+                            <label>群聊上下文轮数 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">发送给AI的历史消息条数 (0=用全局设置)</small></label>
+                            <input type="number" id="cs-group-context-turns" placeholder="0" class="cs-num-input" style="width: 80px;">
+                        </div>
+                        <div class="cs-row-item cs-solo-only">
                             <label>核心记忆库 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">点击进入管理所有记忆条目</small></label>
                             <span class="cs-text-btn" onclick="openMemoryVault()">打开记忆库 ›</span>
                         </div>
-                        <div style="background: #F9F9F7; border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 0.5px solid rgba(0,0,0,0.03);">
+                        <div class="cs-solo-only" style="background: #F9F9F7; border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 0.5px solid rgba(0,0,0,0.03);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <div style="font-size: 10px; font-weight: 800; color: #A8A196; letter-spacing: 1px;">VAULT STATUS</div>
                                 <div style="font-family: 'Courier New', monospace; font-size: 11px; font-weight: 900; color: #C3A772;" id="cs-memory-count">0 条记忆</div>
@@ -4516,12 +4524,12 @@
                         </div>
                         <textarea id="cs-memory" style="display:none;"></textarea>
                         
-                        <div class="cs-row-item">
+                        <div class="cs-row-item cs-solo-only">
                             <label>自动总结频率 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">每 N 条消息总结一次</small></label>
                             <input type="number" id="cs-auto-sum" class="cs-num-input" placeholder="0">
                         </div>
 
-                        <div class="cs-row-item" style="border:none; padding-bottom:10px; margin-top:20px;">
+                        <div class="cs-row-item cs-solo-only" style="border:none; padding-bottom:10px; margin-top:20px;">
                             <label>自动总结指令</label>
                             <span class="cs-text-btn" onclick="toggleSumPrompt()">修改指令 ▼</span>
                         </div>

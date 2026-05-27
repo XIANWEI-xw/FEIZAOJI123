@@ -298,11 +298,30 @@
                       // 呼吸灯装饰逻辑 (偶数在线，奇数离线)
                       let statusClass = (idx % 2 === 0) ? 'status-dot' : 'status-dot offline';
           
+                      // 群聊头像：优先群头像 > 九宫格 > 默认
+                      let listAvatarHtml = '';
+                      if (c.isGroup === true) {
+                          if (c.groupAvatar) {
+                              listAvatarHtml = `<img src="${c.groupAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`;
+                          } else if (c.groupMembers && c.groupMembers.length > 0) {
+                              listAvatarHtml = '<div class="group-avatar-grid" style="width:100%;height:100%;">';
+                              c.groupMembers.slice(0, 4).forEach(mid => {
+                                  const member = contacts.find(x => x.id === mid);
+                                  if (member) listAvatarHtml += '<div class="group-avatar-cell">' + renderAvatarHTML(member.chatAvatar || member.avatar, 'bot') + '</div>';
+                              });
+                              listAvatarHtml += '</div>';
+                          } else {
+                              listAvatarHtml = renderAvatarHTML('', 'bot');
+                          }
+                      } else {
+                          listAvatarHtml = renderAvatarHTML(c.chatAvatar || c.avatar, 'bot');
+                      }
+
                       item.innerHTML = `
                           <div class="star-dust"><div class="sd-1">★</div><div class="sd-2">✧</div></div>
                           <div class="card-seal-line" data-id="${cardId}"></div><div class="crosshair"></div>
                           <div class="list-avatar-box">
-                              <div class="list-avatar-inner">${renderAvatarHTML(c.chatAvatar || c.avatar, 'bot')}</div>
+                              <div class="list-avatar-inner">${listAvatarHtml}</div>
                               ${starSVG1}${starSVG2}${starSVG3}
                           </div>
                           <div class="c-info">
@@ -349,11 +368,10 @@ function switchSelectChatMode(mode) {
     tabGroup.style.background = mode === 'group' ? 'var(--c-black)' : 'rgba(0,0,0,0.05)';
     tabGroup.style.color = mode === 'group' ? '#fff' : 'var(--c-black)';
     if (mode === 'group') {
-        document.getElementById('select-chat-list').innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:28px;opacity:0.15;margin-bottom:12px;">✦</div><div style="font-size:14px;font-weight:800;color:var(--c-black);letter-spacing:1px;">COMING SOON</div><div style="font-size:11px;color:var(--c-gray-dark);margin-top:8px;line-height:1.6;">群聊功能正在全力开发中<br>敬请期待下个版本更新 ✧</div></div>';
+        document.getElementById('select-chat-group-actions').style.display = 'block';
+    } else {
         document.getElementById('select-chat-group-actions').style.display = 'none';
-        return;
     }
-    document.getElementById('select-chat-group-actions').style.display = 'none';
     renderSelectChatList();
 }
 
@@ -405,12 +423,14 @@ function createGroupChat() {
     }).filter(Boolean);
     const groupName = nameInput.value.trim() || (memberNames.slice(0, 3).join('、') + (memberNames.length > 3 ? '...' : ''));
     let combinedPrompt = '群聊成员：' + memberNames.join('、');
+    // 生成默认群头像（取前4个成员头像拼接存为标记）
     const groupContact = {
         id: 'group_' + Date.now(),
         name: groupName,
         chatRemark: groupName,
         isGroup: true,
         groupMembers: groupSelectedIds.slice(),
+        groupAvatar: '',
         avatar: '',
         chatAvatar: '',
         group: 'FRIENDS',

@@ -389,6 +389,10 @@ if (!c.theaterHistory) c.theaterHistory = [];
         window.lastTheaterRenderedId = currentContactId;
     }
 
+    // 🚀 核心修复：给对话容器加足够的底部留白，防止最后几条消息被输入框遮挡
+    const thBox = document.getElementById('th-dialogue-box');
+    if (thBox) thBox.style.paddingBottom = '180px';
+
     renderThPresets(); 
 }
          
@@ -581,7 +585,7 @@ function selectThColor(color, name) {
                  <div class="content-col">
                      <div class="speaker-label">${speakerName}</div>
                      <div class="message-content" id="th-content-box-${msgObj._id}">${formattedContent}</div>
-                     <div class="divine-actions">
+                     <div class="divine-actions" style="padding-bottom: 12px; margin-bottom: 8px;">
                          <button class="action-btn" onclick="regenerateThMsg('${msgObj._id}', ${isUser})">Regen</button>
                          <button class="action-btn" onclick="rewriteThMsg('${msgObj._id}')">Edit</button>
                          <button class="action-btn" onclick="eraseThMsg('${msgObj._id}')">Erase</button>
