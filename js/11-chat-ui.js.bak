@@ -346,65 +346,17 @@ if (presetLangs.includes(targetLang)) {
              if (newTitle === null) return;
              newTitle = newTitle.trim();
              var uName = gConfig.meName || '管理员';
-
-             // 构建所有成员的当前头衔状态描述，让AI彻底看清全局
-             var titleStatusLines = [];
-             if (c.groupMembers) {
-                 c.groupMembers.forEach(function(mid) {
-                     var member = contacts.find(function(x) { return x.id === mid; });
-                     if (!member) return;
-                     var mName = member.chatRemark || member.name;
-                     var mTitle = (c.groupTitles && c.groupTitles[mName]) ? c.groupTitles[mName] : '（无头衔）';
-                     titleStatusLines.push('  · ' + mName + '：' + mTitle);
-                 });
-             }
-             var titleStatusBlock = titleStatusLines.length > 0
-                 ? '\n\n【当前全体成员头衔一览】\n' + titleStatusLines.join('\n')
-                 : '';
-
              if (newTitle) {
                  c.groupTitles[speakerName] = newTitle;
-
-                 // 更新状态块中这个人的头衔
-                 titleStatusLines = [];
-                 if (c.groupMembers) {
-                     c.groupMembers.forEach(function(mid) {
-                         var member = contacts.find(function(x) { return x.id === mid; });
-                         if (!member) return;
-                         var mName = member.chatRemark || member.name;
-                         var mTitle = (c.groupTitles && c.groupTitles[mName]) ? c.groupTitles[mName] : '（无头衔）';
-                         titleStatusLines.push('  · ' + mName + '：' + mTitle);
-                     });
-                 }
-                 titleStatusBlock = titleStatusLines.length > 0
-                     ? '\n\n【当前全体成员头衔一览（已更新）】\n' + titleStatusLines.join('\n')
-                     : '';
-
                  c.history.push({
                      role: 'system_sum',
-                     content: '<div style="text-align:center; width:100%;"><div style="color:var(--c-gray-dark); font-size:10px; font-weight:700; background:rgba(0,0,0,0.03); padding:4px 10px; border-radius:10px; display:inline-block;">' + uName + ' 将「' + speakerName + '」的头衔设为「' + newTitle + '」</div></div>\n<span style="display:none;">[🚨 系统群管理通知 — 请所有角色认真阅读]\n\n本次操作人：' + uName + '（群主/管理员）\n操作内容：将群成员【' + speakerName + '】的专属头衔设置为「' + newTitle + '」\n\n【绝对明确】：这次头衔变更只针对【' + speakerName + '】这一个人，其他所有人的头衔完全不受影响。' + titleStatusBlock + '\n\n请各角色根据自己的人设对此事做出自然反应。【' + speakerName + '】应该对自己被赋予「' + newTitle + '」这个头衔做出回应，其他人可以起哄、吐槽或祝贺。]</span>'
+                     content: '<div style="text-align:center; width:100%;"><div style="color:var(--c-gray-dark); font-size:10px; font-weight:700; background:rgba(0,0,0,0.03); padding:4px 10px; border-radius:10px; display:inline-block;">' + uName + ' 将「' + speakerName + '」的头衔修改为「' + newTitle + '」</div></div>\n<span style="display:none;">[系统通知：群管理员刚刚将 ' + speakerName + ' 的群头衔修改为「' + newTitle + '」。所有群成员都能看到这个头衔。请自然地对此做出反应。]</span>'
                  });
              } else {
                  delete c.groupTitles[speakerName];
-
-                 // 更新状态块
-                 titleStatusLines = [];
-                 if (c.groupMembers) {
-                     c.groupMembers.forEach(function(mid) {
-                         var member = contacts.find(function(x) { return x.id === mid; });
-                         if (!member) return;
-                         var mName = member.chatRemark || member.name;
-                         var mTitle = (c.groupTitles && c.groupTitles[mName]) ? c.groupTitles[mName] : '（无头衔）';
-                         titleStatusLines.push('  · ' + mName + '：' + mTitle);
-                     });
-                 }
-                 titleStatusBlock = titleStatusLines.length > 0
-                     ? '\n\n【当前全体成员头衔一览（已更新）】\n' + titleStatusLines.join('\n')
-                     : '';
-
                  c.history.push({
                      role: 'system_sum',
-                     content: '<div style="text-align:center; width:100%;"><div style="color:var(--c-gray-dark); font-size:10px; font-weight:700; background:rgba(0,0,0,0.03); padding:4px 10px; border-radius:10px; display:inline-block;">' + uName + ' 清除了「' + speakerName + '」的头衔</div></div>\n<span style="display:none;">[🚨 系统群管理通知]\n\n本次操作人：' + uName + '\n操作内容：清除了群成员【' + speakerName + '】的专属头衔\n\n【绝对明确】：只有【' + speakerName + '】的头衔被清除，其他人不受影响。' + titleStatusBlock + '\n\n请【' + speakerName + '】对头衔被取消这件事做出符合人设的反应。]</span>'
+                     content: '<div style="text-align:center; width:100%;"><div style="color:var(--c-gray-dark); font-size:10px; font-weight:700; background:rgba(0,0,0,0.03); padding:4px 10px; border-radius:10px; display:inline-block;">' + uName + ' 清除了「' + speakerName + '」的头衔</div></div>'
                  });
              }
              saveData();
