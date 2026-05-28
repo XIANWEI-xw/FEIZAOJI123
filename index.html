@@ -4537,6 +4537,17 @@
                             <label>群聊上下文轮数 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">发送给AI的历史消息条数 (0=用全局设置)</small></label>
                             <input type="number" id="cs-group-context-turns" placeholder="0" class="cs-num-input" style="width: 80px;">
                         </div>
+                        <div class="cs-group-only" style="display:none; margin-top: 20px; background: #F9F9F7; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <label style="font-size: 13px; font-weight: 800;">私聊注入群聊记录</label>
+                                <div class="cs-toggle"><input type="checkbox" id="cs-group-private-sync" class="cs-toggle-input" checked><label for="cs-group-private-sync"></label></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="font-size: 11px; font-weight: 800; color: #A8A196;">注入消息条数</label>
+                                <input type="number" id="cs-group-private-sync-turns" placeholder="25" class="cs-num-input" style="width: 80px;">
+                            </div>
+                            <p style="font-size: 9px; color: #A8A196; margin-top: 10px; line-height: 1.4;">开启后，群内各成员的私聊 AI 会自动读取群聊中的最近对话，让角色在私聊中也能回忆起群里发生的事。标记为 [你自己] 的是该角色在群里说过的话。</p>
+                        </div>
                         <div class="cs-row-item cs-solo-only">
                             <label>核心记忆库 <small style="display:block; font-size:9px; color:#A8A196; font-weight:500;">点击进入管理所有记忆条目</small></label>
                             <span class="cs-text-btn" onclick="openMemoryVault()">打开记忆库 ›</span>

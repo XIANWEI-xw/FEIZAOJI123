@@ -742,36 +742,61 @@ ${wbTop}
                          }
                      }
                      
-                     // 🔄【群聊记忆互通引擎】：将群聊中的最新对话实时同步到私聊
+                     // 🔄【群聊记忆互通引擎 V2】：将群聊中的最新对话实时同步到私聊（可配置轮数，默认25条）
                      const groupChatsWithMember = contacts.filter(gc => 
                          gc.isGroup === true && 
                          gc.groupMembers && 
                          gc.groupMembers.includes(c.id) && 
+                         gc.groupPrivateSync !== false &&
                          gc.history && 
                          gc.history.length > 1
                      );
 
                      if (groupChatsWithMember.length > 0) {
                          let groupContextParts = [];
+                         let botName = c.chatRemark || c.name;
                          groupChatsWithMember.forEach(gc => {
+                             let syncTurns = gc.groupPrivateSyncTurns || 25;
                              let recentGroupMsgs = gc.history
-                                 .filter(h => h.role !== 'system' && h.role !== 'system_sum' && !h.isTheater && !h.isRevoked)
-                                 .slice(-12)
+                                 .filter(h => {
+                                     if (h.isTheater || h.isRevoked) return false;
+                                     if (h.role === 'system') return false;
+                                     if (h.role === 'system_sum') {
+                                         return h.content && (h.content.includes('头衔') || h.content.includes('群管理通知'));
+                                     }
+                                     return true;
+                                 })
+                                 .slice(-syncTurns)
                                  .map(h => {
+                                     if (h.role === 'system_sum') {
+                                         let sysMatch = h.content.match(/<span style="display:none;">([\s\S]*?)<\/span>/);
+                                         let sysText = sysMatch ? sysMatch[1].replace(/<[^>]+>/g, '').trim() : h.content.replace(/<[^>]+>/g, '').trim();
+                                         if (!sysText || sysText.length < 2) return null;
+                                         return `[群管理通知]: ${sysText.substring(0, 200)}`;
+                                     }
                                      let speaker = h.role === 'user' ? uName : (h.speakerName || (gc.chatRemark || gc.name));
                                      let text = (h.content || '').replace(/<[^>]+>/g, '').trim();
                                      if (!text || text.length < 2) return null;
-                                     return `${speaker}: ${text.substring(0, 100)}`;
+                                     let isSelf = (speaker === botName);
+                                     let prefix = isSelf ? `[你自己] ${speaker}` : speaker;
+                                     return `${prefix}: ${text.substring(0, 150)}`;
                                  })
                                  .filter(Boolean);
                              
                              if (recentGroupMsgs.length > 0) {
-                                 groupContextParts.push(`[群聊「${gc.chatRemark || '群聊'}」的最近对话]\n${recentGroupMsgs.join('\n')}`);
+                                 let memberNames = gc.groupMembers.map(mid => { let m = contacts.find(x => x.id === mid); return m ? (m.chatRemark || m.name) : '未知'; }).join('、');
+                                 groupContextParts.push(`[群聊「${gc.chatRemark || '群聊'}」的最近 ${recentGroupMsgs.length} 条对话]\n群成员：${memberNames}\n你在群里的身份是：${botName}\n---\n${recentGroupMsgs.join('\n')}`);
                              }
                          });
                          
                          if (groupContextParts.length > 0) {
-                             finalSysPrompt += `\n\n【❗ 群聊记忆无缝互通】：以下是你和${uName}共同参与的群聊中的最近对话记录。你必须记得群聊里发生过的所有事情！如果群聊里有人聊到了有趣的话题、发生了冲突、或者有人说了你的坏话/好话，你在私聊中必须自然地表现出你知道这件事，可以主动提起、吐槽、或延续相关情绪！绝对不要失忆！\n${groupContextParts.join('\n\n')}`;
+                             finalSysPrompt += `\n\n【❗ 群聊记忆无缝互通】：以下是你和${uName}共同参与的群聊中的最近对话记录。
+【核心规则】：
+1. 标记为 [你自己] 的发言就是你（${botName}）在群里说过的话，你必须记得你说了什么并且认账！
+2. 你必须记得群聊里发生过的所有事情，包括其他人说了什么、有没有人吵架、有没有人提到你！
+3. 如果群聊里有人聊到了有趣的话题、发生了冲突、或者有人说了你的坏话/好话，你在私聊中必须自然地表现出你知道这件事！
+4. 可以主动提起群聊里发生的事、吐槽其他群友、或延续相关情绪！绝对不要失忆！
+\n${groupContextParts.join('\n\n')}`;
                          }
                      }
 

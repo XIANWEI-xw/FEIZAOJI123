@@ -133,6 +133,15 @@ function isUserInChatRoom(targetContactId) {
     updateChatTopUI(); 
     applyChatBackground(c.chatBg); 
     
+    // 群聊消息注入：如果刚从群聊退出，且当前私聊角色是群成员，自动注入群聊记录
+    if (lastExitedGroupId && c.isGroup !== true) {
+        const gc = contacts.find(x => x.id === lastExitedGroupId);
+        if (gc && gc.isGroup && gc.groupPrivateSync !== false && gc.groupMembers && gc.groupMembers.includes(id)) {
+            injectGroupChatSync(c, gc);
+        }
+        lastExitedGroupId = null;
+    }
+    
     // 🚀 核心修复：进入聊天室时，强制重置渲染状态并执行全量渲染
     // 确保在后台期间 history 增加的所有内容都能被画出来
     renderChatHistory(); 
@@ -161,8 +170,17 @@ function isUserInChatRoom(targetContactId) {
     document.getElementById('view-chat').classList.add('slide-in'); 
 }
          
+         let lastExitedGroupId = null;
+
          function goBackToMain(animate = true) { 
              exitChatMultiSelect();
+             // 记录退出的群聊ID，供私聊注入使用
+             if (currentContactId) {
+                 const exitingContact = contacts.find(x => x.id === currentContactId);
+                 if (exitingContact && exitingContact.isGroup === true) {
+                     lastExitedGroupId = currentContactId;
+                 }
+             }
              document.getElementById('view-chat').classList.remove('slide-in'); currentContactId = null; 
              if(animate) {
                  const kw = document.getElementById('msg-search-input').value.trim();
@@ -170,6 +188,75 @@ function isUserInChatRoom(targetContactId) {
              } 
          }
          
+         // 群聊消息注入引擎：退出群聊后进入私聊时，一次性写入隐形群聊记录
+         function injectGroupChatSync(contact, groupChat) {
+             let botName = contact.chatRemark || contact.name;
+             let syncTurns = groupChat.groupPrivateSyncTurns || 25;
+             let uName = gConfig.meName || '我';
+
+             // 防重复：2分钟内同一个群已注入过则跳过
+             for (let k = contact.history.length - 1; k >= Math.max(0, contact.history.length - 8); k--) {
+                 let m = contact.history[k];
+                 if (m._groupSyncFrom === groupChat.id && m.timestamp && (Date.now() - m.timestamp < 120000)) return;
+             }
+
+             let recentGroupMsgs = groupChat.history
+                 .filter(function(h) {
+                     if (h.isTheater || h.isRevoked) return false;
+                     if (h.role === 'system') return false;
+                     if (h.role === 'system_sum') {
+                         return h.content && (h.content.includes('头衔') || h.content.includes('群管理通知'));
+                     }
+                     return true;
+                 })
+                 .slice(-syncTurns)
+                 .map(function(h) {
+                     if (h.role === 'system_sum') {
+                         var match = h.content.match(/<span style="display:none;">([\s\S]*?)<\/span>/);
+                         var sysText = match ? match[1].replace(/<[^>]+>/g, '').trim() : h.content.replace(/<[^>]+>/g, '').trim();
+                         if (!sysText || sysText.length < 2) return null;
+                         return '[群管理通知]: ' + sysText.substring(0, 200);
+                     }
+                     var speaker = h.role === 'user' ? uName : (h.speakerName || (groupChat.chatRemark || groupChat.name));
+                     var text = (h.content || '').replace(/<[^>]+>/g, '').trim();
+                     if (!text || text.length < 2) return null;
+                     var isSelf = (speaker === botName);
+                     var prefix = isSelf ? '[你自己] ' + speaker : speaker;
+                     return prefix + ': ' + text.substring(0, 150);
+                 })
+                 .filter(Boolean);
+
+             if (recentGroupMsgs.length < 2) return;
+
+             let memberNames = groupChat.groupMembers.map(function(mid) {
+                 let m = contacts.find(x => x.id === mid);
+                 return m ? (m.chatRemark || m.name) : '未知';
+             }).join('、');
+
+             let groupName = groupChat.chatRemark || '群聊';
+
+             let hiddenContent = '[🔔 群聊记忆同步通知]\n'
+                 + '你刚刚在群聊「' + groupName + '」中参与了对话。以下是群里最近的 ' + recentGroupMsgs.length + ' 条消息记录：\n'
+                 + '群成员：' + memberNames + '\n'
+                 + '你在群里的身份是：' + botName + '\n'
+                 + '标记为 [你自己] 的发言是你（' + botName + '）说过的话，你必须认账！\n'
+                 + '---\n'
+                 + recentGroupMsgs.join('\n') + '\n'
+                 + '---\n'
+                 + '请在接下来的私聊中自然地表现出你知道群里发生的事！可以主动提起、吐槽群友、延续相关情绪。绝对不要失忆！';
+
+             let visibleText = '✧ 群聊「' + groupName + '」的 ' + recentGroupMsgs.length + ' 条最近动态已同步';
+
+             contact.history.push({
+                 role: 'system_sum',
+                 content: '<i>' + visibleText + '</i>\n<span style="display:none;">' + hiddenContent + '</span>',
+                 timestamp: Date.now(),
+                 _groupSyncFrom: groupChat.id
+             });
+
+             saveData();
+         }
+
          /* 修复壁纸乱动 Bug：将壁纸绑定到绝对不会改变尺寸的父级外壳 view-chat 上 */
          function applyChatBackground(bgData) { 
              const vc = document.getElementById('view-chat'); 
@@ -329,6 +416,8 @@ if (presetLangs.includes(targetLang)) {
              
              // 8. 群聊设置
              document.getElementById('cs-group-context-turns').value = c.groupContextTurns || 0;
+             document.getElementById('cs-group-private-sync').checked = c.groupPrivateSync !== false;
+             document.getElementById('cs-group-private-sync-turns').value = c.groupPrivateSyncTurns || 25;
 
              // 9. 刷新记忆库统计预览
              if (typeof mvUpdateSettingsPreview === 'function') mvUpdateSettingsPreview(c);
@@ -631,6 +720,8 @@ c.history[0].content = newPrompt;
              c.autoSumFreq = parseInt(document.getElementById('cs-auto-sum').value) || 0; 
              c.sumPrompt = document.getElementById('cs-sum-prompt').value.trim() || c.sumPrompt;
              c.groupContextTurns = parseInt(document.getElementById('cs-group-context-turns').value) || 0;
+             c.groupPrivateSync = document.getElementById('cs-group-private-sync').checked;
+             c.groupPrivateSyncTurns = parseInt(document.getElementById('cs-group-private-sync-turns').value) || 25;
     
              // 5. 应用与保存
              updateChatTopUI(); 
