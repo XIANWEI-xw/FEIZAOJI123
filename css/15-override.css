@@ -1176,3 +1176,14 @@ display: none; opacity: 0; transition: opacity 0.5s, background-color 0.5s;
     border: none !important;
     box-shadow: none !important;
 }
+/* iOS bottom offset neutralizer */
+@supports (-webkit-touch-callout: none) {
+    #app-messages .bottom-tabs-dark {
+        bottom: max(env(safe-area-inset-bottom),10px) !important;
+        transform: translateY(0) !important;
+    }
+    #app-messages .chat-input-wrap {
+        transform: translateY(0) !important;
+        bottom: 0 !important;
+    }
+}

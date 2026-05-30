@@ -1,5 +1,26 @@
-﻿         
-         // =====================================================================
+﻿// ================= 推特时间格式化引擎 =================
+function twFormatRelativeTime(timestamp) {
+    if (!timestamp) return '刚刚';
+    const now = Date.now();
+    const diff = now - timestamp;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (seconds < 60) return '刚刚';
+    if (minutes < 60) return minutes + '分钟';
+    if (hours < 24) return hours + '小时';
+    if (days < 7) return days + '天';
+
+    const d = new Date(timestamp);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const year = d.getFullYear();
+    const currentYear = new Date().getFullYear();
+    if (year === currentYear) return month + '月' + day + '日';
+    return year + '年' + month + '月' + day + '日';
+}// =====================================================================
          // 推特 (Star UI) 专属 JS 交互逻辑
          // =====================================================================
          // 动态生成推文 HTML 引擎 (保留了所有精美样式和交互)
@@ -75,7 +96,7 @@ let likesCount = post.likes || Math.floor(Math.random()*300)+10;
 let commentsCount = post.comments ? post.comments.length : 0;
 let isLikedClass = post.isLiked ? 'text-pink-500' : '';
 let likeIconClass = post.isLiked ? 'fa-solid' : 'fa-regular';
-let timeDisplay = post.timestamp ? mFormatRelativeTime(post.timestamp) : '刚刚';
+let timeDisplay = post.timestamp ? twFormatRelativeTime(post.timestamp) : '刚刚';
 
 // 增加删除按钮逻辑 (所有人都能删)
 let deleteBtnHtml = `
@@ -1492,6 +1513,13 @@ function openEditProfileModal(cid = 'me') {
         document.getElementById('edit-profile-handle').value = (twData.meHandle || '@soap_user').replace('@', '');
         document.getElementById('edit-profile-bio').value = twData.meBio || '记录自己的生活碎片。';
         
+        //粉丝数设置
+        let followingInput = document.getElementById('edit-profile-following');
+        let followersInput = document.getElementById('edit-profile-followers');
+        if (followingInput) followingInput.value = twData.meFollowing || 128;
+        if (followersInput) followersInput.value = twData.meFollowers || 45;
+        if (document.getElementById('tw-profile-stats-section')) document.getElementById('tw-profile-stats-section').classList.remove('hidden');
+        
         document.getElementById('tw-profile-history-section').classList.add('hidden');
         document.getElementById('tw-btn-ai-profile').classList.add('hidden');
     } else {
@@ -1600,6 +1628,11 @@ if (tw_currentEditProfileId === 'me') {
         twData.meBio = newBio;
         document.getElementById('profile-body-bio').innerText = newBio;
     }
+    // 保存粉丝数
+    let followingInput = document.getElementById('edit-profile-following');
+    let followersInput = document.getElementById('edit-profile-followers');
+    if (followingInput) twData.meFollowing = parseInt(followingInput.value) || 0;
+    if (followersInput) twData.meFollowers = parseInt(followersInput.value) || 0;
     saveTwData();
 } else {
     const c = contacts.find(x => x.id === tw_currentEditProfileId);
@@ -2681,6 +2714,9 @@ if (profileView) {
     profileView.querySelector('#profile-body-name').innerText = myName;
     profileView.querySelector('#profile-body-handle').innerText = myHandle;
     profileView.querySelector('#profile-body-bio').innerText = myBio;
+    // 动态渲染粉丝数（全局所有位置同步）
+    document.querySelectorAll('.tw-stat-following').forEach(el => el.innerText = twData.meFollowing || 128);
+    document.querySelectorAll('.tw-stat-followers').forEach(el => el.innerText = twData.meFollowers || 45);
     
     const avatarWrapper = profileView.querySelector('.w-20.h-20.sm\\:w-32.sm\\:h-32');
     if (avatarWrapper) avatarWrapper.innerHTML = getProfileAvatarHtml(null, true);

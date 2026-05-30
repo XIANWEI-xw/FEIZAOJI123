@@ -360,9 +360,9 @@ window.CoRead = {
                 </div>
                 <div style="flex:1;">
                     <div class="coread-lib-it">导入新书</div>
-                    <div class="coread-lib-is">TXT · 自动识别 UTF-8 / GBK</div>
+                    <div class="coread-lib-is">TXT / EPUB · 自动识别编码</div>
                 </div>
-                <input type="file" accept=".txt,text/plain" hidden onchange="CoRead.handleFileUpload(event)">
+                <input type="file" accept=".txt,.epub,text/plain,application/epub+zip" hidden onchange="CoRead.handleFileUpload(event)">
             </label>
             <div class="coread-lib-section">
                 <div class="coread-lib-section-label">已收录 · ARCHIVE</div>
@@ -390,6 +390,13 @@ window.CoRead = {
         const file = e.target.files[0];
         e.target.value = '';
         if (!file) return;
+
+        // EPUB 文件走专用解析流程
+        if (file.name.toLowerCase().endsWith('.epub')) {
+            this.handleEpubUpload(file);
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = (ev) => {
             let content = ev.target.result;
@@ -404,6 +411,116 @@ window.CoRead = {
         };
         reader.onerror = () => alert('读取文件失败');
         reader.readAsText(file, 'UTF-8');
+    },
+
+    /* ---------- EPUB 解析引擎 ---------- */
+    async handleEpubUpload(file) {
+        try {
+            if (typeof JSZip === 'undefined') {
+                // 动态加载 JSZip
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                    s.onload = resolve;
+                    s.onerror = () => reject(new Error('JSZip 加载失败'));
+                    document.head.appendChild(s);
+                });
+            }
+
+            const arrayBuffer = await file.arrayBuffer();
+            const zip = await JSZip.loadAsync(arrayBuffer);
+
+            // 1. 解析 META-INF/container.xml 找到 rootfile
+            const containerXml = await zip.file('META-INF/container.xml').async('string');
+            const containerDoc = new DOMParser().parseFromString(containerXml, 'application/xml');
+            const rootfilePath = containerDoc.querySelector('rootfile').getAttribute('full-path');
+            const rootDir = rootfilePath.includes('/') ? rootfilePath.substring(0, rootfilePath.lastIndexOf('/') + 1) : '';
+
+            // 2. 解析 OPF 文件，获取 spine顺序和 manifest
+            const opfXml = await zip.file(rootfilePath).async('string');
+            const opfDoc = new DOMParser().parseFromString(opfXml, 'application/xml');
+
+            // 获取书名
+            const titleEl = opfDoc.querySelector('metadata title');
+            const bookName = titleEl ? titleEl.textContent.trim() : file.name.replace(/\.[^/.]+$/, '');
+
+            // 构建 manifest map: id -> href
+            const manifest = {};
+            opfDoc.querySelectorAll('manifest item').forEach(item => {
+                manifest[item.getAttribute('id')] = item.getAttribute('href');
+            });
+
+            // 获取 spine 顺序
+            const spineItems = [];
+            opfDoc.querySelectorAll('spine itemref').forEach(ref => {
+                const idref = ref.getAttribute('idref');
+                if (manifest[idref]) spineItems.push(manifest[idref]);
+            });
+
+            // 3. 按顺序读取每个章节的XHTML，提取纯文本
+            let fullText = '';
+            for (const href of spineItems) {
+                const filePath = rootDir + href;
+                const zipEntry = zip.file(filePath);
+                if (!zipEntry) continue;
+                const html = await zipEntry.async('string');
+                const doc = new DOMParser().parseFromString(html, 'application/xhtml+xml');
+                const body = doc.querySelector('body');
+                if (!body) continue;
+                // 提取文本，保留段落换行
+                const paragraphs = body.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6');
+                if (paragraphs.length > 0) {
+                    paragraphs.forEach(p => {
+                        const t = p.textContent.trim();
+                        if (t) fullText += t + '\n\n';
+                    });
+                } else {
+                    const t = body.textContent.trim();
+                    if (t) fullText += t + '\n\n';
+                }
+            }
+
+            if (!fullText.trim()) {
+                alert('EPUB 解析完成但未提取到文本内容，请检查文件是否有效。');
+                return;
+            }
+
+            // 4. 尝试提取封面图片
+            let coverData = null;
+            const coverMeta = opfDoc.querySelector('metadata meta[name="cover"]');
+            const coverId = coverMeta ? coverMeta.getAttribute('content') : null;
+            if (coverId && manifest[coverId]) {
+                const coverPath = rootDir + manifest[coverId];
+                const coverEntry = zip.file(coverPath);
+                if (coverEntry) {
+                    try {
+                        const blob = await coverEntry.async('blob');
+                        if (blob.size < 2* 1024 * 1024) {
+                            coverData = await new Promise(resolve => {
+                                const r = new FileReader();
+                                r.onload = () => resolve(r.result);
+                                r.onerror = () => resolve(null);
+                                r.readAsDataURL(blob);
+                            });
+                        }
+                    } catch (err) { /* ignore cover extraction errors */ }
+                }
+            }
+
+            const book = {
+                id: 'book_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                name: bookName,
+                content: fullText.trim(),
+                cover: coverData,
+                progress: 0,
+                createdAt: Date.now()
+            };
+            this.books.unshift(book);
+            this.saveBooks();
+            this.renderLibrary();} catch (err) {
+            console.error('[CoRead EPUB]', err);
+            alert('EPUB 解析失败：' + err.message + '\n\n请确保文件是有效的 .epub 格式。');
+        }
     },
 
     readAsGBK(file) {

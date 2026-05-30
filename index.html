@@ -911,9 +911,9 @@
                         <p id="sidebar-name" class="font-bold text-[17px] hover:underline">您的名字</p>
                         <p id="sidebar-handle" class="text-mono-500 text-[15px] mt-0.5">@your_handle</p>
                      </div>
-                     <div class="flex space-x-4 mt-4 text-[14px]">
-                        <div class="cursor-pointer hover:underline transition"><span class="font-bold text-mono-600 dark:text-mono-950">128</span> <span class="text-mono-500">正在关注</span></div>
-                        <div class="cursor-pointer hover:underline transition"><span class="font-bold text-mono-600 dark:text-mono-950">45</span> <span class="text-mono-500">关注者</span></div>
+                          <div class="flex space-x-4 mt-4 text-[14px]">
+                        <div class="cursor-pointer hover:underline transition"><span class="font-bold text-mono-600 dark:text-mono-950 tw-stat-following">128</span> <span class="text-mono-500">正在关注</span></div>
+                        <div class="cursor-pointer hover:underline transition"><span class="font-bold text-mono-600 dark:text-mono-950 tw-stat-followers">45</span> <span class="text-mono-500">关注者</span></div>
                      </div>
                      <div class="mt-6 space-y-1">
                         <div onclick="switchView('profile-view')" class="cursor-pointer flex items-center space-x-4 py-3 hover:bg-mono-100 dark:hover:bg-mono-800 px-3 text-[18px] font-bold transition">
@@ -1179,6 +1179,18 @@
          <div class="relative rounded-md border border-mono-300 dark:border-mono-600 focus-within:border-mono-600 dark:focus-within:border-mono-300 transition px-3 py-2">
             <label class="text-[13px] text-mono-500 block">个人简介</label>
             <textarea id="edit-profile-bio" class="w-full bg-transparent border-none outline-none text-[15px] text-mono-600 dark:text-mono-950 mt-1 resize-none h-24"></textarea>
+         </div>
+         <!-- 粉丝数设置 (仅编辑自己时显示) -->
+         <div id="tw-profile-stats-section" class="hidden">
+            <div class="flex gap-4"><div class="relative rounded-md border border-mono-300 dark:border-mono-600 focus-within:border-mono-600dark:focus-within:border-mono-300 transition px-3 py-2 flex-1">
+                  <label class="text-[13px] text-mono-500 block">正在关注</label>
+                  <input type="number" id="edit-profile-following" class="w-full bg-transparent border-none outline-none text-[15px] text-mono-600 dark:text-mono-950 mt-1" value="128">
+               </div>
+               <div class="relative rounded-md border border-mono-300 dark:border-mono-600 focus-within:border-mono-600 dark:focus-within:border-mono-300 transition px-3 py-2 flex-1">
+                  <label class="text-[13px] text-mono-500 block">关注者</label>
+                  <input type="number" id="edit-profile-followers" class="w-full bg-transparent border-none outline-none text-[15px] text-mono-600 dark:text-mono-950 mt-1" value="45">
+               </div>
+            </div>
          </div>
          <!-- AI 生成按钮 -->
          <button id="tw-btn-ai-profile" class="hidden w-full py-3 rounded-xl bg-mono-100 dark:bg-mono-800 hover:bg-mono-200 dark:hover:bg-mono-700 text-mono-600 dark:text-mono-950 font-bold text-[14px] transition" onclick="twGenerateProfileByAI()">✧ 让 AI 感知灵魂自动生成</button>
@@ -1616,8 +1628,8 @@
                                  <p id="profile-body-handle" class="text-mono-500 text-[15px]">@your_handle</p>
                                  <p id="profile-body-bio" class="mt-3 text-[15px] leading-normal">极简排版的追寻者。 ⬛⬜</p>
                                  <div class="flex space-x-4 mt-3 text-[15px]">
-               <div class="cursor-pointer hover:underline transition"><span class="font-bold">128</span> <span class="text-mono-500">正在关注</span></div>
-               <div class="cursor-pointer hover:underline transition"><span class="font-bold">45</span> <span class="text-mono-500">关注者</span></div>
+               <div class="cursor-pointer hover:underline transition"><span class="font-bold tw-stat-following">128</span> <span class="text-mono-500">正在关注</span></div>
+               <div class="cursor-pointer hover:underline transition"><span class="font-bold tw-stat-followers">45</span> <span class="text-mono-500">关注者</span></div>
             </div>
          </div>
       </div>

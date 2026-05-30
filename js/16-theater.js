@@ -1545,3 +1545,4 @@ async function executeTheaterCustomSync() {
         btn.style.opacity = '1';
     }
 }
+
