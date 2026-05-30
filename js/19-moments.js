@@ -1268,33 +1268,41 @@ async function initMomentsSystem() {
              });
          }
          function mRegenerateAIComments(postId) {
-             let post = momentsData.posts.find(p => p.id === postId);
-             if (!post) return;
-             
-             if (!confirm("确定要删除当前该动态下的所有 AI 评论，并让 AI 重新回复吗？")) return;
-             
-             // 保留我的评论，删掉所有 AI 的评论
-             post.comments = post.comments.filter(c => c.id === 'me');
-             saveMomentsData();
-             mRenderAllFeeds();
-             
-             if (post.authorId === 'me') {
-                 // 是我的动态，重新让 AI 群友来评论
-                 mTriggerAIAfterUserPost(post);
-             } else {
-                 // 是 AI 的动态，让它重新回复我最后一次的评论
-                 let lastUserComment = post.comments.slice().reverse().find(c => c.id === 'me');
-                 if (lastUserComment) {
-                     const c = contacts.find(x => x.id === post.authorId);
-                     if (c) {
-                         let uName = momentsData.meName || gConfig.meName || '我';
-                         mTriggerAICommentReply(c, post, lastUserComment.text, uName);
-                     }
-                 } else {
-                     alert("这是 AI 发的动态，且你还没有评论过，AI 无法凭空回复你哦。");
-                 }
-             }
-         }
+    let post = momentsData.posts.find(p => p.id === postId);
+    if (!post) return;
+
+    if (!gConfig.apiUrl || !gConfig.apiKey) {
+        alert('需配置API！请在设置中填写接口和密钥。');
+        return;
+    }
+
+    if (!confirm("确定要重新调取 AI 评论吗？当前 AI 评论将被清除后重新生成。")) return;
+
+    // 保留我的评论，清除所有 AI 评论
+    post.comments = post.comments.filter(c => c.id === 'me');
+    saveMomentsData();
+    mRenderAllFeeds();
+
+    if (post.authorId === 'me') {
+        // 我的动态：让联动AI 来围观评论
+        mTriggerAIAfterUserPost(post);
+    } else {
+        // AI 的动态：让该AI 主动评论，无需依赖用户先评论
+        const c = contacts.find(x => x.id === post.authorId);
+        if (!c) return;
+        let uName = momentsData.meName || gConfig.meName || '我';
+        // 优先取最后一条用户评论作为回复上下文，没有则传空触发 AI 主动发言
+        let lastUserComment = post.comments.slice().reverse().find(cm => cm.id === 'me');
+        let triggerText = lastUserComment ? lastUserComment.text : null;
+
+        if (triggerText) {
+            mTriggerAICommentReply(c, post, triggerText, uName);
+        } else {
+            // 无用户评论时，直接让 AI 主动在自己的动态下发言
+            mGenerateAICommentForUserPost(c, post.id);
+        }
+    }
+}
          // 动态计算过去的时间
          function mFormatRelativeTime(ts) {
              if(!ts) return 'JUST NOW';
@@ -1626,13 +1634,17 @@ async function initMomentsSystem() {
                  
                  saveData();
          
-                 // 如果当前正好停在朋友圈页面，重绘让新评论冒出来！
-                 if (document.getElementById('view-main-moments').style.display !== 'none') {
-                     mRenderAllFeeds();
-                 }
+                // 如果当前正好停在朋友圈页面，重绘让新评论冒出来！
+                if (document.getElementById('view-main-moments').style.display !== 'none') {
+                    mRenderAllFeeds();
+                }
+
+                // 弹窗确认
+                alert(`✧ AI 评论调取成功\n\n【${c.momentName || c.name}】回复了：\n"${replyText}"`);
          
              } catch (error) {
                  console.error("AI 评论回复失败:", error);
+                 alert("AI 评论调取失败：" + error.message);
              }
          }
          
@@ -2592,10 +2604,12 @@ ${c.history[0].content}
          if (document.getElementById('view-main-moments').style.display !== 'none') {
          mRenderAllFeeds();
          }
-             } catch (error) {
-                 console.error("AI 自动评论你的朋友圈失败:", error);
-             }
+
+         // 弹窗确认
+         alert(`✧ AI 评论调取成功\n\n【${c.momentName || c.name}】评论了：\n"${replyText}"`);} catch (error) {
+                 console.error("AI 自动评论你的朋友圈失败:", error);}
          }
+
              // 用户手动发送黑金礼盒
          function sendUserLuxuryBox() {
              if(!currentContactId) return alert("请先进入聊天室！");
